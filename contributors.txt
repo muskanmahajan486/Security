@@ -1,0 +1,5 @@
+Juha Lindfors
+
+Number of third party Open Source components are used in OpenRemote each
+of which has their own contributors. We wish to thank all those individuals
+who contribute their work under Open Source licenses.

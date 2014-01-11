@@ -180,6 +180,15 @@
           depends = "-unit-test-compile, -after-unit-test-compile, -before-unit-test"
           description = "Executes project Java unit tests">
 
+    <echo>
+
+    -------------------------------------------------------------
+      Executing ${project.name} Java unit tests
+      (with code coverage)...
+    -------------------------------------------------------------
+
+    </echo>
+
     <openremote:run-java-unit-test/>
 
     <makeurl file = "${unit.test.report.dir}" property = "unit.test.report.uri"/>

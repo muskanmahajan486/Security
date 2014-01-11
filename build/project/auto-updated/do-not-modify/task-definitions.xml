@@ -113,7 +113,8 @@
 
     <internal:compile
             srcdir = "${java.src.dir}"
-            destdir = "${classes.dir}"/>
+            destdir = "${classes.dir}"
+            classpathref = "default.java.compile.classpath"/>
 
   </presetdef>
 

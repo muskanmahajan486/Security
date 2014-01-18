@@ -253,7 +253,7 @@ public class AsymmetricKeyManager
   /**
    * Default logger for the security package.
    */
-  private static Logger securityLog = Logger.getInstance(SecurityLog.DEFAULT);
+  protected static Logger securityLog = Logger.getInstance(SecurityLog.DEFAULT);
 
 
   /**

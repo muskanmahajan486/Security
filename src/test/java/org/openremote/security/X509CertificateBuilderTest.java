@@ -51,7 +51,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(null);
+      new X509CertificateBuilder.Configuration(null);
 
       Assert.fail("should not get here...");
     }
@@ -69,7 +69,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration("");
+      new X509CertificateBuilder.Configuration("");
 
       Assert.fail("should not get here...");
     }
@@ -439,8 +439,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      X509CertificateBuilder.Configuration config =
-          new X509CertificateBuilder.Configuration("OpenRemote, Inc.");
+      new X509CertificateBuilder.Configuration("OpenRemote, Inc.");
 
       Assert.fail("should not get here...");
     }
@@ -525,8 +524,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      X509CertificateBuilder.Configuration config =
-          new X509CertificateBuilder.Configuration("LOCALITY=bar");
+      new X509CertificateBuilder.Configuration("LOCALITY=bar");
 
       Assert.fail("should not get here...");
     }

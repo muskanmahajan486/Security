@@ -23,6 +23,8 @@ package org.openremote.security;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.security.KeyStore;
+
 /**
  * Unit tests for shared implementation in abstract {@link org.openremote.security.KeyManager}
  * class.
@@ -48,6 +50,39 @@ public class KeyManagerTest
         KeyManager.StorageType.JKS.name().equals(KeyManager.StorageType.JKS.toString())
     );
   }
+
+  /**
+   * Tests keystore save when file descriptor is null.
+   *
+   * @throws Exception  if test fails
+   */
+  @Test public void testSaveWithNullFile() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+
+    char[] storePW = new char[] { 'f', 'o', 'o'};
+
+    try
+    {
+      keyMgr.save(null, storePW);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+
+  // Nested Classes -------------------------------------------------------------------------------
+
+  private static class TestKeyManager extends KeyManager
+  {
+
+  }
+
 
 }
 

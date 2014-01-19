@@ -572,30 +572,6 @@ public class AsymmetricKeyManagerTest
     Assert.assertTrue(loadStore.containsAlias("key1"));
   }
 
-  /**
-   * Tests keystore save when file descriptor is null.
-   *
-   * @throws Exception  if test fails
-   */
-  @Test public void testSaveWithNullFile() throws Exception
-  {
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
-
-    char[] storePW = new char[] { 'f', 'o', 'o'};
-
-    try
-    {
-      KeyStore keystore = keyMgr.save(null, storePW);
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-  }
-
 
   /**
    * Tests storing and loading a keystore from a file-system.

@@ -49,6 +49,7 @@ import org.openremote.security.X509CertificateBuilder;
 public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilder
 {
 
+
   /**
    * Creates a self-signed X.509 v3 public key certificate using BouncyCastle as security provider.
    *
@@ -62,10 +63,23 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
    *
    * @throws CertificateBuilderException
    *            if creating a certificate fails for any reason
+   *
+   * @throws IllegalArgumentException
+   *            if keyPair or config arguments are null
    */
   @Override public X509Certificate createSelfSignedCertificate(KeyPair keyPair, Configuration config)
       throws CertificateBuilderException
   {
+    if (keyPair == null)
+    {
+      throw new IllegalArgumentException("Implementation error: null key pair.");
+    }
+
+    if (config == null)
+    {
+      throw new IllegalArgumentException("Implementation error: null certificate configuration.");
+    }
+
     try
     {
       Long time = System.currentTimeMillis();

@@ -63,7 +63,7 @@ import org.openremote.exception.OpenRemoteException;
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class AsymmetricKeyManager
+public class AsymmetricKeyManager extends KeyManager
 {
 
   // Constants ------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ public class AsymmetricKeyManager
    */
   public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA512 = "1.2.840.10045.4.3.4";
 
-  
+
   /**
    * The default key algorithm used when generating self-signed key pairs : {@value}
    */

@@ -79,6 +79,30 @@ public class KeyManagerTest
     }
   }
 
+
+  /**
+   * Tests storing an empty in-memory keystore.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testEmptyInMemoryKeystore() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+    char[] password = new char[] { 'f', 'o', 'o' };
+
+    KeyStore keystore = keyMgr.save(password);
+
+    Assert.assertTrue(keystore.size() == 0);
+
+    // Ensure we've erased the password from memory after API call...
+    
+    for (char c : password)
+    {
+      Assert.assertTrue(c == 0);
+    }
+  }
+
+
   /**
    * Tests storing an empty in-memory keystore with empty keystore password.
    *

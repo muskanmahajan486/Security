@@ -230,27 +230,6 @@ public class AsymmetricKeyManagerTest
   }
 
 
-  /**
-   * Tests storing an empty in-memory keystore.
-   *
-   * @throws Exception  if test fails for any reason
-   */
-  @Test public void testEmptyInMemoryKeystore() throws Exception
-  {
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
-    char[] password = new char[] { 'f', 'o', 'o' };
-
-    KeyStore keystore = keyMgr.save(password);
-
-    Assert.assertTrue(keystore.size() == 0);
-
-    for (char c : password)
-    {
-      Assert.assertTrue(c == 0);
-    }
-  }
-
-
    // TODO : test certificate contents
 
   /**

@@ -129,12 +129,15 @@ public abstract class KeyManager
   }
 
 
-  // Protected Instance Fields --------------------------------------------------------------------
+  // Class Members --------------------------------------------------------------------------------
 
   /**
    * Default logger for the security package.
    */
-  protected static Logger securityLog = Logger.getInstance(SecurityLog.DEFAULT);
+  protected final static Logger securityLog = Logger.getInstance(SecurityLog.DEFAULT);
+
+
+  // Protected Instance Fields --------------------------------------------------------------------
 
   /**
    * Stores key store entries which are used when the contents of this key manager is
@@ -608,7 +611,7 @@ public abstract class KeyManager
     }
   }
 
-  
+
   /**
    * Exception type for the public API of this class to indicate errors.
    */

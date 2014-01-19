@@ -149,7 +149,7 @@ public class AsymmetricKeyManagerTest
 
     try
     {
-      Certificate cert = keystore.createSelfSignedKey(
+      keystore.createSelfSignedKey(
           null, null, new BouncyCastleX509CertificateBuilder(), "testInMemoryKeyStore"
       );
 
@@ -177,7 +177,7 @@ public class AsymmetricKeyManagerTest
 
     try
     {
-      Certificate cert = keystore.createSelfSignedKey(
+      keystore.createSelfSignedKey(
           alias2, keypassword, null, "testInMemoryKeyStore-2243"
       );
 
@@ -210,7 +210,7 @@ public class AsymmetricKeyManagerTest
 
     try
     {
-      Certificate cert = keystore.createSelfSignedKey(
+      keystore.createSelfSignedKey(
           alias2, keypassword, new BouncyCastleX509CertificateBuilder(), null
       );
 
@@ -356,13 +356,13 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
     String alias1 = "key1";
 
-    Certificate cert1 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias1, keypassword, new BouncyCastleX509CertificateBuilder(), "testIssuer"
     );
 
     String alias2 = "key2";
 
-    Certificate cert2 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias2, new char[] {}, new BouncyCastleX509CertificateBuilder(), "testIssuer2"
     );
 
@@ -381,13 +381,13 @@ public class AsymmetricKeyManagerTest
 
     String alias3 = "key3";
 
-    Certificate cert3 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias3, new char[] {}, new BouncyCastleX509CertificateBuilder(), "testIssuer3"
     );
 
     String alias4 = "key4";
 
-    Certificate cert4 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias4, new char[] {}, new BouncyCastleX509CertificateBuilder(), "testIssuer4"
     );
 
@@ -409,13 +409,13 @@ public class AsymmetricKeyManagerTest
 
     String alias5 = "key2";
 
-    Certificate cert5 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias5, new char[] {}, new BouncyCastleX509CertificateBuilder(), "testIssuer3"
     );
 
     String alias6 = "key6";
 
-    Certificate cert6 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias6, new char[] {}, new BouncyCastleX509CertificateBuilder(), "testIssuer4"
     );
 
@@ -486,7 +486,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
     String alias1 = "key1";
 
-    Certificate cert1 = keyMgr.createSelfSignedKey(
+    keyMgr.createSelfSignedKey(
         alias1, keypassword, new BouncyCastleX509CertificateBuilder(), "testIssuer"
     );
 
@@ -496,7 +496,7 @@ public class AsymmetricKeyManagerTest
 
     char[] storePW = new char[] { 'f', 'o', 'o'};
 
-    KeyStore keystore = keyMgr.save(f, storePW);
+    keyMgr.save(f, storePW);
 
     // Make sure the password is erased from memory after the API call...
 

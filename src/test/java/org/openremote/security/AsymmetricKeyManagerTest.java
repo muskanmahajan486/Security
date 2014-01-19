@@ -250,44 +250,8 @@ public class AsymmetricKeyManagerTest
     }
   }
 
-  /**
-   * Tests storing an empty in-memory keystore with empty keystore password.
-   *
-   * @throws Exception  if test fails for any reason
-   */
-  @Test public void testEmptyInMemoryKeystoreWithEmptyPassword() throws Exception
-  {
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
-
-    KeyStore keystore = keyMgr.save(new char[] { });
-
-    Assert.assertTrue(keystore.size() == 0);
-  }
-
-  /**
-   * Tests storing an empty in-memory keystore with null keystore password.
-   *
-   * @throws Exception  if test fails for any reason
-   */
-  @Test public void testEmptyInMemoryKeystoreWithNullPassword() throws Exception
-  {
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
-
-    try
-    {
-      KeyStore keystore = keyMgr.save(null);
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-  }
 
    // TODO : test certificate contents
-   // TODO : test certificate issuer string encoding
 
   /**
    * Tests storing of keys into an in-memory keystore format.
@@ -480,7 +444,7 @@ public class AsymmetricKeyManagerTest
 
     // Convert to keystore instance....
 
-    keystore = keyMgr.save(new char[] {});
+    keystore = keyMgr.save(new char[] { 0 });
 
     Assert.assertTrue(keystore.size() == 5, "expected 5 keys, found " + keystore.size());
 
@@ -570,41 +534,6 @@ public class AsymmetricKeyManagerTest
 
     Assert.assertTrue(loadStore.size() == 1);
     Assert.assertTrue(loadStore.containsAlias("key1"));
-  }
-
-
-  /**
-   * Tests storing and loading a keystore from a file-system.
-   *
-   * @throws Exception  if test fails
-   */
-  @Test public void testFileKeyStoreNullPassword() throws Exception
-  {
-
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
-
-    char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
-    String alias1 = "key1";
-
-    Certificate cert1 = keyMgr.createSelfSignedKey(
-        alias1, keypassword, new BouncyCastleX509CertificateBuilder(), "testIssuer"
-    );
-
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
-    f.deleteOnExit();
-
-    try
-    {
-      KeyStore keystore = keyMgr.save(f, null);
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected
-    }
   }
 
 

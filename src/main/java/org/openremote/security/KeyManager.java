@@ -64,6 +64,17 @@ public abstract class KeyManager
   public final static Provider DEFAULT_SECURITY_PROVIDER = new BouncyCastleProvider();
 
 
+  // Constructors ---------------------------------------------------------------------------------
+
+  /**
+   * Empty implementation, no-args constructor limited for subclass use only.
+   */
+  protected KeyManager()
+  {
+
+  }
+
+
   // Enums ----------------------------------------------------------------------------------------
 
   /**
@@ -286,9 +297,11 @@ public abstract class KeyManager
   private KeyStore save(KeyStore keystore, OutputStream out, char[] password)
       throws KeyManagerException
   {
-    if (password == null)
+    if (password == null || password.length == 0)
     {
-      throw new KeyManagerException("Null password. Keystore must be protected with a password.");
+      throw new KeyManagerException(
+          "Null or empty password. Keystore must be protected with a password."
+      );
     }
 
     BufferedOutputStream bout = new BufferedOutputStream(out);
@@ -363,7 +376,7 @@ public abstract class KeyManager
    */
   private KeyStore instantiateKeyStore(char[] password) throws KeyStoreException
   {
-    return instantiateKeyStore(password, StorageType.PKCS12);
+    return instantiateKeyStore(password, StorageType.PKCS12);   // TODO : define default store type
   }
 
   /**
@@ -479,9 +492,11 @@ public abstract class KeyManager
   private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
       throws KeyStoreException
   {
-    if (password == null)
+    if (password == null || password.length == 0)
     {
-      throw new KeyStoreException("Null password. Keystore must be protected with a password.");
+      throw new KeyStoreException(
+          "Null or empty password. Keystore must be protected with a password."
+      );
     }
 
     try

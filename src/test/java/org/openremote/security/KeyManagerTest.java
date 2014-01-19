@@ -23,7 +23,11 @@ package org.openremote.security;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.util.UUID;
 
 /**
  * Unit tests for shared implementation in abstract {@link org.openremote.security.KeyManager}
@@ -65,6 +69,102 @@ public class KeyManagerTest
     try
     {
       keyMgr.save(null, storePW);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests storing an empty in-memory keystore with empty keystore password.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testEmptyInMemoryKeystoreWithEmptyPassword() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+
+    try
+    {
+      keyMgr.save(new char[] { });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests storing an empty in-memory keystore with null keystore password.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testEmptyInMemoryKeystoreWithNullPassword() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+
+    try
+    {
+      keyMgr.save(null);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests storing a keystore with null master password.
+   *
+   * @throws Exception  if test fails
+   */
+  @Test public void testFileKeyStoreNullPassword() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+
+    File dir = new File(System.getProperty("user.dir"));
+    File f = new File(dir, "test.keystore." + UUID.randomUUID());
+    f.deleteOnExit();
+
+    try
+    {
+      keyMgr.save(f, null);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected
+    }
+  }
+
+  /**
+   * Tests storing a keystore with empty master password.
+   *
+   * @throws Exception  if test fails
+   */
+  @Test public void testFileKeyStoreEmptyPassword() throws Exception
+  {
+    TestKeyManager keyMgr = new TestKeyManager();
+
+    File dir = new File(System.getProperty("user.dir"));
+    File f = new File(dir, "test.keystore." + UUID.randomUUID());
+    f.deleteOnExit();
+
+    try
+    {
+      keyMgr.save(f, new char[] {});
 
       Assert.fail("should not get here...");
     }

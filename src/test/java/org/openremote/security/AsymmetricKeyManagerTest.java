@@ -280,7 +280,7 @@ public class AsymmetricKeyManagerTest
       Assert.fail("should not get here...");
     }
 
-    catch (AsymmetricKeyManager.KeyManagerException e)
+    catch (KeyManager.KeyManagerException e)
     {
       // expected...
     }
@@ -590,7 +590,7 @@ public class AsymmetricKeyManagerTest
       Assert.fail("should not get here...");
     }
 
-    catch (AsymmetricKeyManager.KeyManagerException e)
+    catch (KeyManager.KeyManagerException e)
     {
       // expected...
     }
@@ -625,7 +625,7 @@ public class AsymmetricKeyManagerTest
       Assert.fail("should not get here...");
     }
 
-    catch (AsymmetricKeyManager.KeyManagerException e)
+    catch (KeyManager.KeyManagerException e)
     {
       // expected
     }

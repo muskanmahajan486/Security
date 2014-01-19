@@ -126,48 +126,10 @@ public class AsymmetricKeyManager extends KeyManager
    */
   public final static BigInteger DEFAULT_RSA_PUBLIC_EXPONENT = RSAKeyGenParameterSpec.F4;
 
-  //
-  // TODO : add dynamic classloading so we don't introduce mandatory runtime dependency
-  //
-  public final static Provider DEFAULT_SECURITY_PROVIDER = new BouncyCastleProvider();
 
 
   // Enums ----------------------------------------------------------------------------------------
 
-  /**
-   * Format for storing, serializing and persisting private key information. Defines
-   * the known types as per the document:
-   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyStore <p>
-   */
-  public enum StorageType
-  {
-    /**
-     * PKCS #12 format
-     */
-    PKCS12,
-
-    /**
-     * Proprietary 'Java Keystore' format (in default 'SUN' provider)
-     */
-    JKS,
-
-    /**
-     * Proprietary 'Java Keystore' format in Java cryptography extension ('SunJCE') provider
-     */
-    JCEKS;
-
-
-    /**
-     * Returns the standard name of this storage type as defined in the keystore standard names
-     * Java SE 6 security guide.
-     *
-     * @return  standard keystore name
-     */
-    @Override public String toString()
-    {
-      return name();
-    }
-  }
 
   /**
    * Algorithms for generating asymmetric key pairs, as defined in the document:

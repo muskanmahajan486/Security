@@ -592,7 +592,6 @@ public abstract class KeyManager
 
   // Nested Classes -------------------------------------------------------------------------------
 
-
   /**
    * Convenience class to hold keystore entry and its protection parameter as single entity in
    * collections.
@@ -609,17 +608,18 @@ public abstract class KeyManager
     }
   }
 
+  
   /**
    * Exception type for the public API of this class to indicate errors.
    */
   public static class KeyManagerException extends OpenRemoteException
   {
-    private KeyManagerException(String msg)
+    protected KeyManagerException(String msg)
     {
       super(msg);
     }
 
-    private KeyManagerException(String msg, Throwable cause, Object... params)
+    protected KeyManagerException(String msg, Throwable cause, Object... params)
     {
       super(msg, cause, params);
     }

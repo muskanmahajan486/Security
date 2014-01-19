@@ -100,7 +100,7 @@ public class AsymmetricKeyManager extends KeyManager
   public final static int DEFAULT_RSA_KEY_SIZE = 3072;
 
   /**
-   * Public exponent value used in RSA algorithm (increase impacts performance): {@value)
+   * Public exponent value used in RSA algorithm (increase impacts performance): {@value}
    *
    * @see java.security.spec.RSAKeyGenParameterSpec#F4
    */
@@ -371,22 +371,6 @@ public class AsymmetricKeyManager extends KeyManager
 
 
   // Nested Classes -------------------------------------------------------------------------------
-
-  /**
-   * Exception type for the public API of this class to indicate errors.
-   */
-  public static class KeyManagerException extends OpenRemoteException
-  {
-    private KeyManagerException(String msg)
-    {
-      super(msg);
-    }
-
-    private KeyManagerException(String msg, Throwable cause, Object... params)
-    {
-      super(msg, cause, params);
-    }
-  }
 
   /**
    * Specific (internal -- shows up as root cause) exception type for asymmetric

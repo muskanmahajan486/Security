@@ -631,29 +631,6 @@ public class AsymmetricKeyManagerTest
     }
   }
 
-  /**
-   * Very basic test runs on StorageType enum to ensure implementation consistency.
-   */
-  @Test public void testStorageTypes()
-  {
-    Assert.assertTrue(
-        AsymmetricKeyManager.StorageType.PKCS12.name()
-            .equals(
-        AsymmetricKeyManager.StorageType.PKCS12.toString())
-    );
-
-    Assert.assertTrue(
-        AsymmetricKeyManager.StorageType.JCEKS.name()
-            .equals(
-        AsymmetricKeyManager.StorageType.JCEKS.toString())
-    );
-
-    Assert.assertTrue(
-        AsymmetricKeyManager.StorageType.JKS.name()
-            .equals(
-        AsymmetricKeyManager.StorageType.JKS.toString())
-    );
-  }
 
 }
 

@@ -22,7 +22,6 @@ package org.openremote.security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openremote.exception.OpenRemoteException;
-import org.openremote.logging.Hierarchy;
 import org.openremote.logging.Logger;
 
 import java.io.BufferedInputStream;
@@ -76,22 +75,6 @@ public abstract class KeyManager
 
 
   // Enums ----------------------------------------------------------------------------------------
-
-  /**
-   * Log categories used by this implementation.
-   */
-  public static enum SecurityLog implements Hierarchy
-  {
-    // TODO : should move to standalone enum ?
-
-    DEFAULT;
-
-    @Override public String getCanonicalLogHierarchyName()
-    {
-      return "Security";
-    }
-  }
-
 
   /**
    * Format for storing, serializing and persisting private key information. Defines

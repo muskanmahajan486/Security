@@ -126,7 +126,7 @@ public abstract class KeyManager
    * Stores key store entries which are used when the contents of this key manager is
    * turned into a keystore implementation (in-memory, file-persisted, or otherwise).
    */
-  protected Map<String, KeyStoreEntry> keyEntries = new HashMap<String, KeyStoreEntry>();
+  private Map<String, KeyStoreEntry> keyEntries = new HashMap<String, KeyStoreEntry>();
 
 
   // Public Instance Methods ----------------------------------------------------------------------

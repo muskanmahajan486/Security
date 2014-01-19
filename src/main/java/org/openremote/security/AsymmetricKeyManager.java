@@ -75,6 +75,38 @@ public class AsymmetricKeyManager
   public final static String ASN_OID_STD_CURVE_NSA_NIST_P521 = "1.3.132.0.35";
 
   /**
+   * ASN.1 OID for NSA / NIST standard curve P-384. This is equivalent to SEC 2 prime curve
+   * "secp384r1". OID = {@value}
+   */
+  public final static String ASN_OID_STD_CURVE_NSA_NIST_P384 = "1.3.132.0.34";
+
+  /**
+   * ASN.1 OID for NSA / NIST standard curve P-256. This is equivalent to SEC 2 prime curve
+   * "secp256r1" and ANSI X9.62 "prime256v1". OID = {@value}
+   */
+  public final static String ASN_OID_STD_CURVE_NSA_NIST_P256 = "1.2.840.10045.3.1.7";
+
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA256' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA256 = "1.2.840.10045.4.3.2";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA384' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA384 = "1.2.840.10045.4.3.3";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA512' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA512 = "1.2.840.10045.4.3.4";
+
+  
+  /**
    * The default key algorithm used when generating self-signed key pairs : {@value}
    */
   public final static KeyAlgorithm DEFAULT_SELF_SIGNED_KEY_ALGORITHM = KeyAlgorithm.EC;

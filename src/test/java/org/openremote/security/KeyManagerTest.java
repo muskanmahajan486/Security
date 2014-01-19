@@ -24,9 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.UUID;
 
 /**
@@ -95,7 +93,7 @@ public class KeyManagerTest
     Assert.assertTrue(keystore.size() == 0);
 
     // Ensure we've erased the password from memory after API call...
-    
+
     for (char c : password)
     {
       Assert.assertTrue(c == 0);
@@ -204,7 +202,7 @@ public class KeyManagerTest
 
   private static class TestKeyManager extends KeyManager
   {
-
+    // no op, just to test abstract superclass implementation...
   }
 
 

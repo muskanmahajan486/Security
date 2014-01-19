@@ -34,7 +34,6 @@ import java.util.UUID;
 
 import org.openremote.security.provider.BouncyCastleX509CertificateBuilder;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -210,12 +210,29 @@ public abstract class KeyManager
 
 
     /**
-     * Returns the standard name of this storage type as defined in the keystore standard names
-     * Java SE 6 security guide.
+     * Returns the name of this storage type. Standard names are defined in the  Java SE 6
+     * security guide: http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html
      *
-     * @return  standard keystore name
+     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
+     *
+     * @see #getStorageTypeName()
+     *
+     * @return  keystore name string
      */
     @Override public String toString()
+    {
+      return getStorageTypeName();
+    }
+
+    /**
+     * Returns the name of this storage type. Standard names are defined in the  Java SE 6
+     * security guide: http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html
+     *
+     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
+     *
+     * @return  keystore name string
+     */
+    public String getStorageTypeName()
     {
       return name();
     }
@@ -413,9 +430,39 @@ public abstract class KeyManager
 
   protected void add(String keyAlias, KeyStore.Entry entry, KeyStore.ProtectionParameter param)
   {
+    if (keyAlias == null || keyAlias.equals(""))
+    {
+      throw new IllegalArgumentException(
+          "Implementation Error: null or empty key alias is not allowed."
+      );
+    }
+
+    if (entry == null)
+    {
+      throw new IllegalArgumentException(
+          "Implementation Error: null keystore entry is not allowed."
+      );
+    }
+
+    // TODO check if null protection param is ok?
+    // TODO boolean to save/not save immediately.
+
     keyEntries.put(keyAlias, new KeyStoreEntry(entry, param));
   }
 
+  protected boolean remove(String keyAlias)
+  {
+    KeyStoreEntry entry = keyEntries.remove(keyAlias);
+
+    // TODO : remove from associated storage?
+
+    return entry != null;
+  }
+
+  protected Provider getSecurityProvider()
+  {
+    return provider;
+  }
 
 
   // Private Instance Methods ---------------------------------------------------------------------

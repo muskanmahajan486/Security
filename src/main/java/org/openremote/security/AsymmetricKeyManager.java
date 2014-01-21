@@ -252,7 +252,7 @@ public class AsymmetricKeyManager extends KeyManager
    */
   private AsymmetricKeyManager()
   {
-
+    super();
   }
 
 
@@ -372,7 +372,18 @@ public class AsymmetricKeyManager extends KeyManager
   {
     try
     {
-      KeyPairGenerator keyGen = KeyPairGenerator.getInstance(keyAlgo.toString(), DEFAULT_SECURITY_PROVIDER);
+      KeyPairGenerator keyGen;
+
+      if (getSecurityProvider() == null)
+      {
+        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName());
+      }
+
+      else
+      {
+        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName(), getSecurityProvider());
+      }
+
       keyGen.initialize(keyAlgo.spec);
 
       return keyGen.generateKeyPair();

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Created-By: OpenRemote, Inc.
+Name: openremote-security
+Specification-Title: OpenRemote Security
+Specification-Version: ${api.version}
+Specification-Vendor: OpenRemote, Inc.
+Implementation-Title: OpenRemote Security
+Implementation-Version: ${release.version}
+Implementation-Vendor: OpenRemote, Inc.
+

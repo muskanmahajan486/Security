@@ -492,6 +492,85 @@ public class KeyManagerTest
     }
   }
 
+  /**
+   * Tests error handling behavior on add() with null alias.
+   *
+   * @see KeyManager#add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
+   */
+  @Test public void testAddNullAlias()
+  {
+    TestKeyManager mgr = new TestKeyManager();
+
+    try
+    {
+      mgr.add(
+          null,
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (IllegalArgumentException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests error handling behavior on add() with empty alias.
+   *
+   * @see KeyManager#add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
+   */
+  @Test public void testAddEmptyAlias()
+  {
+    TestKeyManager mgr = new TestKeyManager();
+
+    try
+    {
+      mgr.add(
+          "",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (IllegalArgumentException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests error handling behavior on add() with empty alias.
+   *
+   * @see KeyManager#add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
+   */
+  @Test public void testAddNullEntry()
+  {
+    TestKeyManager mgr = new TestKeyManager();
+
+    try
+    {
+      mgr.add(
+          "test",
+          null,
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (IllegalArgumentException e)
+    {
+      // expected...
+    }
+  }
+
+
   // Nested Classes -------------------------------------------------------------------------------
 
   private static class TestKeyManager extends KeyManager

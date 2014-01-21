@@ -305,9 +305,7 @@ public abstract class KeyManager
   }
 
 
-  // Public Instance Methods ----------------------------------------------------------------------
-
-
+  // Protected Instance Methods -------------------------------------------------------------------
 
   /**
    * Stores the keys in this key manager in a secure keystore format. This implementation generates
@@ -330,7 +328,7 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading or creating the keystore fails
    */
-  public KeyStore save(File file, char[] password) throws KeyManagerException
+  protected KeyStore save(File file, char[] password) throws KeyManagerException
   {
     if (file == null)
     {
@@ -383,8 +381,6 @@ public abstract class KeyManager
     }
   }
 
-
-  // Protected Instance Methods -------------------------------------------------------------------
 
   /**
    * Stores the keys in this key manager in a secure keystore format. This implementation generates

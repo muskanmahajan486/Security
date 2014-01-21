@@ -162,6 +162,29 @@ public class AsymmetricKeyManagerTest
     }
   }
 
+  /**
+   * Test a keystore empty string key alias which should *not* be allowed.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testEmptyKey() throws Exception
+  {
+    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+
+    try
+    {
+      keystore.createSelfSignedKey(
+          "", null, new BouncyCastleX509CertificateBuilder(), "testInMemoryKeyStore"
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected....
+    }
+  }
 
   /**
    * Test a certificate builder null reference.
@@ -228,6 +251,38 @@ public class AsymmetricKeyManagerTest
     }
   }
 
+  /**
+   * Test a empty string issuer name.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testEmptyIssuerName() throws Exception
+  {
+    char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
+    String alias2 = "mykey5221";
+
+    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+
+    try
+    {
+      keystore.createSelfSignedKey(
+          alias2, keypassword, new BouncyCastleX509CertificateBuilder(), ""
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected....
+
+      for (char c : keypassword)
+      {
+        Assert.assertTrue(c == 0);
+      }
+    }
+  }
+  
 
    // TODO : test certificate contents
 
@@ -515,5 +570,37 @@ public class AsymmetricKeyManagerTest
   }
 
 
+  /**
+   * Runs basic test to ensure the key algorithm names are consistent across
+   * name(), toString() and getAlgorithmName()
+   */
+  @Test public void testKeyAlgorithmNames()
+  {
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.EC.name().equals(AsymmetricKeyManager.KeyAlgorithm.EC.toString())
+    );
+
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.EC.toString().equals(AsymmetricKeyManager.KeyAlgorithm.EC.getAlgorithmName())
+    );
+
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.EC.getAlgorithmName().equals(AsymmetricKeyManager.KeyAlgorithm.EC.name())
+    );
+
+
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.RSA.name().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.toString())
+    );
+
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.RSA.toString().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.getAlgorithmName())
+    );
+
+    Assert.assertTrue(
+        AsymmetricKeyManager.KeyAlgorithm.RSA.getAlgorithmName().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.name())
+    );
+
+  }
 }
 

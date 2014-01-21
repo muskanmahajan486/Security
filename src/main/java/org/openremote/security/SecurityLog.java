@@ -38,13 +38,22 @@ import org.openremote.logging.Hierarchy;
  */
 public enum SecurityLog implements Hierarchy
 {
-  DEFAULT;
+  DEFAULT,
+
+  CONFIGURATION;
 
   @Override public String getCanonicalLogHierarchyName()
   {
-    // So far we just have one category so return the same canonical name always...
 
-    return "Security";
+    if (this.equals(DEFAULT))
+    {
+      return "Security";
+    }
+
+    else
+    {
+      return "Security." + name().toLowerCase();
+    }
   }
 
 }

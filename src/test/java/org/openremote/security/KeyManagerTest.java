@@ -464,6 +464,33 @@ public class KeyManagerTest
     }
   }
 
+  /**
+   * Test error behavior when file doesn't exist.
+   */
+  @Test public void testSaveWithBrokenFile()
+  {
+    TestKeyManager mgr = new TestKeyManager();
+
+    File f = new File("///");
+    char[] pw = new char[] { 'p' };
+
+    try
+    {
+      mgr.save(f, pw);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+
+    for (Character c : pw)
+    {
+      Assert.assertTrue(c == 0);
+    }
+  }
 
   // Nested Classes -------------------------------------------------------------------------------
 

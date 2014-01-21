@@ -44,6 +44,7 @@ public class PasswordManagerTest
   {
     File dir = new File(System.getProperty("user.dir"));
     File file = new File(dir, "password-store-" + UUID.randomUUID());
+    file.deleteOnExit();
     URI uri = file.toURI();
 
     char[] masterPassword = new char[] { '1', '2', '3' };

@@ -79,7 +79,7 @@ public abstract class KeyManager
   /**
    * Manages the dynamic loading of a security provider implementations.
    */
-  private enum SecurityProvider
+  protected enum SecurityProvider
   {
     /**
      * BouncyCastle provider.
@@ -99,7 +99,7 @@ public abstract class KeyManager
      *
      * @return  A provider instance <b>or null</b> if the instance could not be loaded
      */
-    public Provider getProviderInstance()
+    protected Provider getProviderInstance()
     {
       try
       {

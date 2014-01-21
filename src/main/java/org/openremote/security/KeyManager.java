@@ -417,6 +417,16 @@ public abstract class KeyManager
     }
   }
 
+  /**
+   * Adds a key entry to this instance. Use {@link #save(java.io.File, char[])} to persist
+   * if desired.
+   *
+   * @param keyAlias
+   *
+   * @param entry
+   *
+   * @param param
+   */
   protected void add(String keyAlias, KeyStore.Entry entry, KeyStore.ProtectionParameter param)
   {
     if (keyAlias == null || keyAlias.equals(""))
@@ -434,7 +444,6 @@ public abstract class KeyManager
     }
 
     // TODO check if null protection param is ok?
-    // TODO boolean to save/not save immediately.
 
     keyEntries.put(keyAlias, new KeyStoreEntry(entry, param));
   }

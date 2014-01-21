@@ -374,6 +374,10 @@ public class AsymmetricKeyManager extends KeyManager
     {
       KeyPairGenerator keyGen;
 
+      // TODO :
+      //        move keypair generator instance retrieval and KeyAlgorithm enum to
+      //        superclass (rename to AsymmetricKeyAlgorithm)
+
       if (getSecurityProvider() == null)
       {
         keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName());

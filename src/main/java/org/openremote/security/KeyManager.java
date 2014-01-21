@@ -33,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -448,15 +447,98 @@ public abstract class KeyManager
     keyEntries.put(keyAlias, new KeyStoreEntry(entry, param));
   }
 
+  /**
+   * TODO
+   *
+   * @param keyAlias
+   *
+   * @return
+   */
   protected boolean remove(String keyAlias)
   {
     KeyStoreEntry entry = keyEntries.remove(keyAlias);
 
-    // TODO : remove from associated storage?
-
     return entry != null;
   }
 
+  /**
+   * TODO
+   *
+   * @param keyAlias
+   *
+   * @param f
+   *
+   * @param keystorePassword
+   *
+   * @throws KeyManagerException
+   */
+  protected void remove(String keyAlias, File f, char[] keystorePassword)
+      throws KeyManagerException
+  {
+    try
+    {
+      remove(keyAlias);
+
+      KeyStore ks = instantiateKeyStore(f, keystorePassword);
+
+      ks.deleteEntry(keyAlias);
+
+      ks.store(new FileOutputStream(f), keystorePassword);
+    }
+
+    catch (NoSuchAlgorithmException e)
+    {
+      throw new KeyManagerException(
+          "Security provider does not support required key store algorithm: {0}",
+          e, e.getMessage()
+      );
+    }
+
+    catch (CertificateException e)
+    {
+      throw new KeyManagerException("Cannot remove certificate: {0}", e, e.getMessage());
+    }
+
+    catch (FileNotFoundException e)
+    {
+      throw new KeyManagerException(
+          "Error in removing key ''{0}'': {1}", e, keyAlias, e.getMessage()
+      );
+    }
+
+    catch (IOException e)
+    {
+      throw new KeyManagerException(
+          "Unable to remove key ''{0}''. I/O error: {1}",
+          e, keyAlias, e.getMessage()
+      );
+    }
+
+    catch (KeyStoreException e)
+    {
+      throw new KeyManagerException(
+          "Cannot remove key ''{0}'' from keystore: {1}", e, keyAlias, e.getMessage()
+      );
+    }
+
+    finally
+    {
+      if (keystorePassword != null)
+      {
+        for (int i = 0; i < keystorePassword.length; ++i)
+        {
+          keystorePassword[i] = 0;
+        }
+      }
+    }
+  }
+
+
+  /**
+   * TODO
+   *
+   * @return
+   */
   protected Provider getSecurityProvider()
   {
     return provider;
@@ -464,7 +546,6 @@ public abstract class KeyManager
 
 
   // Private Instance Methods ---------------------------------------------------------------------
-
 
   /**
    * Adds the key entries of this key manager into a keystore. The keystore is saved to the given
@@ -518,7 +599,7 @@ public abstract class KeyManager
     catch (IOException e)
     {
       throw new KeyManagerException(
-          "Unable to write key to keystore : {1}", e, e.getMessage()
+          "Unable to write key to keystore : {0}", e, e.getMessage()
       );
     }
 

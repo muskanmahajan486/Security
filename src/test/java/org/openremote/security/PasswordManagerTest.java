@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -42,48 +43,58 @@ public class PasswordManagerTest
 
   @Test public void testAddAndRemovePassword() throws Exception
   {
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "password-store-" + UUID.randomUUID());
-    file.deleteOnExit();
-    URI uri = file.toURI();
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
 
-    char[] masterPassword = new char[] { '1', '2', '3' };
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "password-store-" + UUID.randomUUID());
+      file.deleteOnExit();
+      URI uri = file.toURI();
 
-    PasswordManager mgr = new PasswordManager(uri, masterPassword);
+      char[] masterPassword = new char[] { '1', '2', '3' };
 
-    byte[] password = new byte[] { 'a', 'b', 'c', 'd' };
-    masterPassword = new char[] { '1', '2', '3' };
+      PasswordManager mgr = new PasswordManager(uri, masterPassword);
 
-    mgr.addPassword("mypassword", password, masterPassword);
+      byte[] password = new byte[] { 'a', 'b', 'c', 'd' };
+      masterPassword = new char[] { '1', '2', '3' };
 
-    KeyStore ks = KeyStore.getInstance(KeyManager.StorageType.JCEKS.getStorageTypeName());
+      mgr.addPassword("mypassword", password, masterPassword);
 
-    masterPassword = new char[] { '1', '2', '3' };
-    ks.load(new FileInputStream(new File(uri)), masterPassword);
+      KeyStore ks = KeyStore.getInstance(KeyManager.StorageType.BKS.getStorageTypeName(), new BouncyCastleProvider());
 
-    Assert.assertTrue(ks.containsAlias("mypassword"));
-    Assert.assertTrue(ks.size() == 1);
+      masterPassword = new char[] { '1', '2', '3' };
+      ks.load(new FileInputStream(new File(uri)), masterPassword);
 
-    masterPassword = new char[] { '1', '2', '3' };
-    KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)ks.getEntry(
-        "mypassword", new KeyStore.PasswordProtection(masterPassword)
-    );
+      Assert.assertTrue(ks.containsAlias("mypassword"));
+      Assert.assertTrue(ks.size() == 1);
 
-    SecretKey secret = entry.getSecretKey();
-    byte[] loadedPassword = secret.getEncoded();
-    byte[] originalPassword = new byte[] { 'a', 'b', 'c', 'd' };
+      masterPassword = new char[] { '1', '2', '3' };
+      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)ks.getEntry(
+          "mypassword", new KeyStore.PasswordProtection(masterPassword)
+      );
 
-    Assert.assertTrue(Arrays.equals(loadedPassword, originalPassword));
+      SecretKey secret = entry.getSecretKey();
+      byte[] loadedPassword = secret.getEncoded();
+      byte[] originalPassword = new byte[] { 'a', 'b', 'c', 'd' };
 
-    masterPassword = new char[] { '1', '2', '3' };
-    mgr.removePassword("mypassword", masterPassword);
+      Assert.assertTrue(Arrays.equals(loadedPassword, originalPassword));
 
-    ks = KeyStore.getInstance(KeyManager.StorageType.JCEKS.getStorageTypeName());
+      masterPassword = new char[] { '1', '2', '3' };
+      mgr.removePassword("mypassword", masterPassword);
 
-    masterPassword = new char[] { '1', '2', '3' };
-    ks.load(new FileInputStream(new File(uri)), masterPassword);
+      ks = KeyStore.getInstance(KeyManager.StorageType.BKS.getStorageTypeName(), new BouncyCastleProvider());
 
-    Assert.assertTrue(ks.size() == 0);
+      masterPassword = new char[] { '1', '2', '3' };
+      ks.load(new FileInputStream(new File(uri)), masterPassword);
+
+      Assert.assertTrue(ks.size() == 0);
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
   }
 }
 

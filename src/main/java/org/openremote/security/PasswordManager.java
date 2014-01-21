@@ -20,13 +20,11 @@
  */
 package org.openremote.security;
 
-import org.openremote.security.provider.BouncyCastleX509CertificateBuilder;
-
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.net.URI;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
+
 
 /**
  * This is a password storage implementation using Java's keystore mechanism. It can
@@ -50,20 +48,44 @@ public class PasswordManager extends KeyManager
 
   // Private Instance Fields ----------------------------------------------------------------------
 
+  /**
+   * Location of the keystore, if persisted.
+   */
   private URI keystoreLocation = null;
 
 
   // Constructors ---------------------------------------------------------------------------------
 
+  /**
+   * Constructs an in-memory password manager backed by {@link StorageType#BKS} storage format.
+   * Requires BouncyCastle security provider to be available on the classpath and installed
+   * as a security provider to the JVM.
+   *
+   * @see java.security.Security#addProvider(java.security.Provider)
+   * @see org.bouncycastle.jce.provider.BouncyCastleProvider
+   */
   public PasswordManager()
   {
     super(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
   }
 
-
+  /**
+   * Constructs a persistent password manager back by {@link StorageType#BKS} storage format.
+   * Requires BouncyCastle security provider to be available on the classpath and installed
+   * as a security provider to the JVM.
+   *
+   * @see java.security.Security#addProvider(java.security.Provider)
+   * @see org.bouncycastle.jce.provider.BouncyCastleProvider
+   *
+   * @param keystoreLocation
+   *          location of the persisted password storage
+   *
+   * @param masterPassword
+   *          the password to access the password storage
+   */
   public PasswordManager(URI keystoreLocation, char[] masterPassword)
   {
-    super(StorageType.JCEKS, null);
+    this();
 
     try
     {
@@ -99,7 +121,24 @@ public class PasswordManager extends KeyManager
 
   // Public Instance Methods ----------------------------------------------------------------------
 
-  public void addPassword(String alias, byte[] password, char[] masterPassword)
+  /**
+   * Adds a new password to this password manager.
+   *
+   * @param alias
+   *            A named alias for the password used to look it up.
+   *
+   * @param password
+   *            The password to store. Note that the byte array will be set to zero bytes
+   *            when this method completes.
+   *
+   * @param storeMasterPassword
+   *            The master password to access this password storage. Note that the character
+   *            array will be set to zero bytes when this method completes.
+   *
+   * @throws KeyManagerException
+   *            if accessing the password store fails
+   */
+  public void addPassword(String alias, byte[] password, char[] storeMasterPassword)
       throws KeyManagerException
   {
     try
@@ -107,12 +146,12 @@ public class PasswordManager extends KeyManager
       add(
           alias,
           new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password")),
-          new KeyStore.PasswordProtection(masterPassword)
+          new KeyStore.PasswordProtection(storeMasterPassword)
       );
 
       if (keystoreLocation != null)
       {
-        save(new File(keystoreLocation), masterPassword);
+        save(new File(keystoreLocation), storeMasterPassword);
       }
     }
 
@@ -127,20 +166,64 @@ public class PasswordManager extends KeyManager
           password[i] = 0;
         }
       }
+
+      if (storeMasterPassword != null)
+      {
+        // Clear the password from memory...
+
+        for (int i = 0; i < storeMasterPassword.length; ++i)
+        {
+          storeMasterPassword[i] = 0;
+        }
+      }
     }
   }
 
-  public void removePassword(String alias, char[] masterPassword) throws KeyManagerException
+  /**
+   * Removes a password from this password storage.
+   *
+   * @param alias
+   *          The password alias (name) to be removed.
+   *
+   * @param storeMasterPassword
+   *          The master password to access this password storage.
+   *
+   * @throws KeyManagerException
+   *          if accessing the password store fails
+   */
+  public void removePassword(String alias, char[] storeMasterPassword) throws KeyManagerException
   {
-    if (keystoreLocation != null)
+    try
     {
-      remove(alias, new File(keystoreLocation), masterPassword);
+      if (keystoreLocation != null)
+      {
+        remove(alias, new File(keystoreLocation), storeMasterPassword);
+      }
+
+      else
+      {
+        removePassword(alias);
+      }
     }
 
-    else
+    finally
     {
-      remove(alias);
+      if (storeMasterPassword != null)
+      {
+        // Clear the password from memory...
+
+        for (int i = 0; i < storeMasterPassword.length; ++i)
+        {
+          storeMasterPassword[i] = 0;
+        }
+      }
     }
+  }
+
+
+  public void removePassword(String alias)
+  {
+    remove(alias);
   }
 
 }

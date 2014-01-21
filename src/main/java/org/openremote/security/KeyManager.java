@@ -307,40 +307,6 @@ public abstract class KeyManager
 
   // Public Instance Methods ----------------------------------------------------------------------
 
-  /**
-   * Stores the keys in this key manager in a secure keystore format. This implementation generates
-   * an in-memory keystore that is not backed by a persistent storage. The format used for
-   * storing the key entries is PKCS #12.
-   *
-   * @param password
-   *            A secret password used to access the keystore contents. Note that the character
-   *            array will be set to zero bytes when this method completes.
-   *
-   * @return    An in-memory keystore instance.
-   *
-   * @throws KeyManagerException
-   *            if the keystore creation fails for any reason
-   */
-  public KeyStore save(char[] password) throws KeyManagerException
-  {
-    try
-    {
-      KeyStore keystore = instantiateKeyStore(password);
-
-      return save(keystore, new ByteArrayOutputStream(), password);
-    }
-
-    finally
-    {
-      if (password != null)
-      {
-        for (int i = 0; i < password.length; ++i)
-        {
-          password[i] = 0;
-        }
-      }
-    }
-  }
 
 
   /**
@@ -419,6 +385,41 @@ public abstract class KeyManager
 
 
   // Protected Instance Methods -------------------------------------------------------------------
+
+  /**
+   * Stores the keys in this key manager in a secure keystore format. This implementation generates
+   * an in-memory keystore that is not backed by a persistent storage. The format used for
+   * storing the key entries is PKCS #12.
+   *
+   * @param password
+   *            A secret password used to access the keystore contents. Note that the character
+   *            array will be set to zero bytes when this method completes.
+   *
+   * @return    An in-memory keystore instance.
+   *
+   * @throws KeyManagerException
+   *            if the keystore creation fails for any reason
+   */
+  protected KeyStore save(char[] password) throws KeyManagerException
+  {
+    try
+    {
+      KeyStore keystore = instantiateKeyStore(password);
+
+      return save(keystore, new ByteArrayOutputStream(), password);
+    }
+
+    finally
+    {
+      if (password != null)
+      {
+        for (int i = 0; i < password.length; ++i)
+        {
+          password[i] = 0;
+        }
+      }
+    }
+  }
 
   protected void add(String keyAlias, KeyStore.Entry entry, KeyStore.ProtectionParameter param)
   {

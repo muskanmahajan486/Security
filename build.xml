@@ -137,6 +137,7 @@
 
   </path>
 
+  <property name = "manifest.classpath" value = "bcpkix-jdk15on-150.jar bcprov-jdk15on-150.jar openremote-logging-0.1.0.jar"/>
 
   <target name = "package" extensionOf = "-package-project"
           depends = "clean, unit-test, -init-package">
@@ -158,6 +159,14 @@
     </copy>
 
     <zip basedir = "${build.package.dir}" destfile = "${output.dir}/openremote-security-${release.version}.jar"/>
+
+    <!-- copy dependencies... -->
+
+    <copy todir = "${output.dir}" flatten = "true">
+      <fileset dir = "${lib.dir}">
+        <include name = "**/*.jar"/>
+      </fileset>
+    </copy>
 
   </target>
 

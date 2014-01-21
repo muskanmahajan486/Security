@@ -137,5 +137,30 @@
 
   </path>
 
+
+  <target name = "package" extensionOf = "-package-project"
+          depends = "clean, unit-test, -init-package">
+
+    <copy todir = "${build.package.dir}/META-INF"
+          file = "${resources.dir}/META-INF/MANIFEST.MF">
+      <filterchain>
+        <expandproperties/>
+      </filterchain>
+    </copy>
+
+    <copy todir = "${build.package.dir}">
+      <fileset dir = "${classes.dir}">
+        <include name = "org/openremote/security/**/*.class"/>
+      </fileset>
+      <fileset dir = "${classes.dir}">
+        <include name = "org/openremote/exception/**/*.class"/>
+      </fileset>
+    </copy>
+
+    <zip basedir = "${build.package.dir}" destfile = "${output.dir}/openremote-security-${release.version}.jar"/>
+
+  </target>
+
+
 </project>
 

@@ -38,10 +38,22 @@ import org.openremote.logging.Hierarchy;
  */
 public enum SecurityLog implements Hierarchy
 {
+  /**
+   * Generic security related top category.
+   */
   DEFAULT,
 
+  /**
+   * Sub-category of security for logging security related configuration information.
+   */
   CONFIGURATION;
 
+  /**
+   * Returns canonical hierarchy names for security logs. All categories are fixed with a
+   * prefix 'Security', followed by dot separated sub-category names.
+   *
+   * @return  security log hierarchy as a dot-separated string
+   */
   @Override public String getCanonicalLogHierarchyName()
   {
 
@@ -52,7 +64,7 @@ public enum SecurityLog implements Hierarchy
 
     else
     {
-      return "Security." + name().toLowerCase();
+      return "Security." + Character.toUpperCase(name().charAt(0)) + name().substring(1).toLowerCase();
     }
   }
 

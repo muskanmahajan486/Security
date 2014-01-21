@@ -20,7 +20,6 @@
  */
 package org.openremote.security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openremote.exception.OpenRemoteException;
 import org.openremote.logging.Logger;
 
@@ -34,12 +33,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.UnrecoverableKeyException;
+import java.security.Security;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,33 +52,134 @@ import java.util.Map;
 public abstract class KeyManager
 {
 
-  // TODO : add deleteKey
-
-
   // Constants ------------------------------------------------------------------------------------
 
-  //
-  // TODO : add dynamic classloading so we don't introduce mandatory runtime dependency
-  // TODO : let individual subclass instances choose which provider instance to use
-  //
-  public final static Provider DEFAULT_SECURITY_PROVIDER = new BouncyCastleProvider();
-
-
-  // Constructors ---------------------------------------------------------------------------------
+  /**
+   * This is the default key storage type used if nothing else is specified. Note that PKCS12
+   * is used for asymmetric PKI keys but not for storing symmetric secret keys. For the latter,
+   * other provider-specific storage types must be used. <p>
+   *
+   * Default: {@value}
+   */
+  public final static StorageType DEFAULT_KEYSTORE_STORAGE_TYPE = StorageType.PKCS12;
 
   /**
-   * Empty implementation, no-args constructor limited for subclass use only.
+   * The default security provider used by this instance. Note that can contain a null value
+   * if loading of the security provider fails. A null value should indicate using the system
+   * installed security providers in their preferred order rather than this explicit security
+   * provider. <p>
+   *
+   * Default: {@value}
    */
-  protected KeyManager()
-  {
-
-  }
+  private final static SecurityProvider DEFAULT_SECURITY_PROVIDER = SecurityProvider.BC;
 
 
   // Enums ----------------------------------------------------------------------------------------
 
   /**
-   * Format for storing, serializing and persisting private key information. Defines
+   * Manages the dynamic loading of a security provider implementations.
+   */
+  private enum SecurityProvider
+  {
+    /**
+     * BouncyCastle provider.
+     */
+    BC("org.bouncycastle.jce.provider.BouncyCastleProvider");
+
+
+    private String className;
+
+    private SecurityProvider(String className)
+    {
+      this.className = className;
+    }
+
+    /**
+     * Manages the dynamic loading of a security provider.
+     *
+     * @return  A provider instance <b>or null</b> if the instance could not be loaded
+     */
+    public Provider getProviderInstance()
+    {
+      try
+      {
+        Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
+
+        Class<? extends Provider> cp = c.asSubclass(Provider.class);
+
+        return cp.newInstance();
+      }
+
+      catch (ClassCastException e)
+      {
+        securityLog.error(
+            "The security provider implementation ''{0}'' does not extend Provider class." +
+            "Defaulting to system installed security providers: {1}",
+            e, className, Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+
+      catch (ClassNotFoundException e)
+      {
+        securityLog.error(
+            "The security provider implementation ''{0}'' was not found in classpath. " +
+            "Defaulting to system installed security providers: {1}",
+            e, className, Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+
+      catch (InstantiationException e)
+      {
+        securityLog.error(
+            "The configured security provider ''{0}'' cannot be instantiated: {1}. " +
+            "Defaulting to system installed security providers: {2} ",
+            e, className, e.getMessage(), Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+
+      catch (IllegalAccessException e)
+      {
+        securityLog.error(
+            "The configured security provider ''{0}'' cannot be accessed: {1]." +
+            "Defaulting to system installed security providers: {2} ",
+            e, className, e.getMessage(), Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+
+      catch (ExceptionInInitializerError e)
+      {
+        securityLog.error(
+            "Error initializing security provider class ''{0}'': {1}. " +
+            "Defaulting to system installed security providers: {2}",
+            e,  className, e.getMessage(), Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+
+      catch (SecurityException e)
+      {
+        securityLog.error(
+            "Security manager prevented instantiating security provider class ''{0}'': {1}. " +
+            "Defaulting to system installed security providers: {2} " +
+            e, className, e.getMessage(), Arrays.toString(Security.getProviders())
+        );
+
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Format for storing, serializing and persisting private and secret key information. Defines
    * the known types as per the document:
    * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyStore <p>
    */
@@ -96,7 +198,15 @@ public abstract class KeyManager
     /**
      * Proprietary 'Java Keystore' format in Java cryptography extension ('SunJCE') provider
      */
-    JCEKS;
+    JCEKS,
+
+    /**
+     * BouncyCastle keystore format roughly equivalent to Sun JKS implementation.
+     */
+    BKS;
+
+
+    // TODO : add the rest of BC keystore options
 
 
     /**
@@ -120,13 +230,62 @@ public abstract class KeyManager
   protected final static Logger securityLog = Logger.getInstance(SecurityLog.DEFAULT);
 
 
-  // Protected Instance Fields --------------------------------------------------------------------
+  // Private Instance Fields ----------------------------------------------------------------------
 
   /**
    * Stores key store entries which are used when the contents of this key manager is
    * turned into a keystore implementation (in-memory, file-persisted, or otherwise).
    */
   private Map<String, KeyStoreEntry> keyEntries = new HashMap<String, KeyStoreEntry>();
+
+  /**
+   * The storage type used by this instance.
+   */
+  private StorageType storage = DEFAULT_KEYSTORE_STORAGE_TYPE;
+
+  /**
+   * The security provider used by this instance.
+   */
+  private Provider provider = DEFAULT_SECURITY_PROVIDER.getProviderInstance();
+
+
+  // Constructors ---------------------------------------------------------------------------------
+
+  /**
+   * Empty implementation, no-args constructor limited for subclass use only.
+   */
+  protected KeyManager()
+  {
+
+  }
+
+  /**
+   * This constructor allows the subclasses to specify both the storage type and explicit
+   * security provider to use with this instance. The storage type and provider will be used
+   * instead of the default values. <p>
+   *
+   * Note that the provider parameter allows a null value. This indicates that the appropriate
+   * security provider should be searched from the JVM installed security providers in their
+   * preferred order.
+   *
+   * @param storage
+   *            The storage type to use with this instance.
+   *
+   * @param provider
+   *            The explicit security provider to use with the storage of this instance. If a
+   *            null value is specified, the implementations should opt to delegate the selection
+   *            of a security provider to the JVMs installed security provider implementations.
+   */
+  protected KeyManager(StorageType storage, Provider provider)
+  {
+    if (storage == null)
+    {
+      throw new IllegalArgumentException("Implementation Error: null storage type");
+    }
+
+    this.provider = provider;
+    this.storage = storage;
+  }
 
 
   // Public Instance Methods ----------------------------------------------------------------------
@@ -360,9 +519,9 @@ public abstract class KeyManager
    * @throws KeyStoreException
    *            if the keystore cannot be created for any reason
    */
-  private KeyStore instantiateKeyStore(char[] password) throws KeyStoreException
+  private KeyStore instantiateKeyStore(char[] password) throws KeyStoreException, KeyManagerException
   {
-    return instantiateKeyStore(password, StorageType.PKCS12);   // TODO : define default store type
+    return instantiateKeyStore(password, storage);
   }
 
   /**
@@ -380,7 +539,8 @@ public abstract class KeyManager
    * @throws KeyStoreException
    *            if the keystore cannot be created for any reason
    */
-  private KeyStore instantiateKeyStore(char[] password, StorageType type) throws KeyStoreException
+  private KeyStore instantiateKeyStore(char[] password, StorageType type)
+      throws KeyStoreException, KeyManagerException
   {
     return getKeyStore(null, password, type);
   }
@@ -401,7 +561,7 @@ public abstract class KeyManager
    */
   private KeyStore instantiateKeyStore(File file, char[] password) throws KeyManagerException
   {
-    return instantiateKeyStore(file, password, StorageType.PKCS12);
+    return instantiateKeyStore(file, password, storage);
   }
 
   /**
@@ -418,8 +578,12 @@ public abstract class KeyManager
    *
    * @return    in-memory keystore instance
    *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
    * @throws KeyManagerException
-   *            if the keystore cannot be created for any reason
+   *            if loading or creating the keystore fails
    */
   private KeyStore instantiateKeyStore(File file, char[] password, StorageType type)
       throws KeyManagerException
@@ -429,13 +593,6 @@ public abstract class KeyManager
       BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
 
       return getKeyStore(in, password, type);
-    }
-
-    catch (KeyStoreException e)
-    {
-      throw new KeyManagerException(
-          "Keystore could not be created : {0}", e, e.getMessage()
-      );
     }
 
     catch (FileNotFoundException e)
@@ -471,55 +628,109 @@ public abstract class KeyManager
    *
    * @return  an in-memory keystore instance
    *
-   * @throws java.security.KeyStoreException
-   *            if the provided security provider does not contain implementation for the
-   *            required keystore type, or loading the keystore fails for any other reason
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if loading or creating the keystore fails
    */
   private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
-      throws KeyStoreException
+      throws KeyManagerException, ConfigurationException
   {
     if (password == null || password.length == 0)
     {
-      throw new KeyStoreException(
+      throw new KeyManagerException(
           "Null or empty password. Keystore must be protected with a password."
       );
     }
 
     try
     {
-      KeyStore keystore = KeyStore.getInstance(type.name(), DEFAULT_SECURITY_PROVIDER);
+      KeyStore keystore;
+
+      if (provider == null)
+      {
+        keystore = KeyStore.getInstance(type.name());
+      }
+
+      else
+      {
+        keystore = KeyStore.getInstance(type.name(), provider);
+      }
+
       keystore.load(in, password);
 
       return keystore;
     }
+
+    catch (KeyStoreException e)
+    {
+      // NOTE:  If the algorithm is not recognized by a provider, it is indicated by a nested
+      //        NoSuchAlgorithmException. This is the behavior for both SUN default provider
+      //        in Java 6 and BouncyCastle.
+
+      if (e.getCause() != null && e.getCause() instanceof NoSuchAlgorithmException)
+      {
+        String usedProviders;
+
+        if (provider == null)
+        {
+          usedProviders = Arrays.toString(Security.getProviders());
+        }
+
+        else
+        {
+          usedProviders = provider.getName();
+        }
+
+        throw new ConfigurationException(
+            "The security provider(s) ''{0}'' do not support keystore type ''{1}'' : {2}",
+            e, usedProviders, type.name(), e.getMessage()
+        );
+      }
+
+      throw new KeyManagerException("Cannot load keystore: {0}", e, e.getMessage());
+    }
+
     catch (NoSuchAlgorithmException e)
     {
-      // If the configured provider(s) do not recognize the keystore format...
+      // If part of the keystore load() the algorithm to verify the keystore contents cannot
+      // be found...
 
-      throw new KeyStoreException(
-          "Required keystore algorithm '" + type.toString() + "' not found: " +
-          e.getMessage(), e
+      throw new KeyManagerException(
+          "Required keystore verification algorithm not found: {0}",
+          e, e.getMessage()
       );
     }
+
     catch (CertificateException e)
     {
       // Can happen if any of the certificates in the store cannot be loaded...
 
-      throw new KeyStoreException("Can't load keystore: " + e.getMessage(), e);
+      throw new KeyManagerException("Can't load keystore: {0}", e, e.getMessage());
     }
+
     catch (IOException e)
     {
       // If there's an I/O problem, or if keystore has been corrupted, or if password is missing
 
-      if (e.getCause() != null && e.getCause() instanceof UnrecoverableKeyException)
-      {
-        throw new KeyStoreException(
-            "Cannot recover keys from keystore (was the provided password correct?) : " +
-            e.getMessage(), e
-        );
-      }
+//      if (e.getCause() != null && e.getCause() instanceof UnrecoverableKeyException)
+//      {
+//        // The Java 6 javadoc claims that an incorrect password can be detected by having
+//        // a nested UnrecoverableKeyException in the wrapping IOException -- this doesn't
+//        // seem to be the case or is not working... incorrect password is reported as an
+//        // IOException just like other I/O errors with no root causes as far as I'm able to
+//        // tell. So leaving this out for now
+//        //                                                                        [JPL]
+//        //
+//        throw new PasswordException(
+//            "Cannot recover keys from keystore (was the provided password correct?) : {0}",
+//            e.getMessage(), e
+//        );
+//      }
 
-      throw new KeyStoreException("Can't load keystore: " + e.getMessage(), e);
+      throw new KeyManagerException("Cannot load keystore: {0}", e, e.getMessage());
     }
   }
 
@@ -606,6 +817,17 @@ public abstract class KeyManager
     }
 
     protected KeyManagerException(String msg, Throwable cause, Object... params)
+    {
+      super(msg, cause, params);
+    }
+  }
+
+  /**
+   * Specific subclass of KeyManagerException that indicates a security configuration issue.
+   */
+  public static class ConfigurationException extends KeyManagerException
+  {
+    protected ConfigurationException(String msg, Throwable cause, Object... params)
     {
       super(msg, cause, params);
     }

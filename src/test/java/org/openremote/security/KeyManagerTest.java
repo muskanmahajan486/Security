@@ -44,6 +44,10 @@ import java.util.UUID;
  */
 public class KeyManagerTest
 {
+  // TODO : test loading zero file behavior
+  // TODO : test saving with non-ascii password
+
+
   /**
    * Very basic test runs on StorageType enum to ensure implementation consistency.
    */
@@ -442,6 +446,24 @@ public class KeyManagerTest
     }
   }
 
+  /**
+   * Test against a broken implementation (subclass) of a key manager.
+   */
+  @Test public void testBrokenStorageManager()
+  {
+    try
+    {
+      new BrokenStorageManager();
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (IllegalArgumentException e)
+    {
+      // expected...
+    }
+  }
+
 
   // Nested Classes -------------------------------------------------------------------------------
 
@@ -513,6 +535,14 @@ public class KeyManagerTest
     PKCS12Storage()
     {
       super(StorageType.PKCS12, null);
+    }
+  }
+
+  private static class BrokenStorageManager extends KeyManager
+  {
+    BrokenStorageManager()
+    {
+      super(null, new BouncyCastleProvider());
     }
   }
 

@@ -20,10 +20,11 @@
  */
 package org.openremote.security;
 
-import org.openremote.logging.Logger;
+import org.openremote.logging.LogService;
 
-import java.security.Provider;
 import java.security.Security;
+import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * Provides some generic methods to work on JVM installed security providers.
@@ -33,23 +34,65 @@ import java.security.Security;
 public class Providers
 {
 
-  private final static Logger log = Logger.getInstance(SecurityLog.CONFIGURATION);
-
+  /**
+   * Main method to print the installed security provider information.
+   *
+   * @param args    command line args
+   */
   public static void main(String... args)
   {
-    Provider[] providers = Security.getProviders();
-    StringBuilder builder = new StringBuilder(1024);
+    SecurityConfig sc = new SecurityConfig();
+    sc.printProviders();
+  }
 
-    for (Provider provider : providers)
+
+  // Nested Classes -------------------------------------------------------------------------------
+
+  /**
+   * Specific log class to write the provider info to.
+   */
+  private static class SecurityConfig extends LogService
+  {
+    /**
+     * Always logs to {@link SecurityLog#CONFIGURATION} category.
+     */
+    private SecurityConfig()
     {
-      builder.append("\nPROVIDER:");
-      builder.append(provider.getName());
-      builder.append("\n            ");
-      builder.append(provider.getInfo());
-      builder.append("\n");
+      super(SecurityLog.CONFIGURATION);
     }
 
-    log.error(builder.toString());
+    /**
+     * Print security provider info to log system console output.
+     */
+    private void printProviders()
+    {
+      java.security.Provider[] providers = Security.getProviders();
+      StringBuilder builder = new StringBuilder(1024);
+
+      for (java.security.Provider provider : providers)
+      {
+        builder.append("\nProvider Name: ");
+        builder.append(provider.getName());
+        builder.append("\n");
+
+        Set<java.security.Provider.Service> services = provider.getServices();
+
+        for (java.security.Provider.Service service : services)
+        {
+          builder.append("    ");
+          builder.append(service.getType());
+          builder.append(" : ");
+          builder.append(service.getAlgorithm());
+          builder.append("\n");
+        }
+      }
+
+      addConsoleOutput(Level.INFO);
+      setLevel(Level.INFO);
+
+      logDelegate.setUseParentHandlers(false);
+      logDelegate.log(Level.INFO, builder.toString());
+    }
   }
 }
 

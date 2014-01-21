@@ -330,11 +330,6 @@ public abstract class KeyManager
       return save(keystore, new ByteArrayOutputStream(), password);
     }
 
-    catch (KeyStoreException e)
-    {
-      throw new KeyManagerException("Keystore could not be created : {0}", e, e.getMessage());
-    }
-
     finally
     {
       if (password != null)
@@ -362,8 +357,12 @@ public abstract class KeyManager
    *
    * @return      an in-memory keystore instance
    *
+   * @throws ConfigurationException
+   *              if the configured security provider(s) do not contain implementation for the
+   *              required keystore type
+   *
    * @throws KeyManagerException
-   *              if the keystore creation fails for any reason
+   *              if loading or creating the keystore fails
    */
   public KeyStore save(File file, char[] password) throws KeyManagerException
   {
@@ -384,18 +383,11 @@ public abstract class KeyManager
       else
       {
         keystore = instantiateKeyStore(password);
-     }
+      }
 
       BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
 
       return save(keystore, out, password);
-    }
-
-    catch (KeyStoreException e)
-    {
-      throw new KeyManagerException(
-          "Cannot create the key store implementation : {0}", e, e.getMessage()
-      );
     }
 
     catch (FileNotFoundException e)
@@ -563,10 +555,15 @@ public abstract class KeyManager
    *
    * @return    in-memory keystore instance
    *
-   * @throws KeyStoreException
-   *            if the keystore cannot be created for any reason
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if loading or creating the keystore fails
    */
-  private KeyStore instantiateKeyStore(char[] password) throws KeyStoreException, KeyManagerException
+  private KeyStore instantiateKeyStore(char[] password)
+      throws ConfigurationException, KeyManagerException
   {
     return instantiateKeyStore(password, storage);
   }
@@ -583,11 +580,15 @@ public abstract class KeyManager
    *
    * @return    in-memory keystore instance
    *
-   * @throws KeyStoreException
-   *            if the keystore cannot be created for any reason
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if loading or creating the keystore fails
    */
   private KeyStore instantiateKeyStore(char[] password, StorageType type)
-      throws KeyStoreException, KeyManagerException
+      throws ConfigurationException, KeyManagerException
   {
     return getKeyStore(null, password, type);
   }
@@ -603,10 +604,15 @@ public abstract class KeyManager
    *
    * @return    in-memory keystore instance
    *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
    * @throws KeyManagerException
-   *            if the keystore cannot be created for any reason
+   *            if loading or creating the keystore fails
    */
-  private KeyStore instantiateKeyStore(File file, char[] password) throws KeyManagerException
+  private KeyStore instantiateKeyStore(File file, char[] password)
+      throws ConfigurationException, KeyManagerException
   {
     return instantiateKeyStore(file, password, storage);
   }
@@ -633,7 +639,7 @@ public abstract class KeyManager
    *            if loading or creating the keystore fails
    */
   private KeyStore instantiateKeyStore(File file, char[] password, StorageType type)
-      throws KeyManagerException
+      throws ConfigurationException, KeyManagerException
   {
     try
     {
@@ -683,7 +689,7 @@ public abstract class KeyManager
    *            if loading or creating the keystore fails
    */
   private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
-      throws KeyManagerException, ConfigurationException
+      throws ConfigurationException, KeyManagerException
   {
     if (password == null || password.length == 0)
     {

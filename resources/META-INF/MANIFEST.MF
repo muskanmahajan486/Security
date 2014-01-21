@@ -7,4 +7,8 @@ Specification-Vendor: OpenRemote, Inc.
 Implementation-Title: OpenRemote Security
 Implementation-Version: ${release.version}
 Implementation-Vendor: OpenRemote, Inc.
+Main-Class: org.openremote.security.Providers
+Class-Path: ${manifest.classpath}
+
+
 

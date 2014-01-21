@@ -54,11 +54,32 @@ public class KeyManagerTest
     );
 
     Assert.assertTrue(
+        KeyManager.StorageType.PKCS12.name().equals(KeyManager.StorageType.PKCS12.getStorageTypeName())
+    );
+
+    Assert.assertTrue(
         KeyManager.StorageType.JCEKS.name().equals(KeyManager.StorageType.JCEKS.toString())
     );
 
     Assert.assertTrue(
+        KeyManager.StorageType.JCEKS.name().equals(KeyManager.StorageType.JCEKS.getStorageTypeName())
+    );
+
+    Assert.assertTrue(
         KeyManager.StorageType.JKS.name().equals(KeyManager.StorageType.JKS.toString())
+    );
+
+    Assert.assertTrue(
+        KeyManager.StorageType.JKS.name().equals(KeyManager.StorageType.JKS.getStorageTypeName())
+    );
+
+
+    Assert.assertTrue(
+        KeyManager.StorageType.BKS.name().equals(KeyManager.StorageType.BKS.toString())
+    );
+
+    Assert.assertTrue(
+        KeyManager.StorageType.BKS.name().equals(KeyManager.StorageType.BKS.getStorageTypeName())
     );
   }
 

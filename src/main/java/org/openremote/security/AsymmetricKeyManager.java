@@ -205,6 +205,30 @@ public class AsymmetricKeyManager extends KeyManager
     {
       this.spec = spec;
     }
+
+    /**
+     * Returns the algorithm's standard name, see
+     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
+     *
+     * @see #getAlgorithmName()
+     *
+     * @return asymmetric key algorithm standard name
+     */
+    @Override public String toString()
+    {
+      return getAlgorithmName();
+    }
+
+    /**
+     * Returns the algorithm's standard name, see
+     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
+     *
+     * @return asymmetric key algorithm standard name
+     */
+    public String getAlgorithmName()
+    {
+      return name();
+    }
   }
 
 

@@ -158,7 +158,9 @@ public abstract class KeyManager
   private StorageType storage = DEFAULT_KEYSTORE_STORAGE_TYPE;
 
   /**
-   * The security provider used by this instance.
+   * The security provider used by this instance. Note that may contain a null reference in
+   * which case implementation should delegate to the the JVM installed security providers
+   * in their preferred use order.
    */
   private Provider provider = DEFAULT_SECURITY_PROVIDER.getProviderInstance();
 
@@ -319,10 +321,14 @@ public abstract class KeyManager
    * if desired.
    *
    * @param keyAlias
+   *            A lookup name for the keystore entry to be added.
    *
    * @param entry
+   *            Keystore entry to be added. Note that accepted entry types depend on the
+   *            keystore storage format.
    *
    * @param param
+   *            Protection parameters for the keystore entry/alias.
    */
   protected void add(String keyAlias, KeyStore.Entry entry, KeyStore.ProtectionParameter param)
   {
@@ -433,9 +439,11 @@ public abstract class KeyManager
 
 
   /**
-   * TODO
+   * Returns the security provider associated with this key manager. Note that may return a
+   * null reference in which case the implementations should delegate the functionality to
+   * JVM installed security providers in their preferred use order.
    *
-   * @return
+   * @return    security provider instance or <tt>null</tt>
    */
   protected Provider getSecurityProvider()
   {

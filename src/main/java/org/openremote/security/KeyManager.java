@@ -325,9 +325,10 @@ public abstract class KeyManager
    *              The password to access the keystore. Note that the subclasses invoking this
    *              method are responsible for resetting the password character array after use.
    *
-   * @return
+   * @return      The loaded keystore instance.
    *
    * @throws KeyManagerException
+   *              if loading the keystore fails
    */
   protected KeyStore load(File f, char[] keystorePassword) throws KeyManagerException
   {
@@ -653,6 +654,11 @@ public abstract class KeyManager
   private KeyStore instantiateKeyStore(File file, char[] password, StorageType type)
       throws ConfigurationException, KeyManagerException
   {
+    if (file == null)
+    {
+      throw new KeyManagerException("Implementation Error: null file descriptor.");
+    }
+
     try
     {
       BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));

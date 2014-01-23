@@ -571,6 +571,85 @@ public class KeyManagerTest
   }
 
 
+  // Load Tests -----------------------------------------------------------------------------------
+
+  /**
+   * Tests saving and loading secret keys with BouncyCastle BKS storage.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testLoadExistingKeyStoreBKS() throws Exception
+  {
+    try
+    {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      BKSStorage mgr = new BKSStorage();
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      File dir = new File(System.getProperty("user.dir"));
+      File f = new File(dir, "test.keystore." + UUID.randomUUID());
+      f.deleteOnExit();
+
+      char[] pw = new char[] { '1' };
+
+      mgr.save(f, pw);
+
+      pw = new char[] { '1' };
+
+      KeyStore ks = mgr.load(f, pw);
+
+      KeyStore.SecretKeyEntry entry =
+          (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
+
+      Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Tests saving and loading secret keys with Sun proprietary JCEKS storage.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testLoadExistingKeyStoreJCEKS() throws Exception
+  {
+    JCEKSStorage mgr = new JCEKSStorage();
+
+    mgr.add(
+        "test",
+        new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+        new KeyStore.PasswordProtection(new char[] { 'b' })
+    );
+
+    File dir = new File(System.getProperty("user.dir"));
+    File f = new File(dir, "test.keystore." + UUID.randomUUID());
+    f.deleteOnExit();
+
+    char[] pw = new char[] { '1' };
+
+    mgr.save(f, pw);
+
+    pw = new char[] { '1' };
+
+    KeyStore ks = mgr.load(f, pw);
+
+    KeyStore.SecretKeyEntry entry =
+        (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
+
+    Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
+  }
+
+
   // Nested Classes -------------------------------------------------------------------------------
 
   private static class TestKeyManager extends KeyManager

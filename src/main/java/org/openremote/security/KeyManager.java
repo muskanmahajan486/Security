@@ -317,6 +317,25 @@ public abstract class KeyManager
   }
 
   /**
+   * TODO
+   *
+   * @param f
+   *
+   * @param keystorePassword
+   *              The password to access the keystore. Note that the subclasses invoking this
+   *              method are responsible for resetting the password character array after use.
+   *
+   * @return
+   *
+   * @throws KeyManagerException
+   */
+  protected KeyStore load(File f, char[] keystorePassword) throws KeyManagerException
+  {
+    return instantiateKeyStore(f, keystorePassword);
+  }
+
+
+  /**
    * Adds a key entry to this instance. Use {@link #save(java.io.File, char[])} to persist
    * if desired.
    *

@@ -22,6 +22,8 @@ package org.openremote.security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -48,6 +50,19 @@ public class KeyManagerTest
   // TODO : test saving with non-ascii password
 
 
+  // Test Lifecycle methods -----------------------------------------------------------------------
+
+  @AfterSuite public void clearSecurityProvider()
+  {
+    Provider p = Security.getProvider("BC");
+
+    if (p != null)
+    {
+      Assert.fail("Tests did not properly remove BouncyCastle provider.");
+    }
+  }
+
+  
   /**
    * Very basic test runs on StorageType enum to ensure implementation consistency.
    */
@@ -647,6 +662,88 @@ public class KeyManagerTest
         (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
 
     Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
+  }
+
+  /**
+   * Tests error behavior when null file descriptor is used.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testLoadingNullFile() throws Exception
+  {
+    try
+    {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      BKSStorage mgr = new BKSStorage();
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] {'a'}, "foo")),
+          new KeyStore.PasswordProtection(new char[] {'b'})
+      );
+
+      char[] pw = new char[] { '1' };
+
+      try
+      {
+        mgr.load(null, pw);
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Tests the error handling behavior when null password is given.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testLoadingWithNullPassword() throws Exception
+  {
+    try
+    {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      BKSStorage mgr = new BKSStorage();
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      File dir = new File(System.getProperty("user.dir"));
+      File f = new File(dir, "test.keystore." + UUID.randomUUID());
+      f.deleteOnExit();
+
+      try
+      {
+        mgr.load(f, null);
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
   }
 
 

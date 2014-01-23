@@ -317,9 +317,10 @@ public abstract class KeyManager
   }
 
   /**
-   * TODO
+   * Loads an existing keystore from a file.
    *
-   * @param f
+   * @param file
+   *              file descriptor pointing to the keystore
    *
    * @param keystorePassword
    *              The password to access the keystore. Note that the subclasses invoking this
@@ -330,9 +331,9 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading the keystore fails
    */
-  protected KeyStore load(File f, char[] keystorePassword) throws KeyManagerException
+  protected KeyStore load(File file, char[] keystorePassword) throws KeyManagerException
   {
-    return instantiateKeyStore(f, keystorePassword);
+    return instantiateKeyStore(file, keystorePassword);
   }
 
 

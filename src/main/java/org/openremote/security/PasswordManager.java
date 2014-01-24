@@ -75,12 +75,31 @@ public class PasswordManager extends KeyManager
    *
    * @see java.security.Security#addProvider(java.security.Provider)
    * @see org.bouncycastle.jce.provider.BouncyCastleProvider
+   *
+   * @param masterPassword
+   *            The master password to access the password storage. Note that the character
+   *            array will be cleared when this constructor completes.
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not support {@link StorageType#BKS}
+   *            keystore type
+   *
+   * @throws  KeyManagerException
+   *            if creating a new keystore instance fails
    */
-  public PasswordManager()
+  public PasswordManager(char[] masterPassword) throws ConfigurationException, KeyManagerException
   {
-    super(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
+    try
+    {
+      init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
 
-    //this.keystoreLocation = instantiateKeyStore(null);
+      this.keystore = instantiateKeyStore(masterPassword);
+    }
+
+    finally
+    {
+      clearPassword(masterPassword);
+    }
   }
 
 

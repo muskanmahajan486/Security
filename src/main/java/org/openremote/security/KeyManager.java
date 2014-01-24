@@ -335,12 +335,39 @@ public abstract class KeyManager
    *
    * @return      The loaded keystore instance.
    *
+   * @throws ConfigurationException
+   *              if the configured security provider(s) do not contain implementation for the
+   *              required keystore type
+   *
    * @throws KeyManagerException
    *              if loading the keystore fails
    */
-  protected KeyStore load(File file, char[] keystorePassword) throws KeyManagerException
+  protected KeyStore load(File file, char[] keystorePassword)
+      throws ConfigurationException, KeyManagerException
   {
     return instantiateKeyStore(file, keystorePassword);
+  }
+
+  /**
+   * Instantiate an in-memory, non-persistent keystore.
+   *
+   * @param password
+   *            Password to access the keystore. Note that the subclasses invoking this
+   *            method are responsible for resetting the password character array after use.
+   *
+   * @return    in-memory keystore instance
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
+   */
+  protected KeyStore instantiateKeyStore(char[] password)
+      throws ConfigurationException, KeyManagerException
+  {
+    return instantiateKeyStore(password, storage);
   }
 
 
@@ -567,27 +594,6 @@ public abstract class KeyManager
     }
   }
 
-
-  /**
-   * Instantiante an in-memory, non-persistent PKCS #12 keystore.
-   *
-   * @param password
-   *            password to access the keystore
-   *
-   * @return    in-memory keystore instance
-   *
-   * @throws ConfigurationException
-   *            if the configured security provider(s) do not contain implementation for the
-   *            required keystore type
-   *
-   * @throws KeyManagerException
-   *            if loading or creating the keystore fails
-   */
-  private KeyStore instantiateKeyStore(char[] password)
-      throws ConfigurationException, KeyManagerException
-  {
-    return instantiateKeyStore(password, storage);
-  }
 
   /**
    * Instantiate an in-memory, non-persistent keystore with a given algorithm for the storage

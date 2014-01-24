@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -505,6 +506,39 @@ public abstract class KeyManager
     return provider;
   }
 
+  /**
+   * Checks if keystore exists at given file location.
+   *
+   * @param file
+   *            a keystore file to check
+   *
+   * @return    true if file exists, false otherwise
+   *
+   * @throws KeyManagerException
+   *            if security manager has denied access to file information
+   */
+  protected boolean exists(File file) throws KeyManagerException
+  {
+    // TODO Implementation Note: API should use URIs to avoid file path portability issues
+    //
+    //File file = new File(uri);
+
+    try
+    {
+      return file.exists();
+    }
+
+    catch (SecurityException e)
+    {
+      String path = resolveFilePath(file);
+
+      throw new KeyManagerException(
+          "Security manager has prevented access to file ''{0}'' : {1}",
+          e, path, e.getMessage()
+      );
+    }
+  }
+
 
   // Private Instance Methods ---------------------------------------------------------------------
 
@@ -842,34 +876,6 @@ public abstract class KeyManager
     }
   }
 
-  /**
-   * Checks if given file exists.
-   *
-   * @param file
-   *            file to check
-   *
-   * @return    true if file exists, false otherwise
-   *
-   * @throws KeyManagerException
-   *            if security manager has denied access to file information
-   */
-  private boolean exists(final File file) throws KeyManagerException
-  {
-    try
-    {
-      return file.exists();
-    }
-
-    catch (SecurityException e)
-    {
-      String path = resolveFilePath(file);
-
-      throw new KeyManagerException(
-          "Security manager has prevented access to file ''{0}'' : {1}",
-          e, path, e.getMessage()
-      );
-    }
-  }
 
 
   // Nested Classes -------------------------------------------------------------------------------

@@ -22,7 +22,6 @@ package org.openremote.security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
@@ -62,7 +61,7 @@ public class KeyManagerTest
     }
   }
 
-  
+
   /**
    * Very basic test runs on StorageType enum to ensure implementation consistency.
    */
@@ -585,6 +584,23 @@ public class KeyManagerTest
     }
   }
 
+  // InstantiateKeyStore Tests --------------------------------------------------------------------
+
+  @Test public void testInstantiate() throws Exception
+  {
+    TestKeyManager mgr = new TestKeyManager();
+    KeyStore store = mgr.instantiateKeyStore(new char[] { 'a' });
+
+    Assert.assertTrue(store != null);
+  }
+
+  @Test public void testInstantiateNullPassword() throws Exception
+  {
+    TestKeyManager mgr = new TestKeyManager();
+    KeyStore store = mgr.instantiateKeyStore(null);
+
+    Assert.assertTrue(store != null);
+  }
 
   // Load Tests -----------------------------------------------------------------------------------
 

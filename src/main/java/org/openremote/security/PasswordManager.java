@@ -104,7 +104,10 @@ public class PasswordManager extends KeyManager
 
 
   /**
-   * Constructs a persistent password manager back by {@link StorageType#BKS} storage format.
+   * Constructs a persistent password manager backed by {@link StorageType#BKS} storage format.
+   * If no password storage exists at the given URI, a new file will be created when passwords
+   * are added to this password manager. <p>
+   *
    * Requires BouncyCastle security provider to be available on the classpath and installed
    * as a security provider to the JVM.
    *
@@ -112,29 +115,30 @@ public class PasswordManager extends KeyManager
    * @see org.bouncycastle.jce.provider.BouncyCastleProvider
    *
    * @param keystoreLocation
-   *          location of the persisted password storage
+   *            location of the persisted password storage
    *
    * @param masterPassword
-   *          The master password to access the password storage. Note that the character
-   *          array will be cleared when this constructor completes.
+   *            The master password to access the password storage. Note that the character
+   *            array will be cleared when this constructor completes.
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not support {@link StorageType#BKS}
+   *            keystore type
+   *
+   * @throws  KeyManagerException
+   *            if loading an existing keystore fails, or creating a new keystore instance
+   *            fails
    */
   public PasswordManager(URI keystoreLocation, char[] masterPassword)
       throws ConfigurationException, KeyManagerException
   {
-    super(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
-    
     try
     {
-      if (masterPassword == null || masterPassword.length == 0)
-      {
-        throw new IllegalArgumentException(
-            "Implementation error: keystore master password is null or empty."
-        );
-      }
+      init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
 
       if (keystoreLocation == null)
       {
-        throw new IllegalArgumentException("Implementation error: keystore location URI is null.");
+        throw new KeyManagerException("Implementation error: keystore location URI is null.");
       }
 
       this.keystoreLocation = keystoreLocation;
@@ -152,15 +156,7 @@ public class PasswordManager extends KeyManager
 
     finally
     {
-      if (masterPassword != null)
-      {
-        // Clear the password from memory...
-
-        for (int i = 0; i < masterPassword.length; ++i)
-        {
-          masterPassword[i] = 0;
-        }
-      }
+      clearPassword(masterPassword);
     }
   }
 

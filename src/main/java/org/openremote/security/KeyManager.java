@@ -655,7 +655,7 @@ public abstract class KeyManager
   }
 
   /**
-   * Loads a PKCS #12 keystore instance from an existing file.
+   * Loads a keystore instance from an existing file.
    *
    * @param file
    *            file to load the keystore from

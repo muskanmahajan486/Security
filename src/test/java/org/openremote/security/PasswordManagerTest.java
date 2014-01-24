@@ -21,15 +21,20 @@
 package org.openremote.security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openremote.security.provider.BouncyCastleX509CertificateBuilder;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.Provider;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -41,7 +46,20 @@ import java.util.UUID;
 public class PasswordManagerTest
 {
 
-  // Test No-Arg Constructor ----------------------------------------------------------------------
+  // Test Lifecycle methods -----------------------------------------------------------------------
+
+  @AfterSuite public void clearSecurityProvider()
+  {
+    Provider p = Security.getProvider("BC");
+
+    if (p != null)
+    {
+      Assert.fail("Tests did not properly remove BouncyCastle provider.");
+    }
+  }
+
+
+  // No-Arg Constructor Tests ---------------------------------------------------------------------
 
   /**
    * No arg constructor test with basic parameters.
@@ -99,6 +117,276 @@ public class PasswordManagerTest
   }
 
 
+  // File Constructor Tests -----------------------------------------------------------------------
+
+  /**
+   * Test file-persisted password manager with an existing, empty password store.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructor() throws Exception
+  {
+    // Create an existing, empty keystore...
+
+    TestBKStore store = new TestBKStore();
+
+    File dir = new File(System.getProperty("user.dir"));
+    File file = new File(dir, "test.store-" + UUID.randomUUID());
+    file.deleteOnExit();
+
+    store.save(file, new char[] { '0' });
+
+    char[] pw = new char[] { '0' };
+    PasswordManager mgr = new PasswordManager(file.toURI(), pw);
+
+    // check that password was erased....
+
+    for (Character c : pw)
+    {
+      Assert.assertTrue(c == 0);
+    }
+  }
+
+  /**
+   * Test file-persisted password manager with an existing password store that contains
+   * passwords.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithExistingKeys() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      // Create an existing keystore...
+
+      TestBKStore store = new TestBKStore();
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test.store-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      store.add(
+          "foo",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { '1' }, "test")),
+          new KeyStore.PasswordProtection(new char[] { '0' })
+      );
+
+      store.save(file, new char[] { '0' });
+
+      char[] pw = new char[] { '0' };
+      PasswordManager mgr = new PasswordManager(file.toURI(), pw);
+
+      // check that password was erased....
+
+      for (Character c : pw)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      // check that password is found...
+
+      Assert.assertTrue(Arrays.equals(mgr.getPassword("foo", new char[] {'0'}), new byte[] {'1'}));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test file-persisted password manager constructor loading a keystore that contains
+   * non-password entries.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithWrongEntryType() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      // Create an existing keystore...
+
+      AsymmetricKeyManager keys = AsymmetricKeyManager.create();
+      Certificate cert = keys.createSelfSignedKey(
+          "bar", new char[] {'0'}, new BouncyCastleX509CertificateBuilder(), "test"
+      );
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test.store-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      TestBKStore store = new TestBKStore();
+      store.add(
+          "foo",
+          new KeyStore.TrustedCertificateEntry(cert),
+          null
+      );
+
+      store.save(file, new char[] { '0' });
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { '0' });
+
+      try
+      {
+        mgr.getPassword("bar", new char[] {'0'});
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Test file-persisted password manager constructor against an empty file.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithEmptyFile() throws Exception
+  {
+    // Create an existing keystore...
+
+    File file = File.createTempFile("openremote", null);
+
+    try
+    {
+      new PasswordManager(file.toURI(), new char[] { '0' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Test file-persisted password manager constructor against a non-existent file.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithNewFile() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test.store-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { '0' });
+
+      byte[] password = new byte[] { 'a' };
+      char[] masterpassword = new char[] { '0' };
+
+      mgr.addPassword("foo", password, masterpassword);
+
+      // Check that passwords are cleared...
+      for (Byte b : password)
+      {
+        Assert.assertTrue(b == 0);
+      }
+
+      for (Character c : masterpassword)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      // try to retrieve the password...
+
+      byte[] pw = mgr.getPassword("foo", new char[] { '0' });
+
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { 'a' }));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test error handling behavior when constructor has a null file descriptor.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithNullURI() throws Exception
+  {
+    try
+    {
+      new PasswordManager(null, new char[] { '0' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Test error handling behavior when constructor has a null password.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithNullPassword() throws Exception
+  {
+    try
+    {
+      new PasswordManager(File.createTempFile("openremote", null).toURI(), null);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Test error handling behavior when constructor has empty password.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testFileConstructorWithEmptyPassword() throws Exception
+  {
+    try
+    {
+      new PasswordManager(File.createTempFile("openremote", null).toURI(), new char[] {});
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+
+
+  // Other Tests ----------------------------------------------------------------------------------
 
   @Test public void testAddAndRemovePassword() throws Exception
   {
@@ -153,6 +441,17 @@ public class PasswordManagerTest
     finally
     {
       Security.removeProvider("BC");
+    }
+  }
+
+
+  // Nested Classes -------------------------------------------------------------------------------
+
+  private static class TestBKStore extends KeyManager
+  {
+    private TestBKStore()
+    {
+      super(StorageType.BKS, new BouncyCastleProvider());
     }
   }
 }

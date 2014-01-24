@@ -41,6 +41,65 @@ import java.util.UUID;
 public class PasswordManagerTest
 {
 
+  // Test No-Arg Constructor ----------------------------------------------------------------------
+
+  /**
+   * No arg constructor test with basic parameters.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testNoArgCtor() throws Exception
+  {
+    char[] pw = new char[] { 'a', '1' };
+
+    PasswordManager mgr = new PasswordManager(pw);
+
+    // check that password was erased....
+
+    for (Character c : pw)
+    {
+      Assert.assertTrue(c == 0);
+    }
+  }
+
+  /**
+   * No arg constructor test with null password.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testNoArgCtorNullPassword() throws Exception
+  {
+    try
+    {
+      new PasswordManager(null);
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * No arg constructor test with empty password.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testNoArgCtorEmptyPassword() throws Exception
+  {
+    try
+    {
+      new PasswordManager(new char[] {} );
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+
+
   @Test public void testAddAndRemovePassword() throws Exception
   {
     try

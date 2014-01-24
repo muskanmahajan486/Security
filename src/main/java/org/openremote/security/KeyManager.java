@@ -195,13 +195,7 @@ public abstract class KeyManager
    */
   protected KeyManager(StorageType storage, Provider provider)
   {
-    if (storage == null)
-    {
-      throw new IllegalArgumentException("Implementation Error: null storage type");
-    }
-
-    this.provider = provider;
-    this.storage = storage;
+    init(storage, provider);
   }
 
 
@@ -537,6 +531,30 @@ public abstract class KeyManager
           e, path, e.getMessage()
       );
     }
+  }
+
+
+  /**
+   * Initialization method used by constructors to initialize this instance. Should not be
+   * invoked outside of a constructor.
+   *
+   * @param storage
+   *            The keystore storage type to use with this instance.
+   *
+   * @param provider
+   *            The security provider to use with this instance. Can be null in which case
+   *            the implementations should delegate to the JVM installed security providers
+   *            in their preferred use order.
+   */
+  protected void init(StorageType storage, Provider provider)
+  {
+    if (storage == null)
+    {
+      throw new IllegalArgumentException("Implementation Error: null storage type");
+    }
+
+    this.provider = provider;
+    this.storage = storage;
   }
 
 

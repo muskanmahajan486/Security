@@ -184,11 +184,15 @@ public class PasswordManager extends KeyManager
   {
     try
     {
-      add(
-          alias,
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password")),
-          new KeyStore.PasswordProtection(storeMasterPassword)
-      );
+//    See to-do in add() implementation..
+//
+//      add(
+//          alias,
+//          new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password")),
+//          new KeyStore.PasswordProtection(storeMasterPassword)
+//      );
+
+      add(alias, password, storeMasterPassword);
 
       if (keystoreLocation != null)
       {
@@ -297,7 +301,8 @@ public class PasswordManager extends KeyManager
       {
         throw new PasswordNotFoundException(
             "Implementation Error: password alias ''{0}'' does not correspond to secret " +
-            "key entry in the keystore."
+            "key entry in the keystore.",
+            alias
         );
       }
 
@@ -353,6 +358,30 @@ public class PasswordManager extends KeyManager
       {
         password[i] = 0;
       }
+    }
+  }
+
+
+  private void add(String alias, byte[] password, char[] storeMasterPassword)
+      throws KeyManagerException
+  {
+    // TODO:
+    //  This is a bit of a kludge workaround for now until the superclass can be
+    //  refactored to manage the underlying keystore instance...
+
+    KeyStore.Entry entry = new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password"));
+    KeyStore.ProtectionParameter protection = new KeyStore.PasswordProtection(storeMasterPassword);
+
+    add(alias, entry, protection);
+
+    try
+    {
+      keystore.setEntry(alias, entry, protection);
+    }
+
+    catch (KeyStoreException e)
+    {
+      throw new KeyManagerException(e.getMessage(), e);
     }
   }
 

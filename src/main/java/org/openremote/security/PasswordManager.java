@@ -102,8 +102,8 @@ public class PasswordManager extends KeyManager
   public PasswordManager(URI keystoreLocation, char[] masterPassword)
       throws ConfigurationException, KeyManagerException
   {
-    this();
-
+    super(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
+    
     try
     {
       if (masterPassword == null || masterPassword.length == 0)
@@ -119,7 +119,16 @@ public class PasswordManager extends KeyManager
       }
 
       this.keystoreLocation = keystoreLocation;
-      this.keystore = load(new File(keystoreLocation), masterPassword);
+
+      if (exists(new File(keystoreLocation)))
+      {
+        this.keystore = load(new File(keystoreLocation), masterPassword);
+      }
+
+      else
+      {
+        this.keystore = instantiateKeyStore(masterPassword);
+      }
     }
 
     finally

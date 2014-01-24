@@ -209,7 +209,6 @@ public abstract class KeyManager
   /**
    * Stores the keys in this key manager in a secure keystore format. This implementation generates
    * a file-based, persistent keystore which can be shared with other applications and processes.
-   * The format used for storing the key entries is PKCS #12.
    *
    * @param file
    *              the file where the keystore should be saved
@@ -227,7 +226,8 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading or creating the keystore fails
    */
-  protected KeyStore save(File file, char[] password) throws KeyManagerException
+  protected KeyStore save(File file, char[] password)
+      throws ConfigurationException, KeyManagerException
   {
     if (file == null)
     {
@@ -270,6 +270,8 @@ public abstract class KeyManager
 
     finally
     {
+      // TODO : push the password clearing responsibility to subclasses...
+
       if (password != null)
       {
         for (int i = 0; i < password.length; ++i)
@@ -283,8 +285,7 @@ public abstract class KeyManager
 
   /**
    * Stores the keys in this key manager in a secure keystore format. This implementation generates
-   * an in-memory keystore that is not backed by a persistent storage. The format used for
-   * storing the key entries is PKCS #12.
+   * an in-memory keystore that is not backed by a persistent storage.
    *
    * @param password
    *            A secret password used to access the keystore contents. Note that the character
@@ -292,10 +293,14 @@ public abstract class KeyManager
    *
    * @return    An in-memory keystore instance.
    *
+   * @throws ConfigurationException
+   *              if the configured security provider(s) do not contain implementation for the
+   *              required keystore type
+   *
    * @throws KeyManagerException
    *            if the keystore creation fails for any reason
    */
-  protected KeyStore save(char[] password) throws KeyManagerException
+  protected KeyStore save(char[] password) throws ConfigurationException, KeyManagerException
   {
     try
     {
@@ -306,6 +311,8 @@ public abstract class KeyManager
 
     finally
     {
+      // TODO : push the password clearing responsibility to subclasses...
+
       if (password != null)
       {
         for (int i = 0; i < password.length; ++i)
@@ -599,7 +606,7 @@ public abstract class KeyManager
    *            required keystore type
    *
    * @throws KeyManagerException
-   *            if loading or creating the keystore fails
+   *            if creating the keystore fails
    */
   private KeyStore instantiateKeyStore(char[] password, StorageType type)
       throws ConfigurationException, KeyManagerException

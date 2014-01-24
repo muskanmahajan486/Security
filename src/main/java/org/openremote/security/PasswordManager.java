@@ -20,10 +20,16 @@
  */
 package org.openremote.security;
 
+import org.openremote.exception.OpenRemoteException;
+
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.net.URI;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
 
 
 /**
@@ -53,11 +59,17 @@ public class PasswordManager extends KeyManager
    */
   private URI keystoreLocation = null;
 
+  /**
+   * The backing keystore instance.
+   */
+  private KeyStore keystore = null;
+
 
   // Constructors ---------------------------------------------------------------------------------
 
   /**
-   * Constructs an in-memory password manager backed by {@link StorageType#BKS} storage format.
+   * Constructs an in-memory password manager backed by {@link StorageType#BKS} storage format. <p>
+   *
    * Requires BouncyCastle security provider to be available on the classpath and installed
    * as a security provider to the JVM.
    *
@@ -67,7 +79,10 @@ public class PasswordManager extends KeyManager
   public PasswordManager()
   {
     super(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
+
+    //this.keystoreLocation = instantiateKeyStore(null);
   }
+
 
   /**
    * Constructs a persistent password manager back by {@link StorageType#BKS} storage format.
@@ -81,9 +96,11 @@ public class PasswordManager extends KeyManager
    *          location of the persisted password storage
    *
    * @param masterPassword
-   *          the password to access the password storage
+   *          The master password to access the password storage. Note that the character
+   *          array will be cleared when this constructor completes.
    */
   public PasswordManager(URI keystoreLocation, char[] masterPassword)
+      throws ConfigurationException, KeyManagerException
   {
     this();
 
@@ -102,7 +119,7 @@ public class PasswordManager extends KeyManager
       }
 
       this.keystoreLocation = keystoreLocation;
-
+      this.keystore = load(new File(keystoreLocation), masterPassword);
     }
 
     finally
@@ -186,7 +203,8 @@ public class PasswordManager extends KeyManager
    *          The password alias (name) to be removed.
    *
    * @param storeMasterPassword
-   *          The master password to access this password storage.
+   *          The master password to access this password storage. Note that the character
+   *          array will be cleared when this method completes.
    *
    * @throws KeyManagerException
    *          if accessing the password store fails
@@ -220,10 +238,168 @@ public class PasswordManager extends KeyManager
     }
   }
 
-
   public void removePassword(String alias)
   {
     remove(alias);
+  }
+
+  /**
+   * Fetches a password from this password storage. The password is returned as a byte array
+   * and should be erased immediately after it has been used.
+   *
+   * @param alias
+   *            The password alias used to lookup the required password from the storage.
+   *
+   * @param storeMasterPassword
+   *            The master password to access this password storage. Note that the character
+   *            array will be cleared when this method completes.
+   *
+   * @return    Password in a byte array. This byte array should be erased as soon as the
+   *            password has been used.
+   */
+  public byte[] getPassword(String alias, char[] storeMasterPassword)
+      throws PasswordNotFoundException
+  {
+    try
+    {
+      if (alias == null || alias.equals(""))
+      {
+        throw new PasswordNotFoundException(
+            "Implementation Error: null or empty password alias."
+        );
+      }
+
+      if (!keystore.entryInstanceOf(alias, KeyStore.SecretKeyEntry.class))
+      {
+        throw new PasswordNotFoundException(
+            "Implementation Error: password alias ''{0}'' does not correspond to secret " +
+            "key entry in the keystore."
+        );
+      }
+
+      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)keystore.getEntry(
+          alias, new KeyStore.PasswordProtection(storeMasterPassword)
+      );
+
+      return entry.getSecretKey().getEncoded();
+    }
+
+    catch (KeyStoreException e)
+    {
+      throw new PasswordNotFoundException(
+          "Implementation Error: password manager has not been loaded."
+      );
+    }
+
+    catch (NoSuchAlgorithmException e)
+    {
+      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+    }
+
+    catch (UnrecoverableKeyException e)
+    {
+      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+    }
+
+    catch (UnrecoverableEntryException e)
+    {
+      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+    }
+
+    finally
+    {
+      clearPassword(storeMasterPassword);
+    }
+  }
+
+
+  // Private Instance Methods ---------------------------------------------------------------------
+
+  /**
+   * Clears the given password character array with zero values.
+   *
+   * @param password
+   *            password character array to erase
+   */
+  private void clearPassword(char[] password)
+  {
+    if (password != null)
+    {
+      for (int i = 0; i < password.length; ++i)
+      {
+        password[i] = 0;
+      }
+    }
+  }
+
+
+  // Nested Classes -------------------------------------------------------------------------------
+
+  /**
+   * Implementation specific exception type indicating that a requested password was not
+   * found in this password manager instance.
+   */
+  public class PasswordNotFoundException extends OpenRemoteException
+  {
+    /**
+     * Constructs a password not found exception with a given message.
+     *
+     * @param msg
+     *            exception message
+     */
+    private PasswordNotFoundException(String msg)
+    {
+      super(msg);
+    }
+
+    /**
+     * Constructs a password not found exception with a given parameterized message.
+     *
+     * @see OpenRemoteException
+     *
+     * @param msg
+     *            exception message
+     *
+     * @param params
+     *            message parameters
+     */
+    private PasswordNotFoundException(String msg, Object... params)
+    {
+      super(msg, params);
+    }
+
+    /**
+     * Constructs a password not found exception with a given message and root cause.
+     *
+     * @param msg
+     *            exception message
+     *
+     * @param cause
+     *            root cause for this exception
+     */
+    private PasswordNotFoundException(String msg, Throwable cause)
+    {
+      super(msg, cause);
+    }
+
+    /**
+     * Constructs a password not found exception with a given parameterized message and root cause.
+     *
+     * @see OpenRemoteException
+     *
+     * @param msg
+     *            exception message
+     *
+     * @param cause
+     *            root cause for this exception
+     *
+     * @param params
+     *            message parameters
+     */
+    private PasswordNotFoundException(String msg, Throwable cause, Object... params)
+    {
+      super(msg, cause, params);
+    }
   }
 
 }

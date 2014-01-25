@@ -369,17 +369,22 @@ public class PasswordManager extends KeyManager
     //  This is a bit of a kludge workaround for now until the superclass can be
     //  refactored to manage the underlying keystore instance...
 
-    KeyStore.Entry entry = new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password"));
-    KeyStore.ProtectionParameter protection = new KeyStore.PasswordProtection(storeMasterPassword);
-
-    add(alias, entry, protection);
-
     try
     {
+      KeyStore.Entry entry = new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password"));
+      KeyStore.ProtectionParameter protection = new KeyStore.PasswordProtection(storeMasterPassword);
+
+      add(alias, entry, protection);
+
       keystore.setEntry(alias, entry, protection);
     }
 
     catch (KeyStoreException e)
+    {
+      throw new KeyManagerException(e.getMessage(), e);
+    }
+
+    catch (IllegalArgumentException e)
     {
       throw new KeyManagerException(e.getMessage(), e);
     }

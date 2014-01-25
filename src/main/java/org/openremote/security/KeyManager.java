@@ -236,7 +236,7 @@ public abstract class KeyManager
 
       // If already exists, load from filesystem...
 
-      if (exists(new File(uri)))
+      if (exists(uri))
       {
         keystore = instantiateKeyStore(new File(uri), password);
       }
@@ -509,21 +509,19 @@ public abstract class KeyManager
   }
 
   /**
-   * Checks if keystore exists at given file location.
+   * Checks if keystore exists at given file URI.
    *
-   * @param file
-   *            a keystore file to check
+   * @param uri
+   *            the file URI to check
    *
    * @return    true if file exists, false otherwise
    *
    * @throws KeyManagerException
    *            if security manager has denied access to file information
    */
-  protected boolean exists(File file) throws KeyManagerException
+  protected boolean exists(URI uri) throws KeyManagerException
   {
-    // TODO Implementation Note: API should use URIs to avoid file path portability issues
-    //
-    //File file = new File(uri);
+    File file = new File(uri);
 
     try
     {

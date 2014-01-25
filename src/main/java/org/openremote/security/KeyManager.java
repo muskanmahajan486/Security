@@ -227,7 +227,7 @@ public abstract class KeyManager
   {
     if (uri == null)
     {
-      throw new KeyManagerException("Save failed due to null file descriptor.");
+      throw new KeyManagerException("Save failed due to null URI.");
     }
 
     try
@@ -238,7 +238,7 @@ public abstract class KeyManager
 
       if (exists(uri))
       {
-        keystore = instantiateKeyStore(new File(uri), password);
+        keystore = instantiateKeyStore(uri, password);
       }
 
       // Otherwise create as new...
@@ -348,7 +348,12 @@ public abstract class KeyManager
   protected KeyStore load(File file, char[] keystorePassword)
       throws ConfigurationException, KeyManagerException
   {
-    return instantiateKeyStore(file, keystorePassword);
+    if (file == null)
+    {
+      throw new KeyManagerException("Implementation Error: null file descriptor.");
+    }
+    
+    return instantiateKeyStore(file.toURI(), keystorePassword);
   }
 
   /**
@@ -441,7 +446,7 @@ public abstract class KeyManager
     {
       remove(keyAlias);
 
-      KeyStore ks = instantiateKeyStore(f, keystorePassword);
+      KeyStore ks = instantiateKeyStore(f.toURI(), keystorePassword);
 
       ks.deleteEntry(keyAlias);
 
@@ -679,10 +684,10 @@ public abstract class KeyManager
   }
 
   /**
-   * Loads a keystore instance from an existing file.
+   * Loads a keystore instance from an existing file URI.
    *
-   * @param file
-   *            file to load the keystore from
+   * @param uri
+   *            file URI to load the keystore from
    *
    * @param password
    *            password to access the keystore
@@ -696,10 +701,10 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *            if loading or creating the keystore fails
    */
-  private KeyStore instantiateKeyStore(File file, char[] password)
+  private KeyStore instantiateKeyStore(URI uri, char[] password)
       throws ConfigurationException, KeyManagerException
   {
-    return instantiateKeyStore(file, password, storage);
+    return instantiateKeyStore(new File(uri), password, storage);
   }
 
   /**

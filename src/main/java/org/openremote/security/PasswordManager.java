@@ -196,7 +196,7 @@ public class PasswordManager extends KeyManager
 
       if (keystoreLocation != null)
       {
-        save(new File(keystoreLocation), storeMasterPassword);
+        save(keystoreLocation, storeMasterPassword);
       }
     }
 

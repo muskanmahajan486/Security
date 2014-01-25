@@ -134,7 +134,7 @@ public class PasswordManagerTest
     File file = new File(dir, "test.store-" + UUID.randomUUID());
     file.deleteOnExit();
 
-    store.save(file, new char[] { '0' });
+    store.save(file.toURI(), new char[] { '0' });
 
     char[] pw = new char[] { '0' };
     PasswordManager mgr = new PasswordManager(file.toURI(), pw);
@@ -175,7 +175,7 @@ public class PasswordManagerTest
           new KeyStore.PasswordProtection(new char[] { '0' })
       );
 
-      store.save(file, new char[] { '0' });
+      store.save(file.toURI(), new char[] { '0' });
 
       char[] pw = new char[] { '0' };
       PasswordManager mgr = new PasswordManager(file.toURI(), pw);
@@ -230,7 +230,7 @@ public class PasswordManagerTest
           null
       );
 
-      store.save(file, new char[] { '0' });
+      store.save(file.toURI(), new char[] { '0' });
 
       PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { '0' });
 

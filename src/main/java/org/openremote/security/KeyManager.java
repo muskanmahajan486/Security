@@ -33,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -233,17 +232,23 @@ public abstract class KeyManager
     {
       KeyStore keystore;
 
+      // If already exists, load from filesystem...
+
       if (exists(file))
       {
         keystore = instantiateKeyStore(file, password);
       }
 
+      // Otherwise create as new...
+
       else
       {
-        keystore = instantiateKeyStore(password);
+        keystore = createKeyStore(password);
       }
 
       BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+
+      // Persist...
 
       return save(keystore, out, password);
     }
@@ -299,7 +304,7 @@ public abstract class KeyManager
   {
     try
     {
-      KeyStore keystore = instantiateKeyStore(password);
+      KeyStore keystore = createKeyStore(password);
 
       return save(keystore, new ByteArrayOutputStream(), password);
     }
@@ -344,7 +349,7 @@ public abstract class KeyManager
   }
 
   /**
-   * Instantiate an in-memory, non-persistent keystore.
+   * Creates an in-memory, non-persistent keystore.
    *
    * @param password
    *            Password to access the keystore. Note that the subclasses invoking this
@@ -359,7 +364,7 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *            if creating the keystore fails
    */
-  protected KeyStore instantiateKeyStore(char[] password)
+  protected KeyStore createKeyStore(char[] password)
       throws ConfigurationException, KeyManagerException
   {
     return instantiateKeyStore(password, storage);

@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -204,8 +205,9 @@ public abstract class KeyManager
    * Stores the keys in this key manager in a secure keystore format. This implementation generates
    * a file-based, persistent keystore which can be shared with other applications and processes.
    *
-   * @param file
-   *              the file where the keystore should be saved
+   *
+   * @param uri
+   *              The location of the file where the keystore should be persisted
    *
    * @param password
    *              A secret password used to access the keystore contents. Note that the character
@@ -220,10 +222,10 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading or creating the keystore fails
    */
-  protected KeyStore save(File file, char[] password)
+  protected KeyStore save(URI uri, char[] password)
       throws ConfigurationException, KeyManagerException
   {
-    if (file == null)
+    if (uri == null)
     {
       throw new KeyManagerException("Save failed due to null file descriptor.");
     }
@@ -234,9 +236,9 @@ public abstract class KeyManager
 
       // If already exists, load from filesystem...
 
-      if (exists(file))
+      if (exists(new File(uri)))
       {
-        keystore = instantiateKeyStore(file, password);
+        keystore = instantiateKeyStore(new File(uri), password);
       }
 
       // Otherwise create as new...
@@ -246,7 +248,7 @@ public abstract class KeyManager
         keystore = createKeyStore(password);
       }
 
-      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(uri)));
 
       // Persist...
 
@@ -256,7 +258,8 @@ public abstract class KeyManager
     catch (FileNotFoundException e)
     {
       throw new KeyManagerException(
-          "File ''{0}'' cannot be created or opened : {1}", e, resolveFilePath(file), e.getMessage()
+          "File ''{0}'' cannot be created or opened : {1}",
+          e, resolveFilePath(new File(uri)), e.getMessage()
       );
     }
 
@@ -264,7 +267,7 @@ public abstract class KeyManager
     {
       throw new KeyManagerException(
           "Security manager has denied access to file ''{0}'' : {1}",
-          e, resolveFilePath(file), e.getMessage()
+          e, resolveFilePath(new File(uri)), e.getMessage()
       );
     }
 
@@ -372,7 +375,7 @@ public abstract class KeyManager
 
 
   /**
-   * Adds a key entry to this instance. Use {@link #save(java.io.File, char[])} to persist
+   * Adds a key entry to this instance. Use {@link #save(URI, char[])} to persist
    * if desired.
    *
    * @param keyAlias

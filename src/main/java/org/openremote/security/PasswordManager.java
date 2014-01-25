@@ -93,7 +93,7 @@ public class PasswordManager extends KeyManager
     {
       init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
 
-      this.keystore = instantiateKeyStore(masterPassword);
+      this.keystore = createKeyStore(masterPassword);
     }
 
     finally
@@ -150,7 +150,7 @@ public class PasswordManager extends KeyManager
 
       else
       {
-        this.keystore = instantiateKeyStore(masterPassword);
+        this.keystore = createKeyStore(masterPassword);
       }
     }
 

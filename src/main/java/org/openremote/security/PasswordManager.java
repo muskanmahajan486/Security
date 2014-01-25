@@ -241,14 +241,11 @@ public class PasswordManager extends KeyManager
   {
     try
     {
+      remove(alias);
+
       if (keystoreLocation != null)
       {
-        remove(alias, new File(keystoreLocation), storeMasterPassword);
-      }
-
-      else
-      {
-        removePassword(alias);
+        save(keystoreLocation, storeMasterPassword);
       }
     }
 
@@ -264,11 +261,6 @@ public class PasswordManager extends KeyManager
         }
       }
     }
-  }
-
-  public void removePassword(String alias)
-  {
-    remove(alias);
   }
 
   /**

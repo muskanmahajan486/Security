@@ -551,7 +551,7 @@ public class AsymmetricKeyManagerTest
 
     char[] storePW = new char[] { 'f', 'o', 'o'};
 
-    keyMgr.save(f, storePW);
+    keyMgr.save(f.toURI(), storePW);
 
     // Make sure the password is erased from memory after the API call...
 

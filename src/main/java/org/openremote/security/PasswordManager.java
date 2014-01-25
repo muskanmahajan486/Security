@@ -143,7 +143,7 @@ public class PasswordManager extends KeyManager
 
       this.keystoreLocation = keystoreLocation;
 
-      if (exists(new File(keystoreLocation)))
+      if (exists(keystoreLocation))
       {
         this.keystore = load(new File(keystoreLocation), masterPassword);
       }

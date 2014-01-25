@@ -329,9 +329,10 @@ public abstract class KeyManager
   /**
    * Loads an existing keystore from a file.
    *
-   * @param file
-   *              file descriptor pointing to the keystore
    *
+   * @param uri
+   *              file URI pointing to the location of the keystore to load
+   *              
    * @param keystorePassword
    *              The password to access the keystore. Note that the subclasses invoking this
    *              method are responsible for resetting the password character array after use.
@@ -345,15 +346,15 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading the keystore fails
    */
-  protected KeyStore load(File file, char[] keystorePassword)
+  protected KeyStore load(URI uri, char[] keystorePassword)
       throws ConfigurationException, KeyManagerException
   {
-    if (file == null)
+    if (uri == null)
     {
-      throw new KeyManagerException("Implementation Error: null file descriptor.");
+      throw new KeyManagerException("Implementation Error: null file URI.");
     }
-    
-    return instantiateKeyStore(file.toURI(), keystorePassword);
+
+    return instantiateKeyStore(uri, keystorePassword);
   }
 
   /**

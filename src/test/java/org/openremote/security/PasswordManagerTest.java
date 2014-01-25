@@ -287,6 +287,8 @@ public class PasswordManagerTest
   {
     try
     {
+      // BouncyCastle must be installed as a system security provider...
+
       Security.addProvider(new BouncyCastleProvider());
 
       File dir = new File(System.getProperty("user.dir"));
@@ -384,6 +386,252 @@ public class PasswordManagerTest
     }
   }
 
+
+  // AddPassword Tests ----------------------------------------------------------------------------
+
+  /**
+   * Tests basic password add.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPassword() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
+
+      byte[] pw = mgr.getPassword("test", new char[] { 'b' });
+
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test basic password add without persistence.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPasswordInMemory() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+
+      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
+
+      byte[] pw = mgr.getPassword("test", new char[] { 'b' });
+
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test error handling when adding password with incorrect storage credentials.
+   *
+   * @throws Exception      if test fails
+   */
+  @Test public void testAddPasswordWrongPassword() throws Exception
+  {
+    File dir = new File(System.getProperty("user.dir"));
+    File file = new File(dir, "test-" + UUID.randomUUID());
+    file.deleteOnExit();
+
+    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'c' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests error handling when adding password with a null alias.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPasswordNullAlias() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+      mgr.addPassword(null, new byte[] { '1' }, new char[] { 'c' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Tests error handling when adding password with empty alias.
+   *
+   * @throws Exception      if test fails
+   */
+  @Test public void testAddPasswordEmptyAlias() throws Exception
+  {
+    File dir = new File(System.getProperty("user.dir"));
+    File file = new File(dir, "test-" + UUID.randomUUID());
+    file.deleteOnExit();
+
+    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("", new byte[] { '1' }, new char[] { 'c' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests addPassword() error handling when the given password is a null reference.
+   *
+   * @throws Exception      if test fails
+   */
+  @Test public void testAddPasswordNullPassword() throws Exception
+  {
+    File dir = new File(System.getProperty("user.dir"));
+    File file = new File(dir, "test-" + UUID.randomUUID());
+    file.deleteOnExit();
+
+    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("test", null, new char[] { 'c' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests addPassword() error handling when the given password is an empty byte array.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPasswordEmptyPassword() throws Exception
+  {
+    PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("test", new byte[] { }, new char[] { 'c' });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests addPassword() error handling when the store master password is a null.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPasswordNullMasterPassword() throws Exception
+  {
+    File dir = new File(System.getProperty("user.dir"));
+    File file = new File(dir, "test-" + UUID.randomUUID());
+    file.deleteOnExit();
+
+    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("test", new byte[] { '0' }, null);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Tests addPassword() error handling when the store master password is an empty character
+   * array.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddPasswordEmptyMasterPassword() throws Exception
+  {
+    PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+
+    try
+    {
+      mgr.addPassword("test", new byte[] { '0' }, new char[] { });
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
 
 
   // Other Tests ----------------------------------------------------------------------------------

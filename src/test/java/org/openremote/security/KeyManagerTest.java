@@ -653,7 +653,7 @@ public class KeyManagerTest
 
       pw = new char[] { '1' };
 
-      KeyStore ks = mgr.load(f, pw);
+      KeyStore ks = mgr.load(f.toURI(), pw);
 
       KeyStore.SecretKeyEntry entry =
           (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
@@ -692,7 +692,7 @@ public class KeyManagerTest
 
     pw = new char[] { '1' };
 
-    KeyStore ks = mgr.load(f, pw);
+    KeyStore ks = mgr.load(f.toURI(), pw);
 
     KeyStore.SecretKeyEntry entry =
         (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
@@ -765,7 +765,7 @@ public class KeyManagerTest
 
       try
       {
-        mgr.load(f, null);
+        mgr.load(f.toURI(), null);
 
         Assert.fail("should not get here...");
       }

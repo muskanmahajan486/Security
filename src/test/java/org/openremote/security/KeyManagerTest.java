@@ -208,7 +208,7 @@ public class KeyManagerTest
 
     try
     {
-      keyMgr.save(f, null);
+      keyMgr.save(f.toURI(), null);
 
       Assert.fail("should not get here...");
     }
@@ -243,11 +243,11 @@ public class KeyManagerTest
 
     char[] password = new char[] { 'f', 'o', 'o' };
 
-    ks.save(f, password);
+    ks.save(f.toURI(), password);
 
     try
     {
-      ks.save(f, new char[] { 0 });
+      ks.save(f.toURI(), new char[] { 0 });
 
       Assert.fail("should not get here...");
     }
@@ -410,7 +410,7 @@ public class KeyManagerTest
         new KeyStore.PasswordProtection(new char[] { 'b' })
     );
 
-    ks.save(f, password);
+    ks.save(f.toURI(), password);
 
     FileOutputStream fout = new FileOutputStream(f);
     BufferedOutputStream bout = new BufferedOutputStream(fout);
@@ -422,7 +422,7 @@ public class KeyManagerTest
 
     try
     {
-      ks.save(f, password);
+      ks.save(f.toURI(), password);
 
       Assert.fail("should not get here...");
     }
@@ -449,7 +449,7 @@ public class KeyManagerTest
 
     try
     {
-      keyMgr.save(f, new char[] {});
+      keyMgr.save(f.toURI(), new char[] {});
 
       Assert.fail("should not get here...");
     }
@@ -490,7 +490,7 @@ public class KeyManagerTest
 
     try
     {
-      mgr.save(f, pw);
+      mgr.save(f.toURI(), pw);
 
       Assert.fail("should not get here...");
     }
@@ -621,7 +621,7 @@ public class KeyManagerTest
     }
   }
 
-  
+
   // Load Tests -----------------------------------------------------------------------------------
 
   /**
@@ -649,7 +649,7 @@ public class KeyManagerTest
 
       char[] pw = new char[] { '1' };
 
-      mgr.save(f, pw);
+      mgr.save(f.toURI(), pw);
 
       pw = new char[] { '1' };
 
@@ -688,7 +688,7 @@ public class KeyManagerTest
 
     char[] pw = new char[] { '1' };
 
-    mgr.save(f, pw);
+    mgr.save(f.toURI(), pw);
 
     pw = new char[] { '1' };
 

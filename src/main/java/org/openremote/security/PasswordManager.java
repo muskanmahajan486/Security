@@ -23,13 +23,20 @@ package org.openremote.security;
 import org.openremote.exception.OpenRemoteException;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
 
 
 /**
@@ -232,12 +239,12 @@ public class PasswordManager extends KeyManager
   {
     try
     {
-      remove(alias);
-
-      if (keystoreLocation != null)
+      if (alias == null)
       {
-        save(keystoreLocation, storeMasterPassword);
+        return;
       }
+
+      remove(alias, storeMasterPassword);
     }
 
     finally
@@ -370,6 +377,75 @@ public class PasswordManager extends KeyManager
     catch (IllegalArgumentException e)
     {
       throw new KeyManagerException(e.getMessage(), e);
+    }
+  }
+
+  private void remove(String alias, char[] storeMasterPassword)
+      throws KeyManagerException
+  {
+    // TODO:
+    //  This is a bit of a kludge workaround for now until the superclass can be
+    //  refactored to manager the underlying keystore instance...
+
+    try
+    {
+      if (storeMasterPassword == null || storeMasterPassword.length == 0)
+      {
+        throw new KeyManagerException(
+            "Implementation Error: null or empty storage password is not allowed."
+        );
+      }
+
+      remove(alias);
+
+      keystore.deleteEntry(alias);
+
+      if (keystoreLocation != null)
+      {
+        keystore.store(
+            new BufferedOutputStream(new FileOutputStream(new File(keystoreLocation))),
+            storeMasterPassword
+        );
+      }
+    }
+
+    catch (FileNotFoundException e)
+    {
+      throw new KeyManagerException(
+          "Cannot save password manager to ''{0}'': {1}",
+          e, keystoreLocation, e.getMessage()
+      );
+    }
+
+    catch (NoSuchAlgorithmException e)
+    {
+      throw new KeyManagerException(
+          "Keystore algorithm is not supported by installed security providers ({0}): {1}",
+          e, Arrays.toString(Security.getProviders()), e.getMessage()
+      );
+    }
+
+    catch (CertificateException e)
+    {
+      throw new KeyManagerException("Unable to store certificate: {0}", e, e.getMessage());
+    }
+
+    catch (KeyStoreException e)
+    {
+      throw new KeyManagerException("Cannot delete password ''{0}'': {1}", e, alias, e.getMessage());
+    }
+
+    catch (IOException e)
+    {
+      throw new KeyManagerException("I/O error while saving password: {0}", e, e.getMessage());
+    }
+
+    catch (SecurityException e)
+    {
+      throw new KeyManagerException(
+          "Security manager has prevented saving passwords to ''{0}'' : {1}",
+          e, keystoreLocation, e.getMessage()
+      );
     }
   }
 

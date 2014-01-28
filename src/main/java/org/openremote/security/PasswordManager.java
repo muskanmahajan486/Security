@@ -101,8 +101,7 @@ public class PasswordManager extends KeyManager
 
   /**
    * Constructs a persistent password manager backed by {@link StorageType#BKS} storage format.
-   * If no password storage exists at the given URI, a new file will be created when passwords
-   * are added to this password manager. <p>
+   * If no password storage exists at the given URI, a new one will be created. <p>
    *
    * Requires BouncyCastle security provider to be available on the classpath and installed
    * as a security provider to the JVM.
@@ -111,7 +110,7 @@ public class PasswordManager extends KeyManager
    * @see org.bouncycastle.jce.provider.BouncyCastleProvider
    *
    * @param keystoreLocation
-   *            location of the persisted password storage
+   *            Location of the persisted password storage.
    *
    * @param masterPassword
    *            The master password to access the password storage. Note that the character
@@ -274,6 +273,8 @@ public class PasswordManager extends KeyManager
    *
    * @return    Password in a byte array. This byte array should be erased as soon as the
    *            password has been used.
+   *
+   * @throws
    */
   public byte[] getPassword(String alias, char[] storeMasterPassword)
       throws PasswordNotFoundException

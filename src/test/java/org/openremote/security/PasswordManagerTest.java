@@ -62,7 +62,7 @@ public class PasswordManagerTest
   // No-Arg Constructor Tests ---------------------------------------------------------------------
 
   /**
-   * No arg constructor test with basic parameters.
+   * No arg constructor test (just code execution completeness)
    *
    * @throws Exception    if test fails
    */
@@ -70,42 +70,6 @@ public class PasswordManagerTest
   {
     new PasswordManager();
   }
-
-//  /**
-//   * No arg constructor test with null password.
-//   *
-//   * @throws Exception    if test fails
-//   */
-//  @Test public void testNoArgCtorNullPassword() throws Exception
-//  {
-//    try
-//    {
-//      new PasswordManager(null);
-//    }
-//
-//    catch (KeyManager.KeyManagerException e)
-//    {
-//      // expected...
-//    }
-//  }
-//
-//  /**
-//   * No arg constructor test with empty password.
-//   *
-//   * @throws Exception    if test fails
-//   */
-//  @Test public void testNoArgCtorEmptyPassword() throws Exception
-//  {
-//    try
-//    {
-//      new PasswordManager(new char[] {} );
-//    }
-//
-//    catch (KeyManager.KeyManagerException e)
-//    {
-//      // expected...
-//    }
-//  }
 
 
   // File Constructor Tests -----------------------------------------------------------------------

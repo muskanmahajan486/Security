@@ -245,7 +245,7 @@ public abstract class KeyManager
 
       else
       {
-        keystore = createKeyStore(password);
+        keystore = createKeyStore();
       }
 
       BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(uri)));
@@ -307,7 +307,7 @@ public abstract class KeyManager
   {
     try
     {
-      KeyStore keystore = createKeyStore(password);
+      KeyStore keystore = createKeyStore();
 
       return save(keystore, new ByteArrayOutputStream(), password);
     }
@@ -359,10 +359,6 @@ public abstract class KeyManager
 
   /**
    * Creates an in-memory, non-persistent keystore.
-   *
-   * @param password
-   *            Password to access the keystore. Note that the subclasses invoking this
-   *            method are responsible for resetting the password character array after use.
    *
    * @return    in-memory keystore instance
    *

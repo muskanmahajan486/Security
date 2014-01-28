@@ -594,32 +594,32 @@ public class KeyManagerTest
   @Test public void testCreateKeyStore() throws Exception
   {
     TestKeyManager mgr = new TestKeyManager();
-    KeyStore store = mgr.createKeyStore(new char[] {'a'});
+    KeyStore store = mgr.createKeyStore();
 
     Assert.assertTrue(store != null);
   }
 
-  /**
-   * Test createKeyStore() error handling when null password is passe.d
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testCreateKeyStoreNullPassword() throws Exception
-  {
-    TestKeyManager mgr = new TestKeyManager();
-
-    try
-    {
-      mgr.createKeyStore(null);
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-  }
+//  /**
+//   * Test createKeyStore() error handling when null password is passed.
+//   *
+//   * @throws Exception    if test fails
+//   */
+//  @Test public void testCreateKeyStoreNullPassword() throws Exception
+//  {
+//    TestKeyManager mgr = new TestKeyManager();
+//
+//    try
+//    {
+//      mgr.createKeyStore(null);
+//
+//      Assert.fail("should not get here...");
+//    }
+//
+//    catch (KeyManager.KeyManagerException e)
+//    {
+//      // expected...
+//    }
+//  }
 
 
   // Load Tests -----------------------------------------------------------------------------------

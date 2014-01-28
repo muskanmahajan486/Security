@@ -436,78 +436,6 @@ public abstract class KeyManager
     return entry != null;
   }
 
-  /**
-   * TODO
-   *
-   * @param keyAlias
-   *
-   * @param f
-   *
-   * @param keystorePassword
-   *
-   * @throws KeyManagerException
-   */
-  protected void remove(String keyAlias, File f, char[] keystorePassword)
-      throws KeyManagerException
-  {
-    try
-    {
-      remove(keyAlias);
-
-      KeyStore ks = instantiateKeyStore(f.toURI(), keystorePassword);
-
-      ks.deleteEntry(keyAlias);
-
-      ks.store(new FileOutputStream(f), keystorePassword);
-    }
-
-    catch (NoSuchAlgorithmException e)
-    {
-      throw new KeyManagerException(
-          "Security provider does not support required key store algorithm: {0}",
-          e, e.getMessage()
-      );
-    }
-
-    catch (CertificateException e)
-    {
-      throw new KeyManagerException("Cannot remove certificate: {0}", e, e.getMessage());
-    }
-
-    catch (FileNotFoundException e)
-    {
-      throw new KeyManagerException(
-          "Error in removing key ''{0}'': {1}", e, keyAlias, e.getMessage()
-      );
-    }
-
-    catch (IOException e)
-    {
-      throw new KeyManagerException(
-          "Unable to remove key ''{0}''. I/O error: {1}",
-          e, keyAlias, e.getMessage()
-      );
-    }
-
-    catch (KeyStoreException e)
-    {
-      throw new KeyManagerException(
-          "Cannot remove key ''{0}'' from keystore: {1}", e, keyAlias, e.getMessage()
-      );
-    }
-
-    finally
-    {
-      if (keystorePassword != null)
-      {
-        for (int i = 0; i < keystorePassword.length; ++i)
-        {
-          keystorePassword[i] = 0;
-        }
-      }
-    }
-  }
-
 
   /**
    * Returns the security provider associated with this key manager. Note that may return a
@@ -769,13 +697,6 @@ public abstract class KeyManager
   private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
       throws ConfigurationException, KeyManagerException
   {
-//    if (password == null || password.length == 0)
-//    {
-//      throw new KeyManagerException(
-//          "Null or empty password. Keystore must be protected with a password."
-//      );
-//    }
-
     try
     {
       KeyStore keystore;

@@ -198,13 +198,14 @@ public class PasswordManager extends KeyManager
   }
 
   /**
-   * Removes a password from this password storage.
+   * Removes a password from this password storage. The password storage is immediately persisted
+   * with the given master password as part of this method invocation.
    *
    * @param alias
    *          The password alias (name) to be removed.
    *
    * @param storeMasterPassword
-   *          The master password to access this password storage. Note that the character
+   *          The master password for the password storage. Note that the character
    *          array will be cleared when this method completes.
    *
    * @throws KeyManagerException
@@ -224,15 +225,7 @@ public class PasswordManager extends KeyManager
 
     finally
     {
-      if (storeMasterPassword != null)
-      {
-        // Clear the password from memory...
-
-        for (int i = 0; i < storeMasterPassword.length; ++i)
-        {
-          storeMasterPassword[i] = 0;
-        }
-      }
+      clearPassword(storeMasterPassword);
     }
   }
 
@@ -250,7 +243,8 @@ public class PasswordManager extends KeyManager
    * @return    Password in a byte array. This byte array should be erased as soon as the
    *            password has been used.
    *
-   * @throws
+   * @throws PasswordNotFoundException
+   *            if the password could not be retrieved
    */
   public byte[] getPassword(String alias, char[] storeMasterPassword)
       throws PasswordNotFoundException
@@ -289,17 +283,28 @@ public class PasswordManager extends KeyManager
 
     catch (NoSuchAlgorithmException e)
     {
-      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+      throw new PasswordNotFoundException(
+          "Configuration error. Required password storage algorithm is not available: {0}",
+          e, e.getMessage()
+      );
     }
 
     catch (UnrecoverableKeyException e)
     {
-      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+      throw new PasswordNotFoundException(
+          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
+          "protection password: {1}",
+          e, alias, e.getMessage()
+      );
     }
 
     catch (UnrecoverableEntryException e)
     {
-      throw new PasswordNotFoundException(e.getMessage(), e);   // TODO
+      throw new PasswordNotFoundException(
+          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
+          "protection password: {1}",
+          e, alias, e.getMessage()
+      );
     }
 
     finally

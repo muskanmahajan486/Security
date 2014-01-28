@@ -327,12 +327,12 @@ public abstract class KeyManager
   }
 
   /**
-   * Loads an existing keystore from a file.
+   * Loads an existing keystore from a file URI.
    *
    *
    * @param uri
    *              file URI pointing to the location of the keystore to load
-   *              
+   *
    * @param keystorePassword
    *              The password to access the keystore. Note that the subclasses invoking this
    *              method are responsible for resetting the password character array after use.
@@ -369,26 +369,19 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *            if creating the keystore fails
    */
-  protected KeyStore createKeyStore(char[] password)
-      throws ConfigurationException, KeyManagerException
+  protected KeyStore createKeyStore() throws ConfigurationException, KeyManagerException
   {
-    if (password == null || password.length == 0)
-    {
-      throw new KeyManagerException(
-          "Implementation Error: null or empty storage password is not allowed."
-      );
-    }
+    // TODO : the keystore instance should be managed by this instance, relieving the subclasses from the responsiblity
 
-    return getKeyStore(null /* no input stream */, password, storage);
+    return getKeyStore(null, null, storage);
   }
-
 
   /**
    * Adds a key entry to this instance. Use {@link #save(URI, char[])} to persist
    * if desired.
    *
    * @param keyAlias
-   *            A lookup name for the keystore entry to be added.
+   *            A lookup name of the keystore entry to be added.
    *
    * @param entry
    *            Keystore entry to be added. Note that accepted entry types depend on the
@@ -419,11 +412,13 @@ public abstract class KeyManager
   }
 
   /**
-   * TODO
+   * Removes a key entry from this instance. Use {@link #save(URI, char[])} to persist
+   * if desired.
    *
    * @param keyAlias
+   *            A lookup name of the keystore entry to be removed.
    *
-   * @return
+   * @return    true if key was removed, false otherwise
    */
   protected boolean remove(String keyAlias)
   {

@@ -599,28 +599,6 @@ public class KeyManagerTest
     Assert.assertTrue(store != null);
   }
 
-//  /**
-//   * Test createKeyStore() error handling when null password is passed.
-//   *
-//   * @throws Exception    if test fails
-//   */
-//  @Test public void testCreateKeyStoreNullPassword() throws Exception
-//  {
-//    TestKeyManager mgr = new TestKeyManager();
-//
-//    try
-//    {
-//      mgr.createKeyStore(null);
-//
-//      Assert.fail("should not get here...");
-//    }
-//
-//    catch (KeyManager.KeyManagerException e)
-//    {
-//      // expected...
-//    }
-//  }
-
 
   // Load Tests -----------------------------------------------------------------------------------
 

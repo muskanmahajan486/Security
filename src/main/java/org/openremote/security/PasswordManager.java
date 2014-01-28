@@ -160,17 +160,18 @@ public class PasswordManager extends KeyManager
   // Public Instance Methods ----------------------------------------------------------------------
 
   /**
-   * Adds a new password to this password manager.
+   * Adds a new password to this password manager. The password storage is immediately persisted
+   * after the add operation using the given master password.
    *
    * @param alias
-   *            A named alias for the password used to look it up.
+   *            A named alias of the password for looking it up.
    *
    * @param password
    *            The password to store. Note that the byte array will be set to zero bytes
    *            when this method completes.
    *
    * @param storeMasterPassword
-   *            The master password to access this password storage. Note that the character
+   *            The master password for the password storage. Note that the character
    *            array will be set to zero bytes when this method completes.
    *
    * @throws KeyManagerException
@@ -181,14 +182,6 @@ public class PasswordManager extends KeyManager
   {
     try
     {
-//    See to-do in add() implementation..
-//
-//      add(
-//          alias,
-//          new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password")),
-//          new KeyStore.PasswordProtection(storeMasterPassword)
-//      );
-
       add(alias, password, storeMasterPassword);
 
       if (keystoreLocation != null)
@@ -199,25 +192,8 @@ public class PasswordManager extends KeyManager
 
     finally
     {
-      if (password != null)
-      {
-        // Clear the password from memory...
-
-        for (int i = 0; i < password.length; ++i)
-        {
-          password[i] = 0;
-        }
-      }
-
-      if (storeMasterPassword != null)
-      {
-        // Clear the password from memory...
-
-        for (int i = 0; i < storeMasterPassword.length; ++i)
-        {
-          storeMasterPassword[i] = 0;
-        }
-      }
+      clearPassword(password);
+      clearPassword(storeMasterPassword);
     }
   }
 
@@ -346,6 +322,23 @@ public class PasswordManager extends KeyManager
     if (password != null)
     {
       for (int i = 0; i < password.length; ++i)
+      {
+        password[i] = 0;
+      }
+    }
+  }
+
+  /**
+   * Clears the given password byte array with zero values.
+   *
+   * @param password
+   *            password byte array to erase
+   */
+  private void clearPassword(byte[] password)
+  {
+    if (password != null)
+    {
+      for (int i = 0; i< password.length; ++i)
       {
         password[i] = 0;
       }

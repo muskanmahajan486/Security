@@ -376,7 +376,14 @@ public abstract class KeyManager
   protected KeyStore createKeyStore(char[] password)
       throws ConfigurationException, KeyManagerException
   {
-    return instantiateKeyStore(password, storage);
+    if (password == null || password.length == 0)
+    {
+      throw new KeyManagerException(
+          "Implementation Error: null or empty storage password is not allowed."
+      );
+    }
+
+    return getKeyStore(null /* no input stream */, password, storage);
   }
 
 
@@ -660,31 +667,6 @@ public abstract class KeyManager
 
 
   /**
-   * Instantiate an in-memory, non-persistent keystore with a given algorithm for the storage
-   * format.
-   *
-   * @param password
-   *            password to access the keystore
-   *
-   * @param type
-   *            the algorithm used to store the keystore data
-   *
-   * @return    in-memory keystore instance
-   *
-   * @throws ConfigurationException
-   *            if the configured security provider(s) do not contain implementation for the
-   *            required keystore type
-   *
-   * @throws KeyManagerException
-   *            if creating the keystore fails
-   */
-  private KeyStore instantiateKeyStore(char[] password, StorageType type)
-      throws ConfigurationException, KeyManagerException
-  {
-    return getKeyStore(null, password, type);
-  }
-
-  /**
    * Loads a keystore instance from an existing file URI.
    *
    * @param uri
@@ -787,12 +769,12 @@ public abstract class KeyManager
   private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
       throws ConfigurationException, KeyManagerException
   {
-    if (password == null || password.length == 0)
-    {
-      throw new KeyManagerException(
-          "Null or empty password. Keystore must be protected with a password."
-      );
-    }
+//    if (password == null || password.length == 0)
+//    {
+//      throw new KeyManagerException(
+//          "Null or empty password. Keystore must be protected with a password."
+//      );
+//    }
 
     try
     {

@@ -406,13 +406,54 @@ public class PasswordManagerTest
       File file = new File(dir, "test-" + UUID.randomUUID());
       file.deleteOnExit();
 
-      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+      char[] masterPW = new char[] { 'b' };
+      PasswordManager mgr = new PasswordManager(file.toURI(), masterPW);
 
-      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
+      // Check that the password is cleared...
+
+      for (Character c : masterPW)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      masterPW = new char[] { 'b' };
+      mgr.addPassword("test", new byte[] { '1' }, masterPW);
+
+      // Check that the password is cleared...
+
+      for (Character c : masterPW)
+      {
+        Assert.assertTrue(c == 0);
+      }
 
       byte[] pw = mgr.getPassword("test", new char[] { 'b' });
 
       Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
+
+      TestBKStore store = new TestBKStore();
+      KeyStore ks = store.load(file.toURI(), new char[] { 'b' });
+
+      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)ks.getEntry(
+          "test", new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { '1' }));
+
+      mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+      pw = mgr.getPassword("test", new char[] { 'b' });
+
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
+
+      mgr.addPassword("tz", new byte[] { 'z' }, new char[] { 'b' });
+      mgr.addPassword("tx", new byte[] { 'x' }, new char[] { 'b' });
+
+      ks = store.load(file.toURI(), new char[] { 'b' });
+
+      Assert.assertTrue(ks.containsAlias("tz"));
+      Assert.assertTrue(ks.containsAlias("tx"));
+      Assert.assertTrue(ks.containsAlias("test"));
+
+      Assert.assertTrue(ks.size() == 3);
     }
 
     finally
@@ -634,56 +675,328 @@ public class PasswordManagerTest
   }
 
 
-  // Other Tests ----------------------------------------------------------------------------------
+  // RemovePassword() Tests -----------------------------------------------------------------------
 
-  @Test public void testAddAndRemovePassword() throws Exception
+  /**
+   * Tests removePassword() with persistence.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemovePassword() throws Exception
   {
     try
     {
+      // BouncyCastle must be installed as a system security provider...
+
       Security.addProvider(new BouncyCastleProvider());
 
       File dir = new File(System.getProperty("user.dir"));
-      File file = new File(dir, "password-store-" + UUID.randomUUID());
+      File file = new File(dir, "test-" + UUID.randomUUID());
       file.deleteOnExit();
-      URI uri = file.toURI();
 
-      char[] masterPassword = new char[] { '1', '2', '3' };
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
 
-      PasswordManager mgr = new PasswordManager(uri, masterPassword);
+      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
 
-      byte[] password = new byte[] { 'a', 'b', 'c', 'd' };
-      masterPassword = new char[] { '1', '2', '3' };
+      byte[] pw = mgr.getPassword("test", new char[] { 'b' });
 
-      mgr.addPassword("mypassword", password, masterPassword);
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
 
-      KeyStore ks = KeyStore.getInstance(KeyManager.StorageType.BKS.getStorageTypeName(), new BouncyCastleProvider());
 
-      masterPassword = new char[] { '1', '2', '3' };
-      ks.load(new FileInputStream(new File(uri)), masterPassword);
+      // Remove...
 
-      Assert.assertTrue(ks.containsAlias("mypassword"));
+      char[] masterPW = new char[] { 'b' };
+      mgr.removePassword("test", masterPW);
+
+      // Check that the password is cleared...
+
+      for (Character c : masterPW)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      try
+      {
+        mgr.getPassword("test", new char[] { 'b' });
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Tests removePassword() consequent calls.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemovePasswordTwice() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+
+      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
+
+      byte[] pw = mgr.getPassword("test", new char[] { 'b' });
+
+      Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
+
+
+      // Remove...
+
+      char[] masterPW = new char[] { 'b' };
+      mgr.removePassword("test", masterPW);
+
+      // Check that the password is cleared...
+
+      for (Character c : masterPW)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      mgr.removePassword("test", new char[] {'b'});
+
+
+      try
+      {
+        mgr.getPassword("test", new char[] {'b'});
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Tests removePassword().
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testAddAndRemove() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(uri, new char[] { 'b' });
+
+      mgr.addPassword("test1", new byte[] { '1' }, new char[] { 'b' });
+      mgr.addPassword("test2", new byte[] { '2' }, new char[] { 'b' });
+
+      TestBKStore store = new TestBKStore();
+      KeyStore ks = store.load(uri, new char[] { 'b' });
+
+      Assert.assertTrue(ks.size() == 2);
+      Assert.assertTrue(ks.containsAlias("test1"));
+      Assert.assertTrue(ks.containsAlias("test2"));
+
+      // Remove...
+
+      mgr.removePassword("test1", new char[] { 'b' });
+
+      Assert.assertTrue(Arrays.equals(mgr.getPassword("test2", new char[] { 'b' }), new byte[] { '2' }));
+
+      try
+      {
+        mgr.getPassword("test1", new char[] {'b'});
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+
+      ks = store.load(uri, new char[] { 'b' });
+
       Assert.assertTrue(ks.size() == 1);
+      Assert.assertTrue(ks.containsAlias("test2"));
+    }
 
-      masterPassword = new char[] { '1', '2', '3' };
-      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)ks.getEntry(
-          "mypassword", new KeyStore.PasswordProtection(masterPassword)
-      );
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
 
-      SecretKey secret = entry.getSecretKey();
-      byte[] loadedPassword = secret.getEncoded();
-      byte[] originalPassword = new byte[] { 'a', 'b', 'c', 'd' };
 
-      Assert.assertTrue(Arrays.equals(loadedPassword, originalPassword));
+  /**
+   * Tests remove password behavior with a null alias.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemoveNullAlias() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
 
-      masterPassword = new char[] { '1', '2', '3' };
-      mgr.removePassword("mypassword", masterPassword);
+      Security.addProvider(new BouncyCastleProvider());
 
-      ks = KeyStore.getInstance(KeyManager.StorageType.BKS.getStorageTypeName(), new BouncyCastleProvider());
+      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
 
-      masterPassword = new char[] { '1', '2', '3' };
-      ks.load(new FileInputStream(new File(uri)), masterPassword);
+      // Remove...
 
-      Assert.assertTrue(ks.size() == 0);
+      char[] pw = new char[] { 'f', 'o', 'o' };
+      mgr.removePassword(null, pw);
+
+      // Check that password is erased...
+
+      for (Character c : pw)
+      {
+        Assert.assertTrue(c == 0);
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Tests remove password behavior with empty password alias.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemoveEmptyAlias() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+
+      // Remove...
+
+      char[] pw = new char[] { 'b', '#', 'å' };
+      mgr.removePassword("", pw);
+
+      // Check that password is erased...
+
+      for (Character c : pw)
+      {
+        Assert.assertTrue(c == 0);
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Tests remove password behavior when store password is set to null.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemoveNullPassword() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(uri, new char[] { 'b' });
+
+      mgr.addPassword("test", new byte[] { '2' }, new char[] { 'b' });
+
+      // Remove...
+
+      try
+      {
+        mgr.removePassword("test", null);
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Tests remove password behavior when the store password is set to empty.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testRemoveEmptyPassword() throws Exception
+  {
+    try
+    {
+      // BouncyCastle must be installed as a system security provider...
+
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(uri, new char[] { 'b' });
+
+      mgr.addPassword("test", new byte[] { '2' }, new char[] { 'b' });
+
+      // Remove...
+
+      try
+      {
+        mgr.removePassword("test", new char[] { });
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
     }
 
     finally

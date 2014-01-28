@@ -51,7 +51,6 @@ import java.security.UnrecoverableKeyException;
 public class PasswordManager extends KeyManager
 {
 
-
   // Private Instance Fields ----------------------------------------------------------------------
 
   /**
@@ -61,6 +60,8 @@ public class PasswordManager extends KeyManager
 
   /**
    * The backing keystore instance.
+   *
+   * TODO : should push to super class
    */
   private KeyStore keystore = null;
 
@@ -76,10 +77,6 @@ public class PasswordManager extends KeyManager
    * @see java.security.Security#addProvider(java.security.Provider)
    * @see org.bouncycastle.jce.provider.BouncyCastleProvider
    *
-   * @param masterPassword
-   *            The master password to access the password storage. Note that the character
-   *            array will be cleared when this constructor completes.
-   *
    * @throws ConfigurationException
    *            if the configured security provider(s) do not support {@link StorageType#BKS}
    *            keystore type
@@ -87,19 +84,11 @@ public class PasswordManager extends KeyManager
    * @throws  KeyManagerException
    *            if creating a new keystore instance fails
    */
-  public PasswordManager(char[] masterPassword) throws ConfigurationException, KeyManagerException
+  public PasswordManager() throws ConfigurationException, KeyManagerException
   {
-    try
-    {
-      init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
+    init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
 
-      this.keystore = createKeyStore(masterPassword);
-    }
-
-    finally
-    {
-      clearPassword(masterPassword);
-    }
+    this.keystore = createKeyStore();
   }
 
 
@@ -150,7 +139,9 @@ public class PasswordManager extends KeyManager
 
       else
       {
-        this.keystore = createKeyStore(masterPassword);
+        this.keystore = createKeyStore();
+
+        save(keystoreLocation, masterPassword);
       }
     }
 

@@ -68,53 +68,44 @@ public class PasswordManagerTest
    */
   @Test public void testNoArgCtor() throws Exception
   {
-    char[] pw = new char[] { 'a', '1' };
-
-    PasswordManager mgr = new PasswordManager(pw);
-
-    // check that password was erased....
-
-    for (Character c : pw)
-    {
-      Assert.assertTrue(c == 0);
-    }
+    new PasswordManager();
   }
 
-  /**
-   * No arg constructor test with null password.
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testNoArgCtorNullPassword() throws Exception
-  {
-    try
-    {
-      new PasswordManager(null);
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-  }
-
-  /**
-   * No arg constructor test with empty password.
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testNoArgCtorEmptyPassword() throws Exception
-  {
-    try
-    {
-      new PasswordManager(new char[] {} );
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-  }
+//  /**
+//   * No arg constructor test with null password.
+//   *
+//   * @throws Exception    if test fails
+//   */
+//  @Test public void testNoArgCtorNullPassword() throws Exception
+//  {
+//    try
+//    {
+//      new PasswordManager(null);
+//    }
+//
+//    catch (KeyManager.KeyManagerException e)
+//    {
+//      // expected...
+//    }
+//  }
+//
+//  /**
+//   * No arg constructor test with empty password.
+//   *
+//   * @throws Exception    if test fails
+//   */
+//  @Test public void testNoArgCtorEmptyPassword() throws Exception
+//  {
+//    try
+//    {
+//      new PasswordManager(new char[] {} );
+//    }
+//
+//    catch (KeyManager.KeyManagerException e)
+//    {
+//      // expected...
+//    }
+//  }
 
 
   // File Constructor Tests -----------------------------------------------------------------------
@@ -475,7 +466,7 @@ public class PasswordManagerTest
 
       Security.addProvider(new BouncyCastleProvider());
 
-      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+      PasswordManager mgr = new PasswordManager();
 
       mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
 
@@ -610,7 +601,7 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordEmptyPassword() throws Exception
   {
-    PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+    PasswordManager mgr = new PasswordManager();
 
     try
     {
@@ -659,7 +650,7 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordEmptyMasterPassword() throws Exception
   {
-    PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+    PasswordManager mgr = new PasswordManager();
 
     try
     {
@@ -747,7 +738,7 @@ public class PasswordManagerTest
 
       Security.addProvider(new BouncyCastleProvider());
 
-      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+      PasswordManager mgr = new PasswordManager();
 
       mgr.addPassword("test", new byte[] { '1' }, new char[] { 'b' });
 
@@ -864,7 +855,7 @@ public class PasswordManagerTest
 
       Security.addProvider(new BouncyCastleProvider());
 
-      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+      PasswordManager mgr = new PasswordManager();
 
       // Remove...
 
@@ -899,7 +890,7 @@ public class PasswordManagerTest
 
       Security.addProvider(new BouncyCastleProvider());
 
-      PasswordManager mgr = new PasswordManager(new char[] { 'b' });
+      PasswordManager mgr = new PasswordManager();
 
       // Remove...
 

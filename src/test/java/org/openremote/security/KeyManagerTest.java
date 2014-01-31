@@ -83,14 +83,6 @@ public class KeyManagerTest
         KeyManager.StorageType.JCEKS.name().equals(KeyManager.StorageType.JCEKS.getStorageTypeName())
     );
 
-    Assert.assertTrue(
-        KeyManager.StorageType.JKS.name().equals(KeyManager.StorageType.JKS.toString())
-    );
-
-    Assert.assertTrue(
-        KeyManager.StorageType.JKS.name().equals(KeyManager.StorageType.JKS.getStorageTypeName())
-    );
-
 
     Assert.assertTrue(
         KeyManager.StorageType.BKS.name().equals(KeyManager.StorageType.BKS.toString())

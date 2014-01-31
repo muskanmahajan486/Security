@@ -78,23 +78,23 @@ public abstract class KeyManager
 
   /**
    * Format for storing, serializing and persisting private and secret key information. Defines
-   * the known types as per the document:
-   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyStore <p>
+   * the known types as per the document
+   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyStore
+   * and BouncyCastle (release 1.50) keystore types defined in
+   * http://www.bouncycastle.org/specifications.html
    */
   public enum StorageType
   {
     /**
-     * PKCS #12 format
+     * PKCS #12 format. Used to store private keys of a key pair along with its X.509
+     * certificate. Standardized format.
      */
     PKCS12,
 
     /**
-     * Proprietary 'Java Keystore' format (in default 'SUN' provider)
-     */
-    JKS,
-
-    /**
-     * Proprietary 'Java Keystore' format in Java cryptography extension ('SunJCE') provider
+     * Proprietary 'Java Keystore' format in Java cryptography extension ('SunJCE') provider.
+     * This implementation uses password based encryption with Triple DES. See
+     * http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#JceKeystore
      */
     JCEKS,
 

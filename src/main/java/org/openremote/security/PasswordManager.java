@@ -455,7 +455,7 @@ public class PasswordManager extends KeyManager
    * Implementation specific exception type indicating that a requested password was not
    * found in this password manager instance.
    */
-  public class PasswordNotFoundException extends OpenRemoteException
+  public static class PasswordNotFoundException extends OpenRemoteException
   {
     /**
      * Constructs a password not found exception with a given message.
@@ -463,7 +463,7 @@ public class PasswordManager extends KeyManager
      * @param msg
      *            exception message
      */
-    private PasswordNotFoundException(String msg)
+    public PasswordNotFoundException(String msg)
     {
       super(msg);
     }
@@ -479,7 +479,7 @@ public class PasswordManager extends KeyManager
      * @param params
      *            message parameters
      */
-    private PasswordNotFoundException(String msg, Object... params)
+    public PasswordNotFoundException(String msg, Object... params)
     {
       super(msg, params);
     }
@@ -493,7 +493,7 @@ public class PasswordManager extends KeyManager
      * @param cause
      *            root cause for this exception
      */
-    private PasswordNotFoundException(String msg, Throwable cause)
+    public PasswordNotFoundException(String msg, Throwable cause)
     {
       super(msg, cause);
     }
@@ -512,7 +512,7 @@ public class PasswordManager extends KeyManager
      * @param params
      *            message parameters
      */
-    private PasswordNotFoundException(String msg, Throwable cause, Object... params)
+    public PasswordNotFoundException(String msg, Throwable cause, Object... params)
     {
       super(msg, cause, params);
     }

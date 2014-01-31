@@ -1,0 +1,13 @@
+
+Version 0.3 - 2014/XX/XX
+========================
+
+ - PasswordManager PasswordNotFoundException is now
+   public. API clients can also generate these 
+   exception types if necessary.
+
+ - Adds BouncyCastle UBER storage format (recommended
+   for symmetric key storage if BouncyCastle provider
+   is used).
+
+

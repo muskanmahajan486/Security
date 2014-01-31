@@ -306,18 +306,19 @@ public class KeyManagerTest
   }
 
   /**
-   * Tests adding a secret key to BKS storage.
+   * Tests adding a secret key to BouncyCastle UBER storage.
    *
    * @throws Exception  if test fails
    */
-  @Test public void testAddingSecretKeyToBKS() throws Exception
+  @Test public void testAddingSecretKeyToUBER() throws Exception
   {
-    // BKS implementation requires "BC" to be available as security provider...
+    // UBER implementation requires "BC" to be available as security provider...
+
     try
     {
       Security.addProvider(new BouncyCastleProvider());
 
-      BKSStorage ks = new BKSStorage();
+      UBERStorage ks = new UBERStorage();
 
       ks.add(
           "alias",
@@ -329,7 +330,9 @@ public class KeyManagerTest
 
       char[] password = new char[] { 'f', 'o', 'o' };
 
-      ks.save(password);
+      KeyStore keystore = ks.save(password);
+
+      Assert.assertTrue(keystore.getType().equals("UBER"), "got " + keystore.getType());
     }
 
     finally
@@ -595,17 +598,17 @@ public class KeyManagerTest
   // Load Tests -----------------------------------------------------------------------------------
 
   /**
-   * Tests saving and loading secret keys with BouncyCastle BKS storage.
+   * Tests saving and loading secret keys with BouncyCastle UBER storage.
    *
    * @throws Exception    if test fails
    */
-  @Test public void testLoadExistingKeyStoreBKS() throws Exception
+  @Test public void testLoadExistingKeyStoreUBER() throws Exception
   {
     try
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      BKSStorage mgr = new BKSStorage();
+      UBERStorage mgr = new UBERStorage();
 
       mgr.add(
           "test",
@@ -681,7 +684,7 @@ public class KeyManagerTest
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      BKSStorage mgr = new BKSStorage();
+      UBERStorage mgr = new UBERStorage();
 
       mgr.add(
           "test",
@@ -721,7 +724,7 @@ public class KeyManagerTest
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      BKSStorage mgr = new BKSStorage();
+      UBERStorage mgr = new UBERStorage();
 
       mgr.add(
           "test",
@@ -793,13 +796,13 @@ public class KeyManagerTest
   }
 
   /**
-   * BKS keystorage from BouncyCastle.
+   * UBER keystorage from BouncyCastle.
    */
-  private static class BKSStorage extends KeyManager
+  private static class UBERStorage extends KeyManager
   {
-    BKSStorage()
+    UBERStorage()
     {
-      super(StorageType.BKS, new BouncyCastleProvider());
+      super(StorageType.UBER, new BouncyCastleProvider());
     }
   }
 

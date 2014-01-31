@@ -99,12 +99,16 @@ public abstract class KeyManager
     JCEKS,
 
     /**
-     * BouncyCastle keystore format roughly equivalent to Sun JKS implementation.
+     * BouncyCastle keystore format roughly equivalent to Sun JKS implementation. Works with
+     * Sun's 'keytool'. Resistant to tampering but not resistant to inspection.
      */
-    BKS;
+    BKS,
 
-
-    // TODO : add the rest of BC keystore options
+    /**
+     * Recommended BouncyCastle keystore format. Requires password verification and is
+     * resistant to inspection and tampering.
+     */
+    UBER;
 
 
     /**

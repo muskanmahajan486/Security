@@ -961,6 +961,229 @@ public class PasswordManagerTest
   }
 
 
+  // Test GetPassword() --------------------------------------------------------------------------
+
+  /**
+   * Basic run through test.
+   *
+   * @throws Exception    if test fails
+   */
+  @Test public void testGetPassword() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager();
+
+      mgr.addPassword("testing", new byte[] { 'a', 'b' }, new char[] { '1' });
+
+      byte[] password = mgr.getPassword("testing", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, new byte[] { 'a', 'b'}));
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test passwords above the ANSI range.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordSpecialCharacters() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager();
+
+
+      mgr.addPassword("testing1", "ä".getBytes(), new char[] { '1' });
+
+      byte[] password = mgr.getPassword("testing1", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, "ä".getBytes()));
+
+
+      mgr.addPassword("testing2", "∫".getBytes(), new char[] { '1' });
+
+      password = mgr.getPassword("testing2", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, "∫".getBytes()));
+
+
+      mgr.addPassword("testing3", "ç".getBytes(), new char[] { '1' });
+
+      password = mgr.getPassword("testing3", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, "ç".getBytes()));
+
+
+      mgr.addPassword("testing4", "馬".getBytes(), new char[] { '1' });
+
+      password = mgr.getPassword("testing4", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, "馬".getBytes()));
+
+
+      mgr.addPassword("testing5", "ä∫ç馬".getBytes(), new char[] { '1' });
+
+      password = mgr.getPassword("testing5", new char[] { '1' });
+
+      Assert.assertTrue(Arrays.equals(password, "ä∫ç馬".getBytes()));
+
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Test getPassword() with null alias.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordNullAlias() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(uri, new char[] { '0' });
+
+      try
+      {
+        mgr.getPassword(null, new char[] { '1' });
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test getPassword() with empty alias.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordEmptyAlias() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(uri, new char[] { '1' });
+
+      try
+      {
+        mgr.getPassword("", new char[] { '1' });
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  /**
+   * Test getPassword() with empty store master password.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordEmptyMasterPassword() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager();
+
+      try
+      {
+        mgr.getPassword("foo", new char[] { });
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test getPassword() with null master password.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordNullMasterPassword() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager();
+
+      try
+      {
+        mgr.getPassword("foo", null);
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
   // Nested Classes -------------------------------------------------------------------------------
 
   private static class TestBKStore extends KeyManager

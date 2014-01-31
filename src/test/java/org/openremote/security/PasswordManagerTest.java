@@ -26,10 +26,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.Provider;
@@ -1181,6 +1179,120 @@ public class PasswordManagerTest
     {
       Security.removeProvider("BC");
     }
+  }
+
+  /**
+   * Test error handling behavior when the required keystore algorithm are not present.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordUnrecoverableError() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      PasswordManager mgr = new PasswordManager();
+
+      mgr.addPassword("testing1", new byte[] { 'a' }, new char[] { '1' });
+
+      Security.removeProvider("BC");
+
+      try
+      {
+        mgr.getPassword("testing1", new char[] {'1'});
+
+        Assert.fail("could not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+  /**
+   * Test error behavior when password manager is used to load a non-secret key keystore entry.
+   *
+   * @throws Exception if test fails
+   */
+  @Test public void testGetPasswordNotASecretKey() throws Exception
+  {
+    try
+    {
+      Security.addProvider(new BouncyCastleProvider());
+
+      URI uri = new URI("file", System.getProperty("user.dir") + "/test-" + UUID.randomUUID(), null);
+      File file = new File(uri);
+      file.deleteOnExit();
+
+      AsymmetricKeyManager mgr = AsymmetricKeyManager.create();
+
+      mgr.createSelfSignedKey(
+          "test", new char[] { 'a' }, new BouncyCastleX509CertificateBuilder(), "test"
+      );
+
+      mgr.save(new char[] { 'a' });
+
+      PasswordManager pwmgr = new PasswordManager(uri, new char[] { 'a' });
+
+      try
+      {
+        pwmgr.getPassword("test", new char[] { 'a' });
+
+        Assert.fail("could not get here...");
+      }
+
+      catch (PasswordManager.PasswordNotFoundException e)
+      {
+        // expected...
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider("BC");
+    }
+  }
+
+
+  // Test PasswordNotFoundException ---------------------------------------------------------------
+
+  /**
+   * Basic run through of the defined exception constructors.
+   */
+  @Test public void testCtor()
+  {
+    PasswordManager.PasswordNotFoundException e = new PasswordManager.PasswordNotFoundException("test");
+
+    Assert.assertTrue(e.getMessage().equals("test"));
+    Assert.assertTrue(e.getCause() == null);
+
+
+    e = new PasswordManager.PasswordNotFoundException("test {0}", "test");
+
+    Assert.assertTrue(e.getMessage().equals("test test"));
+    Assert.assertTrue(e.getCause() == null);
+
+
+    e = new PasswordManager.PasswordNotFoundException("test {0}", new Error("foo"));
+
+    Assert.assertTrue(e.getMessage().equals("test {0}"));
+    Assert.assertTrue(e.getCause() instanceof Error);
+    Assert.assertTrue(e.getCause().getMessage().equals("foo"));
+
+
+    e = new PasswordManager.PasswordNotFoundException("test {0}", new Error("foo"), "test");
+
+    Assert.assertTrue(e.getMessage().equals("test test"));
+    Assert.assertTrue(e.getCause() instanceof Error);
+    Assert.assertTrue(e.getCause().getMessage().equals("foo"));
   }
 
 

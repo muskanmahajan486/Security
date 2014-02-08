@@ -119,7 +119,6 @@
     <get dest = "${basedir}" usetimestamp = "true">
 
       <url url = "${build.repository.uri}/project/${project.name}/project.sh"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build.properties"/>
 
     </get>
 

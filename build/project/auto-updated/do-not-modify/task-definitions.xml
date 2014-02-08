@@ -138,6 +138,12 @@
 
     <sequential>
 
+      <!-- Seems to be necessary to delete to prevent cobertura source highlighting from getting out of sync...-->
+
+      <delete file = "${build.test.dir}/instrumented-classes/cobertura-coverage.ser"/>
+
+      <!-- Instrument classes to track code coverage... -->
+
       <internal:cobertura-instrument
           todir = "${build.test.dir}/instrumented-classes"
           datafile = "${build.test.dir}/instrumented-classes/cobertura-coverage.ser">
@@ -147,6 +153,8 @@
         </fileset>
 
       </internal:cobertura-instrument>
+
+      <!-- Run TestNG... -->
 
       <internal:testng
           classpathref = "java.test.run.classpath"

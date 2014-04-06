@@ -4,23 +4,24 @@
   OpenRemote, the Home of the Digital Home.
   Copyright 2008-2014, OpenRemote Inc.
 
-  See the contributors.txt file in the distribution for a
-  full listing of individual contributors.
+  See the contributors.txt file in the distribution for a full listing
+  of individual contributors.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
   published by the Free Software Foundation; either version 3 of the
   License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU Affero General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program; if not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Affero General Public
+  License along with this program; if not, see
+  http://www.gnu.org/licenses/.
+
 -->
-
 
 <!--
  |  This is the base project template for all OpenRemote projects. It provides default
@@ -102,7 +103,54 @@
     <mkdir dir = "${build.lib.dir}"/>
     <mkdir dir = "${lib.dir}"/>
 
+    <antcall target = "-java-style-check"/>
+
     <openremote:compile-java/>
+
+  </target>
+
+  <target name = "-java-style-check">
+
+    <openremote:java-style-check/>
+
+    <antcall target = "-report-java-style-check"/>
+
+  </target>
+
+  <target name = "-java-style-check-strict" depends = "-java-style-check" if = "checkstyle.fail">
+
+    <echo>
+
+    !! RELEASE FAILURE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      Please fix the Java style convention errors before proceeding
+      with creating a release.
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    </echo>
+    <fail message = "Java style convention errors."/>
+
+  </target>
+
+  <target name = "-report-java-style-check" if = "checkstyle.fail">
+
+    <echo>
+
+    ** WARNING ******************************************************
+
+    Source code does not follow Java style conventions and will not
+    be releasable until corrected.
+
+    *****************************************************************
+
+    </echo>
+
+    <loadfile property = "checkstyle.report">
+      <file file = "${build.dir}/checkstyle-report.txt"/>
+    </loadfile>
+
+    <echo message = "${checkstyle.report}"/>
 
   </target>
 
@@ -198,7 +246,8 @@
 
     <echo>
 
-      Unit Test Coverage Report: ${unit.test.coverage.uri}index.html
+    REPORT: Test coverage report available at:
+    ${unit.test.coverage.uri}index.html
 
     </echo>
 
@@ -208,8 +257,12 @@
 
     <echo>
 
-    NOTE: Some unit tests failed. Please investigate the full report:
-          ${unit.test.report.uri}index.html
+    ** NOTE *********************************************************
+
+    Some unit tests failed. Please investigate the full report:
+    ${unit.test.report.uri}index.html
+
+    *****************************************************************
 
     </echo>
 
@@ -258,6 +311,8 @@
 
     <mkdir dir = "${build.package.dir}"/>
 
+    <antcall target = "-java-style-check-strict"/>
+
   </target>
 
   <extension-point name = "-before-package" depends = "clean, unit-test, -after-unit-test"/>
@@ -276,6 +331,7 @@
     <delete dir = "${build.package.dir}"/>
     <delete dir = "${classes.dir}"/>
     <delete dir = "${output.dir}"/>
+    <delete file = "${build.dir}/checkstyle-report.txt"/>
 
   </target>
 

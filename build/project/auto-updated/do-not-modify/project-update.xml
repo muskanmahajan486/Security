@@ -4,21 +4,23 @@
   OpenRemote, the Home of the Digital Home.
   Copyright 2008-2014, OpenRemote Inc.
 
-  See the contributors.txt file in the distribution for a
-  full listing of individual contributors.
+  See the contributors.txt file in the distribution for a full listing
+  of individual contributors.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
   published by the Free Software Foundation; either version 3 of the
   License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU Affero General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program; if not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Affero General Public
+  License along with this program; if not, see
+  http://www.gnu.org/licenses/.
+
 -->
 
 <!--
@@ -111,9 +113,11 @@
       <url url = "${build.repository.uri}/project/${project.name}/default.properties"/>
       <url url = "${build.repository.uri}/project/${project.name}/project.properties"/>
       <url url = "${build.repository.uri}/project/${project.name}/project-update.xml"/>
+      <url url = "${build.repository.uri}/project/${project.name}/project-update-script.xml"/>
       <url url = "${build.repository.uri}/project/${project.name}/project-template.xml"/>
       <url url = "${build.repository.uri}/project/${project.name}/task-definitions.xml"/>
-
+      <url url = "${build.repository.uri}/project/${project.name}/checkstyle-config.xml"/>
+      
     </get>
 
     <get dest = "${basedir}" usetimestamp = "true">
@@ -121,6 +125,12 @@
       <url url = "${build.repository.uri}/project/${project.name}/project.sh"/>
 
     </get>
+
+    <!-- Execute the project-update-script.xml with its default target... -->
+
+    <ant dir = "${project.file.path}" antfile = "project-update-script.xml"/>
+
+    <delete file = "${project.file.path}/project-update-script.xml"/>
 
 
     <echo>
@@ -146,30 +156,46 @@
 
     <get dest = "${cobertura.path}" usetimestamp = "true" verbose = "true">
 
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/LICENSE.txt"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/cobertura-2.0.3.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/LICENSE.txt"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/cobertura-2.0.3.jar"/>
 
     </get>
 
     <get dest = "${cobertura.path}/lib" usetimestamp = "true" verbose = "true">
 
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/asm-4.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/asm-analysis-4.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/asm-commons-4.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/asm-tree-4.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/asm-util-4.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/dom4j-1.6.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/icu4j-2.6.1.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/jaxen-1.1-beta-8.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/jdom-1.0.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/jetty-6.1.14.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/jetty-util-6.1.14.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/log4j-1.2.9.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/oro-2.0.8.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/servlet-api-2.5-6.1.14.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/tagsoup-0.9.7.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/xmlParserAPIs-2.6.2.jar"/>
-      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3/lib/xom-1.0b3.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/asm-4.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/asm-analysis-4.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/asm-commons-4.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/asm-tree-4.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/asm-util-4.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/dom4j-1.6.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/icu4j-2.6.1.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/jaxen-1.1-beta-8.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/jdom-1.0.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/jetty-6.1.14.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/jetty-util-6.1.14.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/log4j-1.2.17.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/oro-2.0.8.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/servlet-api-2.5-6.1.14.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/tagsoup-0.9.7.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/xmlParserAPIs-2.6.2.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/cobertura-2.0.3-orpatch-1/lib/xom-1.0b3.jar"/>
+
+    </get>
+
+
+    <echo>
+    &gt;&gt; Updating Checkstyle libraries...
+    </echo>
+
+    <mkdir dir = "${checkstyle.path}"/>
+
+    <get dest = "${checkstyle.path}" usetimestamp = "true" verbose = "true">
+
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/checkstyle-5.7/checkstyle-5.7-all.jar"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/checkstyle-5.7/LICENSE"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/checkstyle-5.7/LICENSE.apache20"/>
+      <url url = "${build.repository.uri}/project/${project.name}/build/lib/checkstyle-5.7/RIGHTS.antlr"/>
 
     </get>
 

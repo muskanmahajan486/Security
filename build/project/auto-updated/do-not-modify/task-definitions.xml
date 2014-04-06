@@ -4,21 +4,23 @@
   OpenRemote, the Home of the Digital Home.
   Copyright 2008-2014, OpenRemote Inc.
 
-  See the contributors.txt file in the distribution for a
-  full listing of individual contributors.
+  See the contributors.txt file in the distribution for a full listing
+  of individual contributors.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
   published by the Free Software Foundation; either version 3 of the
   License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU Affero General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Affero General Public License for more details.
 
-  You should have received a copy of the GNU Affero General Public License
-  along with this program; if not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Affero General Public
+  License along with this program; if not, see
+  http://www.gnu.org/licenses/.
+
 -->
 
 <!--
@@ -96,6 +98,11 @@
            classpathref = "cobertura.classpath" />
 
 
+  <!-- Internal definitions for Checkstyle tasks... -->
+
+  <taskdef uri = "namespace://build.repository.openremote.org/project/tasks/internal"
+           resource = "com/puppycrawl/tools/checkstyle/antlib.xml"
+           classpath = "${checkstyle.path}/checkstyle-5.7-all.jar"/>
 
 
   <!--
@@ -109,28 +116,74 @@
   <!-- A public, fixed definition for compiling the full source tree under the default Java
        source directory. -->
 
-  <presetdef name = "compile-java" uri = "namespace://build.repository.openremote.org/project/tasks">
+  <macrodef name = "compile-java" uri = "namespace://build.repository.openremote.org/project/tasks">
 
-    <internal:compile
-            srcdir = "${java.src.dir}"
-            destdir = "${classes.dir}"
-            classpathref = "default.java.compile.classpath"/>
+    <sequential>
 
-  </presetdef>
+      <echo>
+
+      Compiling...
+      </echo>
+
+      <internal:compile
+                srcdir = "${java.src.dir}"
+                destdir = "${classes.dir}"
+                classpathref = "default.java.compile.classpath"/>
+
+    </sequential>
+  </macrodef>
 
 
   <!--  A public, fixed definition for compiling the full Java unit test source tree. -->
 
-  <presetdef name = "compile-java-unit-test" uri = "namespace://build.repository.openremote.org/project/tasks">
+  <macrodef name = "compile-java-unit-test" uri = "namespace://build.repository.openremote.org/project/tasks">
 
-    <internal:compile
-            srcdir  = "${test.src.dir}/java"
-            destdir = "${test.classes.dir}"
-            classpathref = "default.java.test.compile.classpath"/>
+    <sequential>
 
-  </presetdef>
+      <echo>
+
+      Compiling...
+      </echo>
+
+      <internal:compile
+                srcdir  = "${test.src.dir}/java"
+                destdir = "${test.classes.dir}"
+                classpathref = "default.java.test.compile.classpath"/>
+
+    </sequential>
+
+  </macrodef>
 
 
+  <!-- A public, fixed definition for running a strict Java styleguide checks on the source. -->
+
+  <macrodef name = "java-style-check" uri = "namespace://build.repository.openremote.org/project/tasks">
+
+    <attribute name = "failOnViolation" default = "false"/>
+
+    <sequential>
+      <echo>
+
+      Checking Java source conventions...
+
+      </echo>
+
+      <internal:checkstyle
+                config = "${project.file.path}/checkstyle-config.xml"
+                failOnViolation = "@{failOnViolation}"
+                failureProperty = "checkstyle.fail"
+                maxErrors = "0">
+
+        <fileset dir = "${java.src.dir}">
+          <include name = "**/*.java"/>
+        </fileset>
+
+        <formatter type = "plain" toFile = "${build.dir}/checkstyle-report.txt"/>
+
+      </internal:checkstyle>
+    </sequential>
+
+  </macrodef>
 
   <!-- A public, fixed definition for executing Java unit tests... -->
 

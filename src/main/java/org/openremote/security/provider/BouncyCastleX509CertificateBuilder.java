@@ -198,22 +198,63 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
           exception.getMessage()
       );
     }
+  }
 
-    catch (CertificateEncodingException e)
+
+  /**
+   * Sign a public key with a given (BouncyCastle) signer and create the corresponding
+   * X.509 certificate.
+   *
+   * @param builder
+   *          BouncyCastle X.509 version 3 certificate builder instance
+   *
+   * @param signer
+   *          BouncyCastle content signer configured with a signature hash algorithm and
+   *          a private key for signing
+   *
+   * @return
+   *          a X.509 certificate
+   *
+   * @throws  KeySigner.SigningException
+   *            if signing the public key fails
+   */
+  private X509Certificate signPublicKey(X509v3CertificateBuilder builder, ContentSigner signer)
+      throws SigningException
+  {
+    // Construct the certificate structure and sign with the given BC content signer...
+
+    X509CertificateHolder certHolder = builder.build(signer);
+
+    // Convert the BC X.509 certificate holder structure into Java Crypto Architecture
+    // javax.security.cert.X509Certificate instance...
+
+    JcaX509CertificateConverter certConverter = new JcaX509CertificateConverter();
+    certConverter.setProvider(SecurityProvider.BC.getProviderInstance());
+
+    try
+    {
+      return certConverter.getCertificate(certHolder);
+    }
+
+    catch (CertificateEncodingException exception)
     {
       // should only happen if the code for certificate creation is using illegal values...
 
-      throw new CertificateBuilderException(
-          "Implementation Error -- Cannot create certificate : {0}", e, e.getMessage()
+      throw new SigningException(
+          exception,
+          "Implementation Error -- Cannot create certificate : {0}",
+          exception.getMessage()
       );
     }
 
-    catch (IllegalStateException e)
+    catch (CertificateException exception)
     {
-      // Incorrect API usage, most likely missing fields in certificate generator...
+      // If certificate conversion from BouncyCastle X.509 to JCA X.509 certificate fails...
 
-      throw new CertificateBuilderException(
-          "Implementation Error -- Cannot create certificate: {0}", e, e.getMessage()
+      throw new SigningException(
+          exception,
+          "Certification conversion error : {0}",
+          exception.getMessage()
       );
     }
 

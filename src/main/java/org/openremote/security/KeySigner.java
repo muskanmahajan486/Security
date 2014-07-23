@@ -22,7 +22,6 @@ package org.openremote.security;
 
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
-import java.security.KeyPair;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +35,6 @@ import org.openremote.exception.OpenRemoteException;
  */
 public interface KeySigner
 {
-
-  // Constants ------------------------------------------------------------------------------------
 
   // Constants ------------------------------------------------------------------------------------
 
@@ -88,8 +85,48 @@ public interface KeySigner
    * @see Configuration#createSelfSigned(java.security.KeyPair, KeySigner.SignatureAlgorithm, String)
    */
   public final static String DEFAULT_X500_LOCATION  = "L=Atlanta";
-  
-  
+
+
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA256' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA256 = "1.2.840.10045.4.3.2";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA384' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA384 = "1.2.840.10045.4.3.3";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA512' in certificate's
+   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
+   */
+  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA512 = "1.2.840.10045.4.3.4";
+
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'sha256WithRSAEncryption' as defined in
+   * RFC5698 -- http://tools.ietf.org/html/rfc5698.
+   */
+  public final static String ASN_OID_SHA256_WITH_RSA_ENCRYPTION = "1.2.840.113549.1.1.11";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'sha384WithRSAEncryption' as defined in
+   * RFC5698 -- http://tools.ietf.org/html/rfc5698.
+   */
+  public final static String ASN_OID_SHA384_WITH_RSA_ENCRYPTION = "1.2.840.113549.1.1.12";
+
+  /**
+   * ASN.1 OID for certificate signature algorithm 'sha512WithRSAEncryption' as defined in
+   * RFC5698 -- http://tools.ietf.org/html/rfc5698.
+   */
+  public final static String ASN_OID_SHA512_WITH_RSA_ENCRYPTION = "1.2.840.113549.1.1.13";
+
+
+
 
   // Interface Definition -------------------------------------------------------------------------
 

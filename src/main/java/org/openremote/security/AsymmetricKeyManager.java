@@ -68,25 +68,6 @@ public class AsymmetricKeyManager extends KeyManager
 
 
   /**
-   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA256' in certificate's
-   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
-   */
-  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA256 = "1.2.840.10045.4.3.2";
-
-  /**
-   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA384' in certificate's
-   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
-   */
-  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA384 = "1.2.840.10045.4.3.3";
-
-  /**
-   * ASN.1 OID for certificate signature algorithm 'ecdsa-with-SHA512' in certificate's
-   * AlgorithmIdentifier field as defined in RFC5758 - http://tools.ietf.org/search/rfc5758.
-   */
-  public final static String ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA512 = "1.2.840.10045.4.3.4";
-
-
-  /**
    * The default key algorithm used when generating self-signed key pairs : {@value}
    */
   public final static KeyAlgorithm DEFAULT_SELF_SIGNED_KEY_ALGORITHM = KeyAlgorithm.EC;

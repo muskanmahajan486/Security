@@ -58,7 +58,7 @@ import org.openremote.security.X509CertificateBuilder;
  *
  * @author <a href = "mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilder
+public class BouncyCastleKeySigner implements KeySigner
 {
 
   /**

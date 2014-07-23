@@ -40,7 +40,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Unit tests for {@link org.openremote.security.provider.BouncyCastleX509CertificateBuilder} class.
+ * Unit tests for {@link BouncyCastleKeySigner} class.
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
@@ -54,7 +54,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedCertificateCreationWithRSAKeys() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generateRSAKeyPair();
 
@@ -155,7 +155,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedCertificateWithEllipticCurves() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generateEllipticCurveKeyPair();
 
@@ -241,7 +241,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedCertificateWith384BitEllipticCurves() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generate384BitEllipticCurveKeyPair();
 
@@ -298,7 +298,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedCertificateWith256BitEllipticCurves() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generate256BitEllipticCurveKeyPair();
 
@@ -355,7 +355,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedCertificateValidityPeriods() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generateRSAKeyPair();
 
@@ -456,7 +456,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedNullKeyPair() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generateEllipticCurveKeyPair();
 
@@ -484,7 +484,7 @@ public class BouncyCastleX509CertificateBuilderTest
    */
   @Test public void testSelfSignedNullConfig() throws Exception
   {
-    X509CertificateBuilder builder = new BouncyCastleX509CertificateBuilder();
+    X509CertificateBuilder builder = new BouncyCastleKeySigner();
 
     KeyPair keyPair = generateEllipticCurveKeyPair();
 

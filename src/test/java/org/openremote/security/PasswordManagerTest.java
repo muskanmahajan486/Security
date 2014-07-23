@@ -21,7 +21,7 @@
 package org.openremote.security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.openremote.security.provider.BouncyCastleX509CertificateBuilder;
+import org.openremote.security.provider.BouncyCastleKeySigner;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
@@ -169,7 +169,7 @@ public class PasswordManagerTest
 
       AsymmetricKeyManager keys = AsymmetricKeyManager.create();
       Certificate cert = keys.createSelfSignedKey(
-          "bar", new char[] {'0'}, new BouncyCastleX509CertificateBuilder(), "test"
+          "bar", new char[] {'0'}, new BouncyCastleKeySigner(), "test"
       );
 
       File dir = new File(System.getProperty("user.dir"));
@@ -1235,7 +1235,7 @@ public class PasswordManagerTest
       AsymmetricKeyManager mgr = AsymmetricKeyManager.create();
 
       mgr.createSelfSignedKey(
-          "test", new char[] { 'a' }, new BouncyCastleX509CertificateBuilder(), "test"
+          "test", new char[] { 'a' }, new BouncyCastleKeySigner(), "test"
       );
 
       mgr.save(new char[] { 'a' });

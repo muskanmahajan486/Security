@@ -127,6 +127,25 @@ public interface KeySigner
 
 
 
+  /**
+   * Default certificate signature algorithm used with elliptic curve encryption keys, if
+   * nothing else is specified: {@value}
+   *
+   * @see Configuration#createSelfSigned(KeyPair, KeySigner.SignatureAlgorithm, String)
+   */
+  public final static SignatureAlgorithm DEFAULT_EC_SIGNATURE_ALGORITHM =
+      SignatureAlgorithm.SHA384_WITH_ECDSA;
+
+  /**
+   * Default certificate signature algorithm used with RSA encryption keys, if nothing else is
+   * specified: {@value}
+   *
+   * @see Configuration#createSelfSigned(KeyPair, KeySigner.SignatureAlgorithm, String)
+   */
+  public final static SignatureAlgorithm DEFAULT_RSA_SIGNATURE_ALGORITHM =
+      SignatureAlgorithm.SHA384_WITH_RSA;
+
+
 
   // Interface Definition -------------------------------------------------------------------------
 

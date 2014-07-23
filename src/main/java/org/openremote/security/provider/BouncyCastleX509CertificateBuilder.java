@@ -61,23 +61,26 @@ import org.openremote.security.X509CertificateBuilder;
 public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilder
 {
 
-
   /**
-   * Creates a self-signed X.509 v3 public key certificate using BouncyCastle as security provider.
+   * Creates a public key certificate that is signed with a given private signing key. <p>
    *
-   * @param keyPair
-   *            public-private key pair for this certificate
+   * Java encryption APIs in many places require keys that are signed with trusted authorities,
+   * even in cases where third party signature authority adds little value, for example when
+   * using asymmetric key encryption between two trusted services. This implementation can be used
+   * to create public key certificates for those cases. <p>
    *
-   * @param config
+   * Key, signature and certificate parameters can be controlled with the
+   * {@link KeySigner.Configuration} instance passed as a parameter to this call.  <p>
+   *
+   * @see     KeySigner.Configuration
+   *
+   * @param   config
    *            configuration for the certificate: issuer, validity, signature algorithm, etc.
    *
-   * @return  a self-signed X.509 v3 certificate
+   * @return  a X.509 v3 public key certificate
    *
-   * @throws CertificateBuilderException
+   * @throws  KeySigner.SigningException
    *            if creating a certificate fails for any reason
-   *
-   * @throws IllegalArgumentException
-   *            if keyPair or config arguments are null
    */
   @Override public X509Certificate createSelfSignedCertificate(KeyPair keyPair, Configuration config)
       throws CertificateBuilderException

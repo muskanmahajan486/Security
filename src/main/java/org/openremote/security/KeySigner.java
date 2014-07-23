@@ -190,9 +190,9 @@ public interface KeySigner
      * any string value, it will be formatted to as a common name in the X.500 name required
      * by the certificate. <p>
      *
-     * This implementation will always include {@link KeySigner#X500_COUNTRY},
-     * {@link KeySigner#X500_STATE}, {@link KeySigner#X500_LOCATION} and
-     * {@link KeySigner#X500_ORGANIZATION} as part of the X.500 distinguished name
+     * This implementation will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
      * of the issuer public info. <p>
      *
      * This constructor defaults to {@link #DEFAULT_SIGNATURE_ALGORITHM} as the certificate
@@ -278,9 +278,9 @@ public interface KeySigner
      * any string value, it will be formatted to as a common name in the X.500 name required
      * by the certificate. <p>
      *
-     * This implementation will always include {@link KeySigner#X500_COUNTRY},
-     * {@link KeySigner#X500_STATE}, {@link KeySigner#X500_LOCATION} and
-     * {@link KeySigner#X500_ORGANIZATION} as part of the X.500 distinguished name
+     * This implementation will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
      * of the issuer public info. <p>
      *
      * The default validity length of the certificate using this constructor is
@@ -508,10 +508,10 @@ public interface KeySigner
     public Issuer(String commonName)
     {
       this.x500Name =
-          X500_ORGANIZATION + "," +
-          X500_COUNTRY + "," +
-          X500_STATE + "," +
-          X500_LOCATION + "," +
+          DEFAULT_X500_ORGANIZATION + "," +
+          DEFAULT_X500_COUNTRY + "," +
+          DEFAULT_X500_COUNTRY_SUBDIVISION + "," +
+          DEFAULT_X500_LOCATION + "," +
           "CN=" + commonName;
     }
 

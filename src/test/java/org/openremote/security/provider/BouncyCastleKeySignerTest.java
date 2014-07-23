@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openremote.security.KeyManager;
+import org.openremote.security.KeySigner;
 import org.openremote.security.PrivateKeyManager;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -127,7 +128,7 @@ public class BouncyCastleKeySignerTest
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -139,13 +140,13 @@ public class BouncyCastleKeySignerTest
     // Subject for self-signed certificates should be equal to issuer...
 
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.DFEAULT_X500_ORGANIZATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -256,7 +257,7 @@ public class BouncyCastleKeySignerTest
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -274,7 +275,7 @@ public class BouncyCastleKeySignerTest
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -384,7 +385,7 @@ public class BouncyCastleKeySignerTest
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -402,7 +403,7 @@ public class BouncyCastleKeySignerTest
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -733,7 +734,7 @@ public class BouncyCastleKeySignerTest
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
@@ -751,7 +752,7 @@ public class BouncyCastleKeySignerTest
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY_SUBDIVISION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)

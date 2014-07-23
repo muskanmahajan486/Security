@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class X509CertificateBuilderTest
+public class KeySignerTest
 {
 
   /**
@@ -320,7 +320,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
     );
 
 
@@ -351,8 +351,8 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_ECDSA,
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        KeySigner.SignatureAlgorithm.SHA512_WITH_ECDSA,
         "CN=foo"
     );
 
@@ -361,7 +361,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_ECDSA)
+        KeySigner.SignatureAlgorithm.SHA512_WITH_ECDSA)
     );
 
     Assert.assertTrue(
@@ -382,7 +382,7 @@ public class X509CertificateBuilderTest
         config.getValidityPeriod().getNotAfterDate()
             .before(
         new Date(time + TimeUnit.MILLISECONDS.convert(
-            X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
+            KeySigner.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
         )
     );
 
@@ -397,9 +397,9 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_RSA,
-        new X509CertificateBuilder.Validity(1),
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        KeySigner.SignatureAlgorithm.SHA512_WITH_RSA,
+        new KeySigner.Validity(1),
         "CN=foo"
     );
 
@@ -408,7 +408,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_RSA)
+        KeySigner.SignatureAlgorithm.SHA512_WITH_RSA)
     );
 
     Assert.assertTrue(
@@ -439,7 +439,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration("OpenRemote, Inc.");
+      new KeySigner.Configuration("OpenRemote, Inc.");
 
       Assert.fail("should not get here...");
     }
@@ -458,8 +458,8 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_ECDSA,
+      new KeySigner.Configuration(
+          KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA,
           "OpenRemote, Inc."
       );
 
@@ -480,8 +480,8 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_RSA,
+      new KeySigner.Configuration(
+          KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
           "OpenRemote, Inc."
       );
 
@@ -502,8 +502,8 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          X509CertificateBuilder.SignatureAlgorithm.SHA384_WITH_RSA,
+      new KeySigner.Configuration(
+          KeySigner.SignatureAlgorithm.SHA384_WITH_RSA,
           "OpenRemote, Inc."
       );
 
@@ -524,7 +524,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration("LOCALITY=bar");
+      new KeySigner.Configuration("LOCALITY=bar");
 
       Assert.fail("should not get here...");
     }
@@ -543,8 +543,8 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
+      new KeySigner.Configuration(
+          KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
           "LOCALITY=bar"
       );
 
@@ -565,8 +565,8 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          new X509CertificateBuilder.Validity(X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS),
+      new KeySigner.Configuration(
+          new KeySigner.Validity(KeySigner.Validity.DEFAULT_VALID_DAYS),
           "LOCALITY=bar"
       );
 
@@ -587,9 +587,9 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(
-          X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
-          new X509CertificateBuilder.Validity(X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS),
+      new KeySigner.Configuration(
+          KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
+          new KeySigner.Validity(KeySigner.Validity.DEFAULT_VALID_DAYS),
           "LOCALITY=bar"
       );
 
@@ -609,7 +609,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration((X509CertificateBuilder.SignatureAlgorithm)null, "foo");
+      new KeySigner.Configuration((KeySigner.SignatureAlgorithm)null, "foo");
 
       Assert.fail("should not get here...");
     }
@@ -627,7 +627,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration((X509CertificateBuilder.Validity)null, "bar");
+      new KeySigner.Configuration((KeySigner.Validity)null, "bar");
 
       Assert.fail("should not get here...");
     }
@@ -643,7 +643,7 @@ public class X509CertificateBuilderTest
    */
   @Test public void testExceptionConstructor()
   {
-    Exception e = new X509CertificateBuilder.SigningException(
+    Exception e = new KeySigner.SigningException(
         "foo {0}", new Error("bar"), "acme");
 
     Assert.assertTrue(e.getCause() instanceof Error);
@@ -653,12 +653,12 @@ public class X509CertificateBuilderTest
 
   @Test public void testSignatureAlgoToString()
   {
-    String sha512_rsa = X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_RSA.toString();
-    String sha384_rsa = X509CertificateBuilder.SignatureAlgorithm.SHA384_WITH_RSA.toString();
-    String sha256_rsa = X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_RSA.toString();
-    String sha512_ecc = X509CertificateBuilder.SignatureAlgorithm.SHA512_WITH_ECDSA.toString();
-    String sha384_ecc = X509CertificateBuilder.SignatureAlgorithm.SHA384_WITH_ECDSA.toString();
-    String sha256_ecc = X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_ECDSA.toString();
+    String sha512_rsa = KeySigner.SignatureAlgorithm.SHA512_WITH_RSA.toString();
+    String sha384_rsa = KeySigner.SignatureAlgorithm.SHA384_WITH_RSA.toString();
+    String sha256_rsa = KeySigner.SignatureAlgorithm.SHA256_WITH_RSA.toString();
+    String sha512_ecc = KeySigner.SignatureAlgorithm.SHA512_WITH_ECDSA.toString();
+    String sha384_ecc = KeySigner.SignatureAlgorithm.SHA384_WITH_ECDSA.toString();
+    String sha256_ecc = KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA.toString();
 
     Assert.assertTrue(sha512_rsa.equals("SHA512withRSA"));
     Assert.assertTrue(sha384_rsa.equals("SHA384withRSA"));

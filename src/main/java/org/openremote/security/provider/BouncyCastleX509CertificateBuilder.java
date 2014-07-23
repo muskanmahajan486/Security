@@ -257,15 +257,39 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
           exception.getMessage()
       );
     }
+  }
 
-    catch (CertificateException e)
+  /**
+   * Generates a unique 40-character serial number value.
+   *
+   * @return 40 character serial number string
+   */
+  private String generateUniqueSerial()
+  {
+    final BigInteger bit64 = BigInteger.ONE.shiftLeft(64);
+
+    UUID random = UUID.randomUUID();
+
+    BigInteger msb = BigInteger.valueOf(random.getMostSignificantBits());
+    BigInteger lsb = BigInteger.valueOf(random.getLeastSignificantBits());
+
+    // convert from signed to unsigned...
+
+    if (msb.signum() < 0)
     {
-      // If certificate conversion from BouncyCastle X.509 to JCA X.509 certificate fails...
-      
-      throw new CertificateBuilderException(
-          "Certification conversion error : {0}", e, e.getMessage()
-      );
+      msb = msb.add(bit64);
     }
+
+    if (lsb.signum() < 0)
+    {
+      lsb = lsb.add(bit64);
+    }
+
+    DecimalFormat decimalFormat = new DecimalFormat("00000000000000000000");
+    String mostSignificantNumbers = decimalFormat.format(msb);
+    String leastSignificantNumbers = decimalFormat.format(lsb);
+
+    return mostSignificantNumbers + leastSignificantNumbers;
   }
 
 }

@@ -92,30 +92,31 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
 
     try
     {
-      Long time = System.currentTimeMillis();
+      // Create BouncyCastle X.509 certificate builder...
 
-      X500Name issuerName = new X500Name(config.getIssuer().getX500Name());
-      X500Name subjectName = new X500Name(config.getIssuer().getX500Name());
+      X509v3CertificateBuilder certBuilder = createCertificateBuilder(config);
 
-      BigInteger serial = new BigInteger(time.toString());
+      // Create BouncyCastle signer using the keypair's private signing key. The signature
+      // algorithm used is defined by the configuration instance...
 
-      Date notBefore = new Date(config.getValidityPeriod().getNotBeforeDate().getTime());
-      Date notAfter = new Date(config.getValidityPeriod().getNotAfterDate().getTime());
+      ContentSigner signer = createContentSigner(config);
 
-      X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-          issuerName, serial, notBefore, notAfter, subjectName, keyPair.getPublic()
+      // Sign the key...
+
+      return signPublicKey(certBuilder, signer);
+    }
+
+    catch (IllegalStateException exception)
+    {
+      // Incorrect API usage, most likely missing fields in certificate generator...
+
+      throw new SigningException(
+          exception,
+          "Implementation Error -- Cannot create certificate: {0}",
+          exception.getMessage()
       );
-
-      JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(
-          config.getSignatureAlgorithm().toString()
-      );
-
-      Provider provider = new BouncyCastleProvider();
-      contentSignerBuilder.setProvider(provider);
-      
-      X509CertificateHolder certHolder = certBuilder.build(
-          contentSignerBuilder.build(keyPair.getPrivate())
-      );
+    }
+  }
 
       JcaX509CertificateConverter certConverter = new JcaX509CertificateConverter();
       certConverter.setProvider(provider);

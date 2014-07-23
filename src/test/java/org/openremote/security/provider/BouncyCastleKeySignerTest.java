@@ -121,16 +121,16 @@ public class BouncyCastleKeySignerTest
     // Issuer names should always include default organization attributes..
 
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains("CN=" + x500CommonName)
@@ -139,16 +139,16 @@ public class BouncyCastleKeySignerTest
     // Subject for self-signed certificates should be equal to issuer...
 
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DFEAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains("CN=" + x500CommonName)
@@ -250,16 +250,16 @@ public class BouncyCastleKeySignerTest
     // Issuer names should always include default organization attributes..
 
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains("CN=" + x500CommonName)
@@ -268,16 +268,16 @@ public class BouncyCastleKeySignerTest
     // Subject for self-signed certificates should be equal to issuer...
 
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains("CN=" + x500CommonName)
@@ -378,16 +378,16 @@ public class BouncyCastleKeySignerTest
     // Issuer names should always include default organization attributes..
 
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains("CN=" + x500CommonName)
@@ -396,16 +396,16 @@ public class BouncyCastleKeySignerTest
     // Subject for self-signed certificates should be equal to issuer...
 
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains("CN=" + x500CommonName)
@@ -727,16 +727,16 @@ public class BouncyCastleKeySignerTest
     // Issuer names should always include default organization attributes...
 
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getIssuerX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getIssuerX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getIssuerX500Principal().getName().contains("CN=" + x500CommonName)
@@ -745,16 +745,16 @@ public class BouncyCastleKeySignerTest
     // Subject for self-signed certificates should be equal to issuer...
 
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_ORGANIZATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_ORGANIZATION)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_COUNTRY)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_COUNTRY)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_STATE)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_STATE)
     );
     Assert.assertTrue(
-        cert.getSubjectX500Principal().getName().contains(KeySigner.X500_LOCATION)
+        cert.getSubjectX500Principal().getName().contains(KeySigner.DEFAULT_X500_LOCATION)
     );
     Assert.assertTrue(
         cert.getSubjectX500Principal().getName().contains("CN=" + x500CommonName)

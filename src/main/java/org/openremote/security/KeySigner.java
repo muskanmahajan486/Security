@@ -39,25 +39,55 @@ public interface KeySigner
 
   // Constants ------------------------------------------------------------------------------------
 
+  // Constants ------------------------------------------------------------------------------------
+
   /**
+   * Default organization name used in public key certificate's X500 issuer name if nothing else
+   * is provided. This default organization name is also used when self-signing public keys, unless
+   * other values are provided. <p>
+   *
    * X.500 organization name for OpenRemote, Inc : {@value}
+   *
+   * @see Configuration#createDefault(java.security.KeyPair, String)
+   * @see Configuration#createSelfSigned(java.security.KeyPair, KeySigner.SignatureAlgorithm, String)
    */
-  public final static String X500_ORGANIZATION = "O=OpenRemote Inc.";
+  public final static String DEFAULT_X500_ORGANIZATION = "O=OpenRemote Inc.";
 
   /**
+   * Default two-character ISO-3166 country identifier used in public key certificate's X500 issuer
+   * name if nothing else is provided. This default country identifier is also used when
+   * self-signing public keys, unless other values are provided. <p>
+   *
    * X.500 country code (ISO-3166) for OpenRemote, Inc : {@value}
+   *
+   * @see Configuration#createDefault(java.security.KeyPair, String)
+   * @see Configuration#createSelfSigned(java.security.KeyPair, KeySigner.SignatureAlgorithm, String)
    */
-  public final static String X500_COUNTRY      = "C=US"; // ISO 3166
+  public final static String DEFAULT_X500_COUNTRY   = "C=US";
 
   /**
-   * X.500 state code (ISO-3166) for OpenRemote, Inc : {@value}
+   * Default country subdivision identifier used in public key certificate's X500 issuer
+   * name if nothing else is provided. This default country subdivision identifier is also used
+   * when self-signing public keys, unless other values are provided. <p>
+   *
+   * X.500 country subdivision code (ISO-3166) for OpenRemote, Inc : {@value}
+   *
+   * @see Configuration#createDefault(java.security.KeyPair, String)
+   * @see Configuration#createSelfSigned(java.security.KeyPair, KeySigner.SignatureAlgorithm, String)
    */
-  public final static String X500_STATE        = "ST=US-GA"; // ISO 3166
+  public final static String DEFAULT_X500_COUNTRY_SUBDIVISION = "ST=US-GA";
 
   /**
+   * Default location attribute used in public key certificate's X500 issuer name if nothing else
+   * is provided. This default location attribute is also used when self-signing public keys,
+   * unless other values are provided. <p>
+   *
    * X.500 location for OpenRemote, Inc : {@value}
+   *
+   * @see Configuration#createDefault(java.security.KeyPair, String)
+   * @see Configuration#createSelfSigned(java.security.KeyPair, KeySigner.SignatureAlgorithm, String)
    */
-  public final static String X500_LOCATION     = "L=Atlanta";
+  public final static String DEFAULT_X500_LOCATION  = "L=Atlanta";
   
   
 

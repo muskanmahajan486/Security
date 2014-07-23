@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openremote.security.KeyManager;
-import org.openremote.security.KeySigner;
 import org.openremote.security.PrivateKeyManager;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

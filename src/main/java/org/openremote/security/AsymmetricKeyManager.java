@@ -266,7 +266,7 @@ public class AsymmetricKeyManager extends KeyManager
    *
    * The self-signed public key X.509 certificate builder is given as a method argument (this is
    * currently not provided by standard Java security architecture providers).  The default
-   * configuration as specified in {@link X509CertificateBuilder.Configuration#Configuration(String)}
+   * configuration as specified in {@link KeySigner.Configuration#createDefault(String)}
    * is used for validity period and signing the certificate.
    *
    * @param keyName
@@ -276,14 +276,14 @@ public class AsymmetricKeyManager extends KeyManager
    *            A secret password used to retrieve the key from the keystore. Note that the
    *            character array is reset to zero bytes when this method completes.
    *
-   * @param certBuilder
+   * @param signer
    *            an implementation that provides a X.509 public certificate for the public key in
    *            this asymmetric key pair
    *
    * @param issuerCommonName
    *            a X.500 common name used in the certificate, note that the other name attributes
    *            are fixed to the defaults as per the
-   *            {@link X509CertificateBuilder.Configuration#Configuration(String)} implementation.
+   *            {@link KeySigner.Configuration#createDefault(String)} implementation.
    *
    * @return  public key X.509 certificate for the generated asymmetric key pair
    *
@@ -291,7 +291,7 @@ public class AsymmetricKeyManager extends KeyManager
    *            if key generation or certificate generation fails
    */
   public Certificate createSelfSignedKey(String keyName, char[] keyPassword,
-                                         X509CertificateBuilder certBuilder,
+                                         KeySigner signer,
                                          String issuerCommonName) throws KeyManagerException
   {
     try
@@ -301,9 +301,9 @@ public class AsymmetricKeyManager extends KeyManager
         throw new KeyManagerException("Implementation error: Null or empty key alias is not allowed.");
       }
 
-      if (certBuilder == null)
+      if (signer == null)
       {
-        throw new KeyManagerException("Implementation error: null certificate builder reference.");
+        throw new KeyManagerException("Implementation error: null certificate signer reference.");
       }
 
       if (issuerCommonName == null || issuerCommonName.equals(""))
@@ -315,8 +315,8 @@ public class AsymmetricKeyManager extends KeyManager
       {
         KeyPair keyPair = generateKey(DEFAULT_SELF_SIGNED_KEY_ALGORITHM);
 
-        Certificate certificate = certBuilder.createSelfSignedCertificate(
-            keyPair, new X509CertificateBuilder.Configuration(issuerCommonName)
+        Certificate certificate = signer.signPublicKey(
+            KeySigner.Configuration.createDefault(issuerCommonName)
         );
 
         KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(
@@ -329,7 +329,7 @@ public class AsymmetricKeyManager extends KeyManager
         return certificate;
       }
 
-      catch (X509CertificateBuilder.SigningException e)
+      catch (KeySigner.SigningException e)
       {
         throw new KeyManagerException("Certification creation failed : {0}", e, e.getMessage());
       }

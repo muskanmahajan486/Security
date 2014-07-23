@@ -36,8 +36,8 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.openremote.security.KeySigner;
 import org.openremote.security.SecurityProvider;
-import org.openremote.security.X509CertificateBuilder;
 
 
 /**
@@ -79,15 +79,15 @@ public class BouncyCastleKeySigner implements KeySigner
    *
    * @return  a X.509 v3 public key certificate
    *
-   * @throws  KeySigner.SigningException
+   * @throws  SigningException
    *            if creating a certificate fails for any reason
    */
-  @Override public X509Certificate signPublicKey(X509CertificateBuilder.Configuration config)
-      throws X509CertificateBuilder.SigningException
+  @Override public X509Certificate signPublicKey(Configuration config)
+      throws SigningException
   {
     if (config == null)
     {
-      throw new X509CertificateBuilder.SigningException("Implementation error: null certificate configuration.");
+      throw new SigningException("Implementation error: null certificate configuration.");
     }
 
     try
@@ -110,7 +110,7 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // Incorrect API usage, most likely missing fields in certificate generator...
 
-      throw new X509CertificateBuilder.SigningException(
+      throw new SigningException(
           "Implementation Error -- Cannot create certificate: {0}",
           exception,
           exception.getMessage()
@@ -132,7 +132,7 @@ public class BouncyCastleKeySigner implements KeySigner
    *
    * @return  BouncyCastle certificate builder instance
    */
-  private X509v3CertificateBuilder createCertificateBuilder(X509CertificateBuilder.Configuration config)
+  private X509v3CertificateBuilder createCertificateBuilder(Configuration config)
   {
     X500Name issuerName = new X500Name(config.getIssuer().toX500Name());
     X500Name subjectName = new X500Name(config.getSubject().toX500Name());
@@ -166,11 +166,10 @@ public class BouncyCastleKeySigner implements KeySigner
    * @return
    *          BouncyCastle content signer instance
    *
-   * @throws  KeySigner.SigningException
+   * @throws  SigningException
    *            if building the BouncyCastle content signer instance fails
    */
-  private ContentSigner createContentSigner(X509CertificateBuilder.Configuration config)
-      throws X509CertificateBuilder.SigningException
+  private ContentSigner createContentSigner(Configuration config) throws SigningException
   {
     // BouncyCastle API to create a content signer for the certificate...
 
@@ -193,7 +192,7 @@ public class BouncyCastleKeySigner implements KeySigner
 
     catch (OperatorCreationException exception)
     {
-      throw new X509CertificateBuilder.SigningException(
+      throw new SigningException(
           "Unable to sign the certificate with the given private key : {0}",
           exception,
           exception.getMessage()
@@ -216,11 +215,11 @@ public class BouncyCastleKeySigner implements KeySigner
    * @return
    *          a X.509 certificate
    *
-   * @throws  KeySigner.SigningException
+   * @throws  SigningException
    *            if signing the public key fails
    */
   private X509Certificate signPublicKey(X509v3CertificateBuilder builder, ContentSigner signer)
-      throws X509CertificateBuilder.SigningException
+      throws SigningException
   {
     // Construct the certificate structure and sign with the given BC content signer...
 
@@ -241,7 +240,7 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // should only happen if the code for certificate creation is using illegal values...
 
-      throw new X509CertificateBuilder.SigningException(
+      throw new SigningException(
           "Implementation Error -- Cannot create certificate : {0}",
           exception,
           exception.getMessage()
@@ -252,7 +251,7 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // If certificate conversion from BouncyCastle X.509 to JCA X.509 certificate fails...
 
-      throw new X509CertificateBuilder.SigningException(
+      throw new SigningException(
           "Certification conversion error : {0}",
           exception,
           exception.getMessage()

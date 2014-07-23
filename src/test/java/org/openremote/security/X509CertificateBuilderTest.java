@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Unit tests for {@link X509CertificateBuilder}.
+ * Unit tests for {@link KeySigner}.
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
@@ -39,7 +39,7 @@ public class X509CertificateBuilderTest
    */
   @Test public void testConfigurationIssuerName()
   {
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration("foo");
+    KeySigner.Configuration config = new KeySigner.Configuration("foo");
 
     Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
   }
@@ -51,7 +51,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration(null);
+      new KeySigner.Configuration(null);
 
       Assert.fail("should not get here...");
     }
@@ -69,7 +69,7 @@ public class X509CertificateBuilderTest
   {
     try
     {
-      new X509CertificateBuilder.Configuration("");
+      new KeySigner.Configuration("");
 
       Assert.fail("should not get here...");
     }
@@ -87,7 +87,7 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration("  foo  ");
+    KeySigner.Configuration config = new KeySigner.Configuration("  foo  ");
 
     Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
 
@@ -97,7 +97,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-                X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+                KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
     );
 
 
@@ -119,7 +119,7 @@ public class X509CertificateBuilderTest
         config.getValidityPeriod().getNotAfterDate()
             .before(
         new Date(time + TimeUnit.MILLISECONDS.convert(
-            X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
+            KeySigner.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
         )
     );
   }
@@ -132,8 +132,8 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        new X509CertificateBuilder.Validity(3),
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        new KeySigner.Validity(3),
         "  foo  "
     );
 
@@ -145,7 +145,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
     );
 
 
@@ -176,8 +176,8 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_ECDSA,
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA,
         "  foo  "
     );
 
@@ -186,7 +186,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_ECDSA)
+        KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA)
     );
 
     // Check default validity period...
@@ -207,7 +207,7 @@ public class X509CertificateBuilderTest
         config.getValidityPeriod().getNotAfterDate()
             .before(
         new Date(time + TimeUnit.MILLISECONDS.convert(
-            X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
+            KeySigner.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
         )
     );
   }
@@ -219,9 +219,9 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_RSA,
-        new X509CertificateBuilder.Validity(5),
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
+        new KeySigner.Validity(5),
         "  foo  "
     );
 
@@ -231,7 +231,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.SignatureAlgorithm.SHA256_WITH_RSA)
+        KeySigner.SignatureAlgorithm.SHA256_WITH_RSA)
     );
 
     Assert.assertTrue(
@@ -261,7 +261,7 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration("CN=foo");
+    KeySigner.Configuration config = new KeySigner.Configuration("CN=foo");
 
     Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
 
@@ -271,7 +271,7 @@ public class X509CertificateBuilderTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        X509CertificateBuilder.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
     );
 
 
@@ -293,7 +293,7 @@ public class X509CertificateBuilderTest
         config.getValidityPeriod().getNotAfterDate()
             .before(
         new Date(time + TimeUnit.MILLISECONDS.convert(
-            X509CertificateBuilder.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
+            KeySigner.Validity.DEFAULT_VALID_DAYS, TimeUnit.DAYS) + 5000)
         )
     );
   }
@@ -307,8 +307,8 @@ public class X509CertificateBuilderTest
   {
     long time = System.currentTimeMillis();
 
-    X509CertificateBuilder.Configuration config = new X509CertificateBuilder.Configuration(
-        new X509CertificateBuilder.Validity(10),
+    KeySigner.Configuration config = new KeySigner.Configuration(
+        new KeySigner.Validity(10),
         "CN=foo"
     );
 

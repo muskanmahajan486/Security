@@ -34,7 +34,7 @@ import org.openremote.exception.OpenRemoteException;
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public interface X509CertificateBuilder
+public interface KeySigner
 {
 
   // Constants ------------------------------------------------------------------------------------
@@ -65,22 +65,17 @@ public interface X509CertificateBuilder
 
 
   /**
-   * Constructs a self-signed public key certificate given the key pair
-   *
-   * @param keyPair
-   *            a key pair (public key and private key)
+   * Signs a public key and generates a signature certificate for the said key.
    *
    * @param config
-   *            certificate configuration, see {@link X509CertificateBuilder.Configuration}
+   *            certificate configuration, see {@link KeySigner.Configuration}
    *
-   * @return    a self-signed X.509 certificate
+   * @return  a X.509 certificate
    *
-   * @throws    X509CertificateBuilder.SigningException
-   *                if creation of certificate fails for any reason
-   *
+   * @throws KeySigner.SigningException
+   *            if creation of certificate fails for any reason
    */
-  X509Certificate createSelfSignedCertificate(KeyPair keyPair, Configuration config)
-      throws SigningException;
+  X509Certificate signPublicKey(Configuration config) throws SigningException;
 
 
 
@@ -128,9 +123,9 @@ public interface X509CertificateBuilder
      * any string value, it will be formatted to as a common name in the X.500 name required
      * by the certificate. <p>
      *
-     * This implementation will always include {@link X509CertificateBuilder#X500_COUNTRY},
-     * {@link X509CertificateBuilder#X500_STATE}, {@link X509CertificateBuilder#X500_LOCATION} and
-     * {@link X509CertificateBuilder#X500_ORGANIZATION} as part of the X.500 distinguished name
+     * This implementation will always include {@link KeySigner#X500_COUNTRY},
+     * {@link KeySigner#X500_STATE}, {@link KeySigner#X500_LOCATION} and
+     * {@link KeySigner#X500_ORGANIZATION} as part of the X.500 distinguished name
      * of the issuer public info. <p>
      *
      * This constructor defaults to {@link #DEFAULT_SIGNATURE_ALGORITHM} as the certificate
@@ -216,9 +211,9 @@ public interface X509CertificateBuilder
      * any string value, it will be formatted to as a common name in the X.500 name required
      * by the certificate. <p>
      *
-     * This implementation will always include {@link X509CertificateBuilder#X500_COUNTRY},
-     * {@link X509CertificateBuilder#X500_STATE}, {@link X509CertificateBuilder#X500_LOCATION} and
-     * {@link X509CertificateBuilder#X500_ORGANIZATION} as part of the X.500 distinguished name
+     * This implementation will always include {@link KeySigner#X500_COUNTRY},
+     * {@link KeySigner#X500_STATE}, {@link KeySigner#X500_LOCATION} and
+     * {@link KeySigner#X500_ORGANIZATION} as part of the X.500 distinguished name
      * of the issuer public info. <p>
      *
      * The default validity length of the certificate using this constructor is

@@ -83,11 +83,11 @@ public class BouncyCastleKeySigner implements KeySigner
    *            if creating a certificate fails for any reason
    */
   @Override public X509Certificate signPublicKey(X509CertificateBuilder.Configuration config)
-      throws SigningException
+      throws X509CertificateBuilder.SigningException
   {
     if (config == null)
     {
-      throw new SigningException("Implementation error: null certificate configuration.");
+      throw new X509CertificateBuilder.SigningException("Implementation error: null certificate configuration.");
     }
 
     try
@@ -110,9 +110,9 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // Incorrect API usage, most likely missing fields in certificate generator...
 
-      throw new SigningException(
-          exception,
+      throw new X509CertificateBuilder.SigningException(
           "Implementation Error -- Cannot create certificate: {0}",
+          exception,
           exception.getMessage()
       );
     }
@@ -169,7 +169,8 @@ public class BouncyCastleKeySigner implements KeySigner
    * @throws  KeySigner.SigningException
    *            if building the BouncyCastle content signer instance fails
    */
-  private ContentSigner createContentSigner(X509CertificateBuilder.Configuration config) throws SigningException
+  private ContentSigner createContentSigner(X509CertificateBuilder.Configuration config)
+      throws X509CertificateBuilder.SigningException
   {
     // BouncyCastle API to create a content signer for the certificate...
 
@@ -192,9 +193,9 @@ public class BouncyCastleKeySigner implements KeySigner
 
     catch (OperatorCreationException exception)
     {
-      throw new SigningException(
-          exception,
+      throw new X509CertificateBuilder.SigningException(
           "Unable to sign the certificate with the given private key : {0}",
+          exception,
           exception.getMessage()
       );
     }
@@ -219,7 +220,7 @@ public class BouncyCastleKeySigner implements KeySigner
    *            if signing the public key fails
    */
   private X509Certificate signPublicKey(X509v3CertificateBuilder builder, ContentSigner signer)
-      throws SigningException
+      throws X509CertificateBuilder.SigningException
   {
     // Construct the certificate structure and sign with the given BC content signer...
 
@@ -240,9 +241,9 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // should only happen if the code for certificate creation is using illegal values...
 
-      throw new SigningException(
-          exception,
+      throw new X509CertificateBuilder.SigningException(
           "Implementation Error -- Cannot create certificate : {0}",
+          exception,
           exception.getMessage()
       );
     }
@@ -251,9 +252,9 @@ public class BouncyCastleKeySigner implements KeySigner
     {
       // If certificate conversion from BouncyCastle X.509 to JCA X.509 certificate fails...
 
-      throw new SigningException(
-          exception,
+      throw new X509CertificateBuilder.SigningException(
           "Certification conversion error : {0}",
+          exception,
           exception.getMessage()
       );
     }

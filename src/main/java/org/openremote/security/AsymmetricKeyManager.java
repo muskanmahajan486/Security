@@ -329,7 +329,7 @@ public class AsymmetricKeyManager extends KeyManager
         return certificate;
       }
 
-      catch (X509CertificateBuilder.CertificateBuilderException e)
+      catch (X509CertificateBuilder.SigningException e)
       {
         throw new KeyManagerException("Certification creation failed : {0}", e, e.getMessage());
       }

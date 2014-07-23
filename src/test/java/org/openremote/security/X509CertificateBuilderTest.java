@@ -643,7 +643,7 @@ public class X509CertificateBuilderTest
    */
   @Test public void testExceptionConstructor()
   {
-    Exception e = new X509CertificateBuilder.CertificateBuilderException(
+    Exception e = new X509CertificateBuilder.SigningException(
         "foo {0}", new Error("bar"), "acme");
 
     Assert.assertTrue(e.getCause() instanceof Error);

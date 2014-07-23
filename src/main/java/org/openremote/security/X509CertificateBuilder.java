@@ -73,14 +73,14 @@ public interface X509CertificateBuilder
    * @param config
    *            certificate configuration, see {@link X509CertificateBuilder.Configuration}
    *
-   * @return  a self-signed X.509 certificate
+   * @return    a self-signed X.509 certificate
    *
-   * @throws  CertificateBuilderException
-   *            if creation of certificate fails for any reason
+   * @throws    X509CertificateBuilder.SigningException
+   *                if creation of certificate fails for any reason
    *
    */
   X509Certificate createSelfSignedCertificate(KeyPair keyPair, Configuration config)
-      throws CertificateBuilderException;
+      throws SigningException;
 
 
 
@@ -562,21 +562,68 @@ public interface X509CertificateBuilder
   /**
    * Checked exception type for certificate builder errors.
    */
-  public static class CertificateBuilderException extends OpenRemoteException
+  public static class SigningException extends OpenRemoteException
   {
+    /**
+     * Constructs a new exception with a give message, root cause exception and message
+     * parameters.
+     *
+     * @param msg
+     *            message (formatted according to {@link java.text.MessageFormat} API)
+     */
+    public SigningException(String msg)
+    {
+      super(msg);
+    }
 
     /**
      * Constructs a new exception with a give message, root cause exception and message
      * parameters.
      *
-     * @param msg     message (formatted according to {@link java.text.MessageFormat} API)
-     * @param t       root cause
-     * @param params  message format parameters
+     * @param msg
+     *            message (formatted according to {@link java.text.MessageFormat} API)
+     *
+     * @param params
+     *            message format parameters
      */
-    public CertificateBuilderException(String msg, Throwable t, Object... params)
+    public SigningException(String msg, Object... params)
     {
-      super(msg, t, params);
+      super(msg, params);
     }
+
+    /**
+     * Constructs a new exception with a give message, root cause exception and message
+     * parameters.
+     *
+     * @param msg
+     *            message (formatted according to {@link java.text.MessageFormat} API)
+     *
+     * @param throwable
+     *            root cause
+     */
+    public SigningException(String msg, Throwable throwable)
+    {
+      super(msg, throwable);
+    }
+
+    /**
+     * Constructs a new exception with a give message, root cause exception and message
+     * parameters.
+     *
+     * @param msg
+     *            message (formatted according to {@link java.text.MessageFormat} API)
+     *
+     * @param throwable
+     *            root cause
+     *
+     * @param params
+     *            message format parameters
+     */
+    public SigningException(String msg, Throwable throwable, Object... params)
+    {
+      super(msg, throwable, params);
+    }
+
   }
 
 }

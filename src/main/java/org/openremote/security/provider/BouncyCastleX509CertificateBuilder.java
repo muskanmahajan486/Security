@@ -118,16 +118,84 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
     }
   }
 
-      JcaX509CertificateConverter certConverter = new JcaX509CertificateConverter();
-      certConverter.setProvider(provider);
-      
-      return certConverter.getCertificate(certHolder);
+
+  // Private Instance Methods ---------------------------------------------------------------------
+
+  /**
+   * Creates a BouncyCastle X.509 V3 certificate builder. The certificate is configured with
+   * X.500 names given in the configuration for the issuer and subject and a given validity
+   * period for the certificate. The certificate's serial number is generated as an unique
+   * 40 character integer value, see {@link #generateUniqueSerial()} for details.
+   *
+   * @param config
+   *          configuration for the X.509 certificate builder
+   *
+   * @return  BouncyCastle certificate builder instance
+   */
+  private X509v3CertificateBuilder createCertificateBuilder(X509CertificateBuilder.Configuration config)
+  {
+    X500Name issuerName = new X500Name(config.getIssuer().toX500Name());
+    X500Name subjectName = new X500Name(config.getSubject().toX500Name());
+
+    // Get configured certificate validity dates...
+
+    Date notBefore = new Date(config.getValidityPeriod().getNotBeforeDate().getTime());
+    Date notAfter = new Date(config.getValidityPeriod().getNotAfterDate().getTime());
+
+    // BouncyCastle API to build a certificate with the public key, issuer and subject,
+    // validity dates and a serial number...
+
+    return new JcaX509v3CertificateBuilder(
+        issuerName,
+        new BigInteger(generateUniqueSerial()),
+        notBefore,
+        notAfter,
+        subjectName,
+        config.getPublicKey()
+    );
+  }
+
+  /**
+   * Creates a BouncyCastle content signer that we can use to sign the X.509 certificate
+   * information.
+   *
+   * @param config
+   *          configuration instance containing the signature algorithm and the private
+   *          singing key used in signing the public key
+   *
+   * @return
+   *          BouncyCastle content signer instance
+   *
+   * @throws  KeySigner.SigningException
+   *            if building the BouncyCastle content signer instance fails
+   */
+  private ContentSigner createContentSigner(X509CertificateBuilder.Configuration config) throws SigningException
+  {
+    // BouncyCastle API to create a content signer for the certificate...
+
+    JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(
+        config.getSignatureAlgorithm().toString()
+    );
+
+    // Explicitly set the security provider as BouncyCastle. The BC provider is dynamically
+    // loaded into the JVM if necessary...
+
+    contentSignerBuilder.setProvider(SecurityProvider.BC.getProviderInstance());
+
+
+    // Sign the public key...
+
+    try
+    {
+      return contentSignerBuilder.build(config.getPrivateSigningKey());
     }
 
-    catch (OperatorCreationException e)
+    catch (OperatorCreationException exception)
     {
-      throw new CertificateBuilderException(
-          "Unable to sign the certificate with the given private key : {0}", e, e.getMessage()
+      throw new SigningException(
+          exception,
+          "Unable to sign the certificate with the given private key : {0}",
+          exception.getMessage()
       );
     }
 

@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class BouncyCastleX509CertificateBuilderTest
+public class BouncyCastleKeySignerTest
 {
 
   /**
@@ -58,7 +58,7 @@ public class BouncyCastleX509CertificateBuilderTest
 
     KeyPair keyPair = generateRSAKeyPair();
 
-    String x500CommonName = "BouncyCastleX509CertificateBuilderTest";
+    String x500CommonName = "BouncyCastleKeySignerTest";
 
 
     // config :
@@ -359,7 +359,7 @@ public class BouncyCastleX509CertificateBuilderTest
 
     KeyPair keyPair = generateRSAKeyPair();
 
-    String x500CommonName = "BouncyCastleX509CertificateBuilderTest";
+    String x500CommonName = "BouncyCastleKeySignerTest";
 
 
     // config :
@@ -460,7 +460,7 @@ public class BouncyCastleX509CertificateBuilderTest
 
     KeyPair keyPair = generateEllipticCurveKeyPair();
 
-    String x500CommonName = "BouncyCastleX509CertificateBuilderTest";
+    String x500CommonName = "BouncyCastleKeySignerTest";
 
     try
     {
@@ -488,7 +488,7 @@ public class BouncyCastleX509CertificateBuilderTest
 
     KeyPair keyPair = generateEllipticCurveKeyPair();
 
-    String x500CommonName = "BouncyCastleX509CertificateBuilderTest";
+    String x500CommonName = "BouncyCastleKeySignerTest";
 
     try
     {

@@ -23,28 +23,40 @@ package org.openremote.security.provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.KeyPair;
-import java.security.Provider;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
+import org.openremote.security.SecurityProvider;
 import org.openremote.security.X509CertificateBuilder;
 
 
 /**
- * A X.509 Version 3 public key certificate builder using the BouncyCastle security
- * provider and API.
+ * This is an implementation of {@link org.openremote.security.KeySigner} and can be used
+ * to sign public keys. Signatures are created as X.509 Version 3 key certificates. <p>
  *
- * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
+ * This implementation requires that a BouncyCastle security provider has been added to the
+ * Java VM runtime.
+ *
+ * @see org.openremote.security.KeySigner
+ *
+ * @see java.security.Security#addProvider(java.security.Provider)
+ * @see java.security.cert.X509Certificate
+ *
+ * @see org.bouncycastle.cert.X509v3CertificateBuilder;
+ * @see org.bouncycastle.cert.X509CertificateHolder;
+ * @see org.bouncycastle.operator.ContentSigner;
+ *
+ * @author <a href = "mailto:juha@openremote.org">Juha Lindfors</a>
  */
 public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilder
 {

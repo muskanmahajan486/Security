@@ -82,17 +82,12 @@ public class BouncyCastleX509CertificateBuilder implements X509CertificateBuilde
    * @throws  KeySigner.SigningException
    *            if creating a certificate fails for any reason
    */
-  @Override public X509Certificate createSelfSignedCertificate(KeyPair keyPair, Configuration config)
-      throws CertificateBuilderException
+  @Override public X509Certificate signPublicKey(X509CertificateBuilder.Configuration config)
+      throws SigningException
   {
-    if (keyPair == null)
-    {
-      throw new IllegalArgumentException("Implementation error: null key pair.");
-    }
-
     if (config == null)
     {
-      throw new IllegalArgumentException("Implementation error: null certificate configuration.");
+      throw new SigningException("Implementation error: null certificate configuration.");
     }
 
     try

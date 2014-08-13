@@ -53,7 +53,8 @@ public class BouncyCastleKeySignerTest
 {
 
 
-  // CreateSelfSignedKey Tests --------------------------------------------------------------------
+
+  // SignPublicKey Tests --------------------------------------------------------------------------
 
   /**
    * Test self-signed RSA 2048 key with SHA-256 certificate.
@@ -64,7 +65,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair();
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair();
 
     String x500CommonName = "BouncyCastleKeySignerTest";
 
@@ -193,7 +194,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair(3096);
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair(3096);
 
     String x500CommonName = "BouncyCastleKeySignerTest";
 
@@ -322,7 +323,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair(4192);
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair(4192);
 
     String x500CommonName = "BouncyCastleKeySignerTest2";
 
@@ -671,7 +672,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair();
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair();
 
     String x500CommonName = "BouncyCastleKeySignerTest";
 
@@ -795,7 +796,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair();
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair();
 
     String x500CommonName = "BouncyCastleKeySignerTest";
 
@@ -838,7 +839,7 @@ public class BouncyCastleKeySignerTest
   {
     KeySigner signer = new BouncyCastleKeySigner();
 
-    KeyPair keyPair = generateRSAKeyPair();
+    KeyPair keyPair = KeySignerTest.generateRSAKeyPair();
 
     String x500CommonName = "BouncyCastleKeySignerTest";
 
@@ -918,26 +919,6 @@ public class BouncyCastleKeySignerTest
 
 
   // Helper Methods -------------------------------------------------------------------------------
-
-  /**
-   * Generate 2048 bit RSA key pair.
-   */
-  private KeyPair generateRSAKeyPair() throws Exception
-  {
-    return generateRSAKeyPair(2048);
-  }
-
-  /**
-   * Generate RSA key pair.
-   */
-  private KeyPair generateRSAKeyPair(int bitlen) throws Exception
-  {
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-
-    keyGen.initialize(bitlen);
-
-    return keyGen.generateKeyPair();
-  }
 
 
   /**

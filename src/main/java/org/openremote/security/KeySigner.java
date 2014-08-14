@@ -21,11 +21,15 @@
 package org.openremote.security;
 
 import java.nio.charset.Charset;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.openremote.exception.OpenRemoteException;
+import org.openremote.base.exception.IncorrectImplementationException;
+import org.openremote.base.exception.OpenRemoteException;
 
 /**
  * Allows for a X.509 certificate builder plugin to be attached to
@@ -169,27 +173,162 @@ public interface KeySigner
   // Nested Classes -------------------------------------------------------------------------------
 
   /**
-   * Used for configuring the certificate generation. This implementation provides a typed
+   * Used for configuring the key signing strategy. This implementation provides a typed
    * interface for configuration data.
    */
   public static class Configuration
   {
 
-    // Constants ----------------------------------------------------------------------------------
+    // Class Members ------------------------------------------------------------------------------
+
 
     /**
-     * Default hash and asymmetric key algorithms used to sign the certificate: {@value}
+     * Creates a default configuration for key signing.
+     *
+     * This configuration uses all default settings which assumes a self-signed key -- they key
+     * pair should contain a private key and it's corresponding public key. The private key is
+     * used to sign its own public key, creating a self-signed key pair. <p>
+     *
+     * This configuration will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
+     * of the certificate issuer and subject public info. <p>
+     *
+     * The signature algorithm is chosen from default algorithms defined in
+     * {@link KeySigner#DEFAULT_EC_SIGNATURE_ALGORITHM} and
+     * {@link KeySigner#DEFAULT_RSA_SIGNATURE_ALGORITHM} constants, depending whether the given
+     * key pair parameter contains RSA or elliptic curve key pair. <p>
+     *
+     * The default validity length of the certificate using this constructor is
+     * {@link Validity#DEFAULT_VALID_DAYS} days, starting at the time of the certificate creation.
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
+     *
+     * @param issuerCommonName
+     *            A common name used in the certificate for issuer and subject. The common name can
+     *            be any string value, it will be formatted to as a common name attribute in the
+     *            X.500 name required by the public key certificate. <p>
+     *
+     * @see #createDefault(java.security.KeyPair, String)
+     *
+     * @return    a new key signature configuration
      */
-    public final static SignatureAlgorithm DEFAULT_SIGNATURE_ALGORITHM =
-        SignatureAlgorithm.SHA384_WITH_ECDSA;
+    public static Configuration createDefault(KeyPair keyPair, String issuerCommonName)
+    {
+      return new Configuration(keyPair, issuerCommonName);
+    }
+
+    /**
+     * Creates a configuration for key signing.
+     *
+     * This configuration uses default settings which assumes a self-signed key but allows
+     * signature algorithm to be specified as an argument. The key pair should contain a private
+     * key and it's corresponding public key. The private key is used to sign its own public key,
+     * creating a self-signed key pair. <p>
+     *
+     * This configuration will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
+     * of the certificate issuer and subject public info. <p>
+     *
+     * The signature algorithm is chosen from default algorithms defined in
+     * {@link KeySigner#DEFAULT_EC_SIGNATURE_ALGORITHM} and
+     * {@link KeySigner#DEFAULT_RSA_SIGNATURE_ALGORITHM} constants, depending whether the given
+     * key pair parameter contains RSA or elliptic curve key pair. <p>
+     *
+     * The default validity length of the certificate using this constructor is
+     * {@link Validity#DEFAULT_VALID_DAYS} days, starting at the time of the certificate creation.
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
+     *
+     * @param signatureAlgorithm
+     *            The algorithm for the signature which should match the signing keys algorithm,
+     *            see {@link SignatureAlgorithm}
+     *
+     * @param issuerCommonName
+     *            A common name used in the certificate for issuer and subject. The common name can
+     *            be any string value, it will be formatted to as a common name attribute in the
+     *            X.500 name required by the public key certificate. <p>
+     *
+     * @see #createDefault(KeyPair, String)
+     *
+     * @return    a new key signature configuration
+     */
+    public static Configuration createSelfSigned(KeyPair keyPair,
+                                                 SignatureAlgorithm signatureAlgorithm,
+                                                 String issuerCommonName)
+    {
+      return new Configuration(keyPair, signatureAlgorithm, issuerCommonName);
+    }
+
+    /**
+     * Creates a configuration for key signing.
+     *
+     * This configuration uses default settings which assumes a self-signed key but allows
+     * signature algorithm and certification validity to be specified as an argument. The key pair
+     * should contain a private key and it's corresponding public key. The private key is used to
+     * sign its own public key, creating a self-signed key pair. <p>
+     *
+     * This configuration will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
+     * of the certificate issuer and subject public info. <p>
+     *
+     * The signature algorithm is chosen from default algorithms defined in
+     * {@link KeySigner#DEFAULT_EC_SIGNATURE_ALGORITHM} and
+     * {@link KeySigner#DEFAULT_RSA_SIGNATURE_ALGORITHM} constants, depending whether the given
+     * key pair parameter contains RSA or elliptic curve key pair. <p>
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
+     *
+     * @param signatureAlgorithm
+     *            The algorithm for the signature which should match the signing keys algorithm,
+     *            see {@link SignatureAlgorithm}
+     *
+     * @param validity
+     *            The validity period for the generated signature certificate, see
+     *            {@link Validity}
+     *
+     * @param issuerCommonName
+     *            A common name used in the certificate for issuer and subject. The common name can
+     *            be any string value, it will be formatted to as a common name attribute in the
+     *            X.500 name required by the public key certificate. <p>
+     *
+     * @see #createDefault(KeyPair, String)
+     *
+     * @return    a new key signature configuration
+     */
+    public static Configuration createSelfSigned(KeyPair keyPair,
+                                                 SignatureAlgorithm signatureAlgorithm,
+                                                 Validity validity,
+                                                 String issuerCommonName)
+    {
+      return new Configuration(keyPair, signatureAlgorithm, validity, issuerCommonName);
+    }
 
 
     // Instance Fields ----------------------------------------------------------------------------
 
     /**
+     * The private signing key used for signing the public key.
+     */
+    private PrivateKey privateSigningKey;
+
+    /**
+     * The public key to sign.
+     */
+    private PublicKey publicKey;
+
+    /**
      * Algorithm used for signing the certificate.
      */
-    private SignatureAlgorithm signatureAlgorithm = DEFAULT_SIGNATURE_ALGORITHM;
+    private SignatureAlgorithm signatureAlgorithm;
 
     /**
      * The validity duration of the certificate.
@@ -201,127 +340,194 @@ public interface KeySigner
      */
     private Issuer issuer;
 
+    /**
+     * Certificate subject information.
+     */
+    private Subject subject;
+
 
     // Constructors -------------------------------------------------------------------------------
 
     /**
-     * Constructs a new certificate configuration with a given issuer name. The name can be
-     * any string value, it will be formatted to as a common name in the X.500 name required
-     * by the certificate. <p>
+     * Constructs a new key signing configuration.
      *
-     * This implementation will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * This configuration uses all default settings which assumes a self-signed key -- they key
+     * pair should contain a private key and it's corresponding public key. The private key is
+     * used to sign its own public key, creating a self-signed key pair. <p>
+     *
+     * The self-signing is also reflected in the public key certificate. The certificate issuer
+     * X500 name is equal to the subject. Also the issuer/subject name uses default X500 name
+     * attributes, except for the issuer common name that can be given as a parameter. <p>
+     *
+     * The common name can be any string value, it will be formatted to as a common name
+     * attribute in the X.500 name required by the public key certificate. <p>
+     *
+     * This constructor will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
      * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
      * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
-     * of the issuer public info. <p>
+     * of the certificate issuer and subject public info. <p>
      *
-     * This constructor defaults to {@link #DEFAULT_SIGNATURE_ALGORITHM} as the certificate
-     * signature algorithm. The default validity length of the certificate using this constructor
-     * is {@link Validity#DEFAULT_VALID_DAYS} days, starting at the time of  the certificate
-     * creation.
-     *
-     * @param issuerCommonName
-     *            issuer common name as a string
-     *
-     * @throws IllegalArgumentException
-     *            if issuer common name is empty or null
-     */
-    public Configuration(String issuerCommonName)
-    {
-      // TODO :
-      //          should be more precise on the name encoding conventions, e.g. special
-      //          characters ',', '=' and so on. As per definitions in for issuer name in
-      //          http://tools.ietf.org/html/rfc5280#section-4.1.2.4 and the associated
-      //          ITU X.501 names in http://www.itu.int/rec/T-REC-X.501-200811-S
-
-
-      if (issuerCommonName == null || issuerCommonName.equals(""))
-      {
-        throw new IllegalArgumentException("Null or empty X.509 certificate issuer common name.");
-      }
-
-      // TODO
-      //
-      // Do a very basic 'common sense' check on the issuer name to ensure basic name validity.
-      // As per the to-do note above, this is not complete or should be considered complete.
-      // Basically we are just rejecting strings that contain '=', or comma characters to avoid
-      // attribute parsing issues, right or wrong. There may be a proper way to encode these
-      // characters defined in the specs. There may be other characters that should be rejected
-      // or encoded.
-      //                                                                                [JPL]
-
-      issuerCommonName = issuerCommonName.trim();
-
-      if (issuerCommonName.startsWith("CN="))
-      {
-        issuerCommonName = issuerCommonName.substring(3, issuerCommonName.length());
-      }
-
-      if (issuerCommonName.contains("="))
-      {
-        throw new IllegalArgumentException(
-            "Issuer common name should not contain '=' characters : '" + issuerCommonName + "'"
-        );
-      }
-
-      if (issuerCommonName.contains(","))
-      {
-        throw new IllegalArgumentException(
-            "Issuer common name should not contain comma : '" + issuerCommonName + "'"
-        );
-      }
-
-      this.validity = new Validity();
-
-      this.signatureAlgorithm = DEFAULT_SIGNATURE_ALGORITHM;
-
-      try
-      {
-        this.issuer = new Issuer(
-            new String(issuerCommonName.getBytes(), Charset.forName("UTF-8"))
-        );
-      }
-
-      catch (Throwable t)
-      {
-        // This shouldn't really happen, UTF-8 should be available but just in case...
-
-        AsymmetricKeyManager.securityLog.warn(
-            "Unable to convert X.509 certificate issuer common name to UTF-8: {0}",
-            t, t.getMessage()
-        );
-      }
-    }
-
-    /**
-     * Constructs a new certificate configuration with a given issuer name. The name can be
-     * any string value, it will be formatted to as a common name in the X.500 name required
-     * by the certificate. <p>
-     *
-     * This implementation will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
-     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
-     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
-     * of the issuer public info. <p>
+     * The signature algorithm is chosen from default algorithms defined in
+     * {@link KeySigner#DEFAULT_EC_SIGNATURE_ALGORITHM} and
+     * {@link KeySigner#DEFAULT_RSA_SIGNATURE_ALGORITHM} constants, depending whether the given
+     * key pair parameter contains RSA or elliptic curve key pair. <p>
      *
      * The default validity length of the certificate using this constructor is
      * {@link Validity#DEFAULT_VALID_DAYS} days, starting at the time of the certificate creation.
      *
+     *
+     * @see #createDefault(KeyPair, String)
+     * @see #Configuration(KeyPair, KeySigner.SignatureAlgorithm, KeySigner.Validity, String)
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
+     *
+     * @param commonName
+     *            common name attribute used in the public key certificate's issuer and subject
+     *            X500 names
+     *
+     * @throws IncorrectImplementationException
+     *            if key pair, keys or common name is empty or null; if key encryption algorithm
+     *            does not have a matching signature algorithm
+     */
+    private Configuration(KeyPair keyPair, String commonName)
+    {
+      if (keyPair == null)
+      {
+        throw new IncorrectImplementationException(
+            "Configuration key pair is null."
+        );
+      }
+
+      if (keyPair.getPublic() == null)
+      {
+        throw new IncorrectImplementationException(
+            "Configuration public key is null."
+        );
+      }
+
+      if (keyPair.getPrivate() == null)
+      {
+        throw new IncorrectImplementationException(
+            "Configuation private key is null."
+        );
+      }
+
+      if (commonName == null || commonName.equals(""))
+      {
+        throw new IncorrectImplementationException(
+            "Null or empty X.509 certificate common name attribute."
+        );
+      }
+
+
+      this.privateSigningKey = keyPair.getPrivate();
+      this.publicKey = keyPair.getPublic();
+      this.validity = new Validity();
+
+
+      // Attempt to convert public key's encryption algorithm into a known (or defined for
+      // our implementation) encryption algorithm...
+
+      try
+      {
+        KeyManager.AsymmetricKeyAlgorithm keyAlgorithm =
+            KeyManager.AsymmetricKeyAlgorithm.valueOf(this.publicKey.getAlgorithm());
+
+        this.signatureAlgorithm = keyAlgorithm.getDefaultSignatureAlgorithm();
+      }
+
+      catch (IllegalArgumentException exception)
+      {
+        throw new IncorrectImplementationException(
+            "No support defined for '{0}' encryption key algorithm.",
+            this.publicKey.getAlgorithm()
+        );
+      }
+
+      try
+      {
+        this.issuer = new Issuer(
+            new String(parseCommonName(commonName).getBytes(), Charset.forName("UTF-8"))
+        );
+      }
+
+      catch (SigningException exception)
+      {
+        // thrown by parseCommonName above...
+
+        throw new IncorrectImplementationException(
+            "Cannot parse X.500 common name '{0}' : {1}", exception,
+            commonName, exception.getMessage()
+        );
+      }
+
+      catch (Throwable throwable)
+      {
+        // This shouldn't really happen, UTF-8 should be available but just in case...
+
+        throw new IncorrectImplementationException(
+            "Unable to convert X.509 certificate common name to UTF-8: {0}", throwable,
+            throwable.getMessage()
+        );
+      }
+
+      this.subject = new Subject(this.issuer.toX500Name());
+    }
+
+
+    /**
+     * Constructs a new key signing configuration. This constructor allows a specific signature
+     * algorithm to be configured.
+     *
+     * This configuration assumes a self-signed key -- they key pair should contain a private key
+     * and it's corresponding public key. The private key is used to sign its own public key,
+     * creating a self-signed key pair. <p>
+     *
+     * The self-signing is also reflected in the public key certificate. The certificate issuer
+     * X500 name is equal to the subject. Also the issuer/subject name uses default X500 name
+     * attributes, except for the issuer common name that can be given as a parameter. <p>
+     *
+     * The common name can be any string value, it will be formatted to as a common name
+     * attribute in the X.500 name required by the public key certificate. <p>
+     *
+     * This constructor will always include {@link KeySigner#DEFAULT_X500_COUNTRY},
+     * {@link KeySigner#DEFAULT_X500_COUNTRY_SUBDIVISION}, {@link KeySigner#DEFAULT_X500_LOCATION}
+     * and {@link KeySigner#DEFAULT_X500_ORGANIZATION} as part of the X.500 distinguished name
+     * of the certificate issuer and subject public info. <p>
+     *
+     * The default validity length of the certificate using this constructor is
+     * {@link Validity#DEFAULT_VALID_DAYS} days, starting at the time of the certificate creation.
+     *
+     * @see #createSelfSigned(KeyPair, KeySigner.SignatureAlgorithm, String)
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
+     *
      * @param signatureAlgo
      *            The hash and asymmetric key signature algorithms used with the certificate.
-     *            See {@link AsymmetricKeyManager.KeyAlgorithm} and {@link SignatureAlgorithm}.
+     *            The chosen signature algorithm must be compatible with the encryption
+     *            algorithm of the given key pair. See
+     *            {@link PrivateKeyManager.AsymmetricKeyAlgorithm} and
+     *            {@link KeySigner.SignatureAlgorithm}.
      *
-     * @param issuerCommonName
-     *            issuer common name as a string
+     * @param commonName
+     *            common name attribute used in the public key certificate's issuer and subject
+     *            X500 names
      *
-     * @throws IllegalArgumentException
-     *            if issuer common name is empty or null, or if signature algorithm is null
+     * @throws IncorrectImplementationException
+     *            if key pair, keys, signature algorithm or common name is empty or null;
+     *            if key encryption algorithm does not have a matching signature algorithm
      */
-    public Configuration(SignatureAlgorithm signatureAlgo, String issuerCommonName)
+    private Configuration(KeyPair keyPair, SignatureAlgorithm signatureAlgo, String commonName)
     {
-      this(issuerCommonName);
+      this(keyPair,  commonName);
 
       if (signatureAlgo == null)
       {
-        throw new IllegalArgumentException(
+        throw new IncorrectImplementationException(
             "Implementation error: null certificate signature algorithm."
         );
       }
@@ -331,25 +537,31 @@ public interface KeySigner
 
 
     /**
-     * Similar to {@link #Configuration(String)} except allows for specifying the validity
+     * Similar to {@link #Configuration(KeyPair, String)} except allows for specifying the validity
      * period of the certificate.
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
      *
      * @param valid
      *            when the certificate is considered valid
      *
-     * @param issuerCommonName
-     *            issuer common name as string
+     * @param commonName
+     *            common name attribute used in the public key certificate's issuer and subject
+     *            X500 names
      *
-     * @throws IllegalArgumentException
-     *            if issuer common name is empty or null
+     * @throws IncorrectImplementationException
+     *            if key pair, keys, validity or common name is empty or null;
+     *            if key encryption algorithm does not have a matching signature algorithm
      */
-    public Configuration(Validity valid, String issuerCommonName)
+    private Configuration(KeyPair keyPair, Validity valid, String commonName)
     {
-      this(issuerCommonName);
+      this(keyPair, commonName);
 
       if (valid == null)
       {
-        throw new IllegalArgumentException(
+        throw new IncorrectImplementationException(
             "Implementation error: certificate validity period is null"
         );
       }
@@ -359,28 +571,47 @@ public interface KeySigner
 
 
     /**
-     * Similar to {@link #Configuration(String)} but also allows for specifying the signature
-     * algorithm and validity period of the certificate.
+     * Similar to {@link #Configuration(KeyPair, String)} but also allows for specifying the
+     * signature algorithm and validity period of the certificate.
+     *
+     * @param keyPair
+     *            A pair of private and its corresponding public key. The private key is used
+     *            to self-sign its public key.
      *
      * @param signatureAlgo
-     *            The signature algorithm to be used with the certificate. See
-     *            {@link AsymmetricKeyManager.KeyAlgorithm} and {@link SignatureAlgorithm}.
+     *            The hash and asymmetric key signature algorithms used with the certificate.
+     *            The chosen signature algorithm must be compatible with the encryption
+     *            algorithm of the given key pair. See
+     *            {@link PrivateKeyManager.AsymmetricKeyAlgorithm} and
+     *            {@link KeySigner.SignatureAlgorithm}.
      *
      * @param valid
      *            when the certificate is considered valid
      *
-     * @param issuerCommonName
-     *            issuer common name as string
-     *
-     * @throws IllegalArgumentException
-     *            if issuer common name is empty or null
+     * @param commonName
+      *            common name attribute used in the public key certificate's issuer and subject
+      *            X500 names
+      *
+      * @throws IncorrectImplementationException
+      *            if key pair, keys, signature algorithm, validity or common name is empty or null;
+      *            if key encryption algorithm does not have a matching signature algorithm
      */
-    public Configuration(SignatureAlgorithm signatureAlgo, Validity valid, String issuerCommonName)
+    private Configuration(KeyPair keyPair, SignatureAlgorithm signatureAlgo,
+                          Validity valid, String commonName)
     {
-      this(signatureAlgo, issuerCommonName);
+      this(keyPair, signatureAlgo, commonName);
+
+
+      if (valid == null)
+      {
+        throw new IncorrectImplementationException(
+            "Implementation error: null certificate validity."
+        );
+      }
 
       this.validity = valid;
     }
+
 
 
     // Public Instance Methods --------------------------------------------------------------------
@@ -395,9 +626,40 @@ public interface KeySigner
       return issuer;
     }
 
+    /**
+     * Returns the X.500 name of the certificate subject.
+     *
+     * @return  subject X.500 distinguished name
+     */
+    public Subject getSubject()
+    {
+      return subject;
+    }
 
     /**
-     * Returns the signature algorithm configuration of the certificate builder.
+     * Returns the public key to be signed.
+     *
+     * @return  public key which will be signed
+     */
+    public PublicKey getPublicKey()
+    {
+      return publicKey;
+    }
+
+    /**
+     * Returns the private key used for signing the public key.
+     *
+     * @see #getPublicKey()
+     *
+     * @return  private key used for signing
+     */
+    public PrivateKey getPrivateSigningKey()
+    {
+      return privateSigningKey;
+    }
+
+    /**
+     * Returns the signature algorithm configuration of the key signer.
      *
      * @return  certificate signature algorithm
      */
@@ -415,6 +677,49 @@ public interface KeySigner
     {
       return validity;
     }
+
+
+    // Private Instance Methods -------------------------------------------------------------------
+
+    private String parseCommonName(String name) throws SigningException
+    {
+      // TODO :
+      //          should be more precise on the name encoding conventions, e.g. special
+      //          characters ',', '=' and so on. As per definitions in for issuer name in
+      //          http://tools.ietf.org/html/rfc5280#section-4.1.2.4 and the associated
+      //          ITU X.501 names in http://www.itu.int/rec/T-REC-X.501-200811-S
+      //
+      // Do a very basic 'common sense' check on the issuer name to ensure basic name validity.
+      // Basically we are just rejecting strings that contain '=', or comma characters to avoid
+      // attribute parsing issues, right or wrong. There may be a proper way to encode these
+      // characters defined in the specs. There may be other characters that should be rejected
+      // or encoded.
+      //                                                                                [JPL]
+
+      name = name.trim();
+
+      if (name.startsWith("CN="))
+      {
+        name = name.substring(3, name.length());
+      }
+
+      if (name.contains("="))
+      {
+        throw new SigningException(
+            "Common name attribute should not contain '=' characters : '" + name + "'"
+        );
+      }
+
+      if (name.contains(","))
+      {
+        throw new SigningException(
+            "Common name attribute should not contain comma : '" + name + "'"
+        );
+      }
+
+      return name;
+    }
+
   }
 
 

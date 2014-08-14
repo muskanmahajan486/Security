@@ -735,7 +735,7 @@ public interface KeySigner
    * SHA1 based algorithms are not included due to possible vulnerabilities. SHA-2 family
    * is included as 256-bit, 384-bit and 512-bit variants.
    */
-  public static enum SignatureAlgorithm
+  public enum SignatureAlgorithm
   {
 
     /**
@@ -743,58 +743,91 @@ public interface KeySigner
      * strength for classified secret information when used in combination with a 256-bit
      * elliptic curve (as per NSA suite B recommendation). <p>
      *
-     * See {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA256_WITH_ECDSA("SHA256withECDSA"),
+    SHA256_WITH_ECDSA("SHA256withECDSA", ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA256),
 
     /**
      * SHA-2 384-bit secure hash with elliptic curve digital signature algorithm. Recommended
      * strength for classified top secret information when used in combination with a 384-bit
      * elliptic curve (as per NSA suite B recommendation). <p>
      *
-     * See {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA384_WITH_ECDSA("SHA384withECDSA"),
+    SHA384_WITH_ECDSA("SHA384withECDSA", ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA384),
 
     /**
-     * SHA-2 512-bit secure has with elliptic curve digital signature algorithm.
-     * <p>
-     * See {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * SHA-2 512-bit secure has with elliptic curve digital signature algorithm. <p>
+     *
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA512_WITH_ECDSA("SHA512withECDSA"),
+    SHA512_WITH_ECDSA("SHA512withECDSA", ASN_OID_SIGNATURE_ALGORITHM_ECDSA_WITH_SHA512),
 
     /**
      * SHA-2 256-bit secure hash with RSA encryption keys. An elliptic curve
-     * should be preferred over RSA but this option is supported here for compatibility. See
-     * {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * should be preferred over RSA but this option is supported here for compatibility. <p>
+     *
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA256_WITH_RSA("SHA256withRSA"),
+    SHA256_WITH_RSA("SHA256withRSA", ASN_OID_SHA256_WITH_RSA_ENCRYPTION),
 
     /**
      * SHA-2 384-bit secure hash with RSA encryption keys. An elliptic curve should be preferred
-     * over RSA but this option is supported here for compatibility.
-     * See {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * over RSA but this option is supported here for compatibility. <p>
+     *
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA384_WITH_RSA("SHA384withRSA"),
+    SHA384_WITH_RSA("SHA384withRSA", ASN_OID_SHA384_WITH_RSA_ENCRYPTION),
 
     /**
      * SHA-2 512-bit secure hash with RSA encryption keys. An elliptic curve
-     * should be preferred over RSA but this option is supported here for compatibility. See
-     * {@link AsymmetricKeyManager.KeyAlgorithm} for additional details.
+     * should be preferred over RSA but this option is supported here for compatibility. <p>
+     *
+     * See {@link PrivateKeyManager.AsymmetricKeyAlgorithm} for
+     * additional details.
      */
-    SHA512_WITH_RSA("SHA512withRSA");
+    SHA512_WITH_RSA("SHA512withRSA", ASN_OID_SHA512_WITH_RSA_ENCRYPTION);
 
+
+    // Instance Fields ----------------------------------------------------------------------------
 
     /**
-     * The signature algorithm
+     * The signature algorithm name
      */
     private String algorithmName;
 
+    /**
+     * The signature algorithm ASN.1 OID corresponding to the name.
+     */
+    private String asnoid;
 
-    private SignatureAlgorithm(String algorithmName)
+
+    // Constructors -------------------------------------------------------------------------------
+
+    private SignatureAlgorithm(String algorithmName, String asnoid)
     {
       this.algorithmName = algorithmName;
+      this.asnoid = asnoid;
     }
+
+
+    // Instance Methods ---------------------------------------------------------------------------
+
+    /**
+     * Returns the ASN.1 OID corresponding to this signature algorithm as a string.
+     *
+     * @return  ASN.1 OID of this signature algorithm as a string
+     */
+    public String getASN1()
+    {
+      return asnoid;
+    }
+
 
     /**
      * Returns the signature algorithm name as string as required by the Java security API.

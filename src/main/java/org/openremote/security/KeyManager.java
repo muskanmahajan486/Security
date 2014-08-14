@@ -20,7 +20,7 @@
  */
 package org.openremote.security;
 
-import org.openremote.exception.OpenRemoteException;
+import org.openremote.base.exception.OpenRemoteException;
 import org.openremote.logging.Logger;
 
 import java.io.BufferedInputStream;

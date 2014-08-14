@@ -31,7 +31,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.cert.Certificate;
 import java.math.BigInteger;
 
-import org.openremote.exception.OpenRemoteException;
+import org.openremote.base.exception.OpenRemoteException;
 
 
 /**

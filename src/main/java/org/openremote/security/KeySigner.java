@@ -877,7 +877,34 @@ public interface KeySigner
      *
      * @return X.500 name with organization, country, state, location and common name attributes
      */
-    public String getX500Name()
+    public String toX500Name()
+    {
+      return x500Name;
+    }
+  }
+
+
+  /**
+   * Defines an X.500 compatible subject name for a certificate. <p>
+   *
+   * TODO : implementation not complete, at the moment exists just to define a separate Java type
+   */
+  public static class Subject
+  {
+    private String x500Name;
+
+    public Subject(String organization, String country, String state,
+                   String location, String commonName)
+    {
+
+    }
+
+    private Subject(String x500Name)
+    {
+      this.x500Name = x500Name;
+    }
+
+    public String toX500Name()
     {
       return x500Name;
     }

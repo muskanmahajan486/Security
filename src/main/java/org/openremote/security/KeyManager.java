@@ -71,7 +71,7 @@ public abstract class KeyManager
    *
    * Default: {@value}
    */
-  private final static SecurityProvider DEFAULT_SECURITY_PROVIDER = SecurityProvider.BC;
+  public final static SecurityProvider DEFAULT_SECURITY_PROVIDER = SecurityProvider.BC;
 
 
   // Enums ----------------------------------------------------------------------------------------

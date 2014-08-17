@@ -670,7 +670,99 @@ public abstract class KeyManager
 
 
   /**
-   * Checks if keystore exists at given file URI.
+   * A convenience method to retrieve a certificate (rather than a private or secret key)
+   * from the underlying keystore.
+   *
+   * @param alias
+   *          Certificate alias to retrieve.
+   *
+   * @return  A certificate, or null if not found
+   */
+  protected Certificate getCertificate(String alias)
+  {
+    try
+    {
+      return keystore.getCertificate(alias);
+    }
+
+    catch (KeyStoreException exception)
+    {
+      // This exception may happen if keystore is not initialized/loaded when asking for
+      // a certificate -- since we initialize the keystore instance as part of the constructor
+      // it should always be present. Therefore this exception should only occur in case of
+      // an implementation error.
+
+      throw new IncorrectImplementationException(
+          "Could not retrieve certificate '{0}': {1}", exception,
+          alias, exception.getMessage()
+      );
+    }
+  }
+
+
+  /**
+   * Generates a new asymmetric key pair using the given algorithm.
+   *
+   * @param keyAlgo
+   *            algorithm for the key generator
+   *
+   * @return generated key pair
+   *
+   * @throws KeyManagerException
+   *            in case any errors in key generation
+   */
+  protected KeyPair generateKey(AsymmetricKeyAlgorithm keyAlgo) throws KeyManagerException
+  {
+    try
+    {
+      KeyPairGenerator keyGen;
+
+      if (provider == null)
+      {
+        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName());
+      }
+
+      else
+      {
+        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName(), provider);
+      }
+
+      keyGen.initialize(keyAlgo.algorithmSpec);
+
+      return keyGen.generateKeyPair();
+    }
+
+    catch (InvalidAlgorithmParameterException exception)
+    {
+      throw new KeyManagerException(
+          "Invalid algorithm parameter in {0} : {1}", exception,
+          keyAlgo, exception.getMessage()
+      );
+    }
+
+    catch (NoSuchAlgorithmException exception)
+    {
+      throw new KeyManagerException(
+          "No security provider found for {0} : {1}", exception,
+          keyAlgo, exception.getMessage()
+      );
+    }
+  }
+
+
+  /**
+   * Returns the key storage type used by this key manager.
+   *
+   * @return    key storage type
+   */
+  protected Storage getStorageType()
+  {
+    return storage;
+  }
+
+
+  /**
+   * Checks if key store exists at given file URI.
    *
    * @param uri
    *            the file URI to check

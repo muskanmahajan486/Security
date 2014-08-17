@@ -781,39 +781,51 @@ public abstract class KeyManager
       return file.exists();
     }
 
-    catch (SecurityException e)
+    catch (SecurityException exception)
     {
       String path = resolveFilePath(file);
 
       throw new KeyManagerException(
-          "Security manager has prevented access to file ''{0}'' : {1}",
-          e, path, e.getMessage()
+          "Security manager has prevented access to file ''{0}'' : {1}", exception,
+          path, exception.getMessage()
       );
     }
   }
 
 
-  /**
-   * Initialization method used by constructors to initialize this instance. Should not be
-   * invoked outside of a constructor.
-   *
-   * @param storage
-   *            The keystore storage type to use with this instance.
-   *
-   * @param provider
-   *            The security provider to use with this instance. Can be null in which case
-   *            the implementations should delegate to the JVM installed security providers
-   *            in their preferred use order.
-   */
-  protected void init(StorageType storage, Provider provider)
-  {
-    if (storage == null)
-    {
-      throw new IllegalArgumentException("Implementation Error: null storage type");
-    }
 
-    this.provider = provider;
-    this.storage = storage;
+  /**
+   * Clears the given password character array with zero values.
+   *
+   * @param password
+   *            password character array to erase
+   */
+  protected void clearPassword(char[] password)
+  {
+    if (password != null)
+    {
+      for (int i = 0; i < password.length; ++i)
+      {
+        password[i] = 0;
+      }
+    }
+  }
+
+  /**
+   * Clears the given password byte array with zero values.
+   *
+   * @param password
+   *            password byte array to erase
+   */
+  protected void clearPassword(byte[] password)
+  {
+    if (password != null)
+    {
+      for (int i = 0; i< password.length; ++i)
+      {
+        password[i] = 0;
+      }
+    }
   }
 
 

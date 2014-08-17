@@ -518,35 +518,68 @@ public abstract class KeyManager
    * if desired.
    *
    * @param keyAlias
-   *            A lookup name of the keystore entry to be added.
+   *            A lookup name of the key entry to be added.
    *
    * @param entry
-   *            Keystore entry to be added. Note that accepted entry types depend on the
+   *            Key entry to be added. Note that accepted entry types depend on the
    *            keystore storage format.
    *
    * @param param
-   *            Protection parameters for the keystore entry/alias.
+   *            Protection parameters for the key entry.  A null value is accepted for
+   *            trusted certificate entries, for other type of key entries a null value
+   *            is converted to an empty password character array.
    */
   protected void add(String keyAlias, KeyStore.Entry entry, KeyStore.ProtectionParameter param)
+      throws KeyManagerException
   {
     if (keyAlias == null || keyAlias.equals(""))
     {
-      throw new IllegalArgumentException(
+      throw new KeyManagerException(
           "Implementation Error: null or empty key alias is not allowed."
       );
     }
 
     if (entry == null)
     {
-      throw new IllegalArgumentException(
+      throw new KeyManagerException(
           "Implementation Error: null keystore entry is not allowed."
       );
     }
 
-    // TODO check if null protection param is ok?
+    // Key stores appear to behave differently with regards to key entries depending what
+    // types of entries are stored (and possibly differing between store implementations too).
+    // E.g. private keys may have a strict requirement for a key protection where public
+    // certificates may not allow protection parameters at all.
+    //
+    // Doing some special handling here depending what type of entry is being stored:
+    //
+    //   - if a null protection parameter is provided, it is converted to an empty password
+    //     protection unless the null protection parameter is for a trusted certificate
+    //     entry in which case it is accepted.
 
-    keyEntries.put(keyAlias, new KeyStoreEntry(entry, param));
+    if (param == null)
+    {
+      param = new KeyStore.PasswordProtection(new char[] {});
+    }
+
+    if (entry instanceof KeyStore.TrustedCertificateEntry)
+    {
+      param = null;
+    }
+
+    try
+    {
+      keystore.setEntry(keyAlias, entry, param);
+    }
+
+    catch (KeyStoreException exception)
+    {
+      throw new KeyManagerException(
+          "Failed to add key '{0}' to key store : {1}", exception,
+          keyAlias, exception.getMessage());
+    }
   }
+
 
   /**
    * Removes a key entry from this instance. Use {@link #save(URI, char[])} to persist

@@ -831,8 +831,9 @@ public abstract class KeyManager
 
   // Private Instance Methods ---------------------------------------------------------------------
 
+
   /**
-   * Adds the key entries of this key manager into a keystore. The keystore is saved to the given
+   * Stores the key entries of this key manager into a keystore. The keystore is saved to the given
    * output stream. The keystore can be an existing, loaded keystore or a new, empty one.
    *
    * @param keystore
@@ -844,12 +845,10 @@ public abstract class KeyManager
    * @param password
    *            password to access the keystore
    *
-   * @return    an in-memory keystore instance
-   *
    * @throws KeyManagerException
    *            if the save operation fails
    */
-  private KeyStore save(KeyStore keystore, OutputStream out, char[] password)
+  private void save(KeyStore keystore, OutputStream out, char[] password)
       throws KeyManagerException
   {
     if (password == null || password.length == 0)
@@ -863,40 +862,39 @@ public abstract class KeyManager
 
     try
     {
-      for (String keyAlias : keyEntries.keySet())
-      {
-        KeyStoreEntry entry = keyEntries.get(keyAlias);
-
-        keystore.setEntry(keyAlias, entry.entry, entry.protectionParameter);
-      }
-
       keystore.store(bout, password);
-
-      return keystore;
     }
 
-    catch (KeyStoreException e)
-    {
-      throw new KeyManagerException("Storing the key pair failed : {0}", e, e.getMessage());
-    }
-
-    catch (IOException e)
+    catch (KeyStoreException exception)
     {
       throw new KeyManagerException(
-          "Unable to write key to keystore : {0}", e, e.getMessage()
+          "Storing the key pair failed : {0}", exception,
+          exception.getMessage()
       );
     }
 
-    catch (NoSuchAlgorithmException e)
+    catch (IOException exception)
     {
       throw new KeyManagerException(
-          "Security provider does not support required key store algorithm: {0}", e, e.getMessage()
+          "Unable to write key to keystore : {0}", exception,
+          exception.getMessage()
       );
     }
 
-    catch (CertificateException e)
+    catch (NoSuchAlgorithmException exception)
     {
-      throw new KeyManagerException("Cannot store certificate: {0}", e, e.getMessage());
+      throw new KeyManagerException(
+          "Security provider does not support required key store algorithm: {0}", exception,
+          exception.getMessage()
+      );
+    }
+
+    catch (CertificateException exception)
+    {
+      throw new KeyManagerException(
+          "Cannot store certificate: {0}", exception,
+          exception.getMessage()
+      );
     }
 
     finally
@@ -909,9 +907,12 @@ public abstract class KeyManager
           bout.close();
         }
 
-        catch (IOException e)
+        catch (IOException exception)
         {
-          securityLog.warn("Failed to close file output stream to keystore : {0}", e, e.getMessage());
+          securityLog.warn(
+              "Failed to close file output stream to keystore : {0}", exception,
+              exception.getMessage()
+          );
         }
       }
     }

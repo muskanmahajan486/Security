@@ -152,10 +152,9 @@ public abstract class KeyManager
   // Private Instance Fields ----------------------------------------------------------------------
 
   /**
-   * Stores key store entries which are used when the contents of this key manager is
-   * turned into a keystore implementation (in-memory, file-persisted, or otherwise).
+   * The key storage type used by this instance.
    */
-  private Map<String, KeyStoreEntry> keyEntries = new HashMap<String, KeyStoreEntry>();
+  private Storage storage = DEFAULT_KEYSTORE_STORAGE;
 
   /**
    * The storage type used by this instance.
@@ -163,11 +162,11 @@ public abstract class KeyManager
   private StorageType storage = DEFAULT_KEYSTORE_STORAGE_TYPE;
 
   /**
-   * The security provider used by this instance. Note that may contain a null reference in
-   * which case implementation should delegate to the the JVM installed security providers
-   * in their preferred use order.
+   * Reference to the internal keystore instance that is used to persist the key entries in
+   * this key manager.
    */
-  private Provider provider = DEFAULT_SECURITY_PROVIDER.getProviderInstance();
+  private KeyStore keystore = null;
+
 
 
   // Constructors ---------------------------------------------------------------------------------

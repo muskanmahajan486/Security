@@ -48,6 +48,8 @@ import java.security.UnrecoverableEntryException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,71 +87,40 @@ public abstract class KeyManager
   public final static SecurityProvider DEFAULT_SECURITY_PROVIDER = SecurityProvider.BC;
 
 
-  // Enums ----------------------------------------------------------------------------------------
 
   /**
-   * Format for storing, serializing and persisting private and secret key information. Defines
-   * the known types as per the document
-   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyStore
-   * and BouncyCastle (release 1.50) keystore types defined in
-   * http://www.bouncycastle.org/specifications.html
+   * ASN.1 OID for NSA / NIST standard curve P-521. This is equivalent to SEC 2 prime curve
+   * "secp521r1". OID = {@value}
    */
-  public enum StorageType
-  {
-    /**
-     * PKCS #12 format. Used to store private keys of a key pair along with its X.509
-     * certificate. Standardized format.
-     */
-    PKCS12,
+  public final static String ASN_OID_STD_CURVE_NSA_NIST_P521 = "1.3.132.0.35";
 
-    /**
-     * Proprietary 'Java Keystore' format in Java cryptography extension ('SunJCE') provider.
-     * This implementation uses password based encryption with Triple DES. See
-     * http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#JceKeystore
-     */
-    JCEKS,
+  /**
+   * ASN.1 OID for NSA / NIST standard curve P-384. This is equivalent to SEC 2 prime curve
+   * "secp384r1". OID = {@value}
+   */
+  public final static String ASN_OID_STD_CURVE_NSA_NIST_P384 = "1.3.132.0.34";
 
-    /**
-     * BouncyCastle keystore format roughly equivalent to Sun JKS implementation. Works with
-     * Sun's 'keytool'. Resistant to tampering but not resistant to inspection.
-     */
-    BKS,
-
-    /**
-     * Recommended BouncyCastle keystore format. Requires password verification and is
-     * resistant to inspection and tampering.
-     */
-    UBER;
+  /**
+   * ASN.1 OID for NSA / NIST standard curve P-256. This is equivalent to SEC 2 prime curve
+   * "secp256r1" and ANSI X9.62 "prime256v1". OID = {@value}
+   */
+  public final static String ASN_OID_STD_CURVE_NSA_NIST_P256 = "1.2.840.10045.3.1.7";
 
 
-    /**
-     * Returns the name of this storage type. Standard names are defined in the  Java SE 6
-     * security guide: http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html
-     *
-     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
-     *
-     * @see #getStorageTypeName()
-     *
-     * @return  keystore name string
-     */
-    @Override public String toString()
-    {
-      return getStorageTypeName();
-    }
+  /**
+   * RSA key size : {@value} <p>
+   *
+   * This is recommended asymmetric RSA key size for classified, secret data, as per NSA Suite B.
+   */
+  public final static int DEFAULT_RSA_KEY_SIZE = 3072;
 
-    /**
-     * Returns the name of this storage type. Standard names are defined in the  Java SE 6
-     * security guide: http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html
-     *
-     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
-     *
-     * @return  keystore name string
-     */
-    public String getStorageTypeName()
-    {
-      return name();
-    }
-  }
+  /**
+   * Public exponent value used in RSA algorithm (increase impacts performance): {@value}
+   *
+   * @see java.security.spec.RSAKeyGenParameterSpec#F4
+   */
+  public final static BigInteger DEFAULT_RSA_PUBLIC_EXPONENT = RSAKeyGenParameterSpec.F4;
+
 
 
   // Class Members --------------------------------------------------------------------------------
@@ -1267,6 +1238,175 @@ public abstract class KeyManager
   }
 
 
+  /**
+   * Algorithms for generating asymmetric key pairs, as defined in the document:
+   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator <p>
+   *
+   * Elliptic curve algorithms should be favored for any new implementations that require long
+   * term, persistent signature keys. DSA is no longer included as an option and RSA is included
+   * to support existing systems, if necessary (see http://bit.ly/1cRMTak for RSA developments). <p>
+   *
+   * It is worth noting that there currently exists quite a bit of debate around the quality
+   * and safety properties of many standard curve specifications typically used with ECC.
+   * Much of the discussion can be followed via Safecurves website at
+   * http://safecurves.cr.yp.to/index.html.  <p>
+   *
+   * In particular, the curve specifications originating from NSA / NIST are under criticism
+   * for couple of different reasons. One critique is the unexplained seed values that were
+   * used to generate the curves, articulated as one of the motivations for creating
+   * ECC Brainpool standard curves described here: http://bit.ly/1caBYF4   <p>
+   *
+   * In addition to the unclear seed value motivation, the NSA / NIST curve properties are
+   * criticized for their difficult to implement properties and some safety weaknesses. Some
+   * of these arguments are detailed in the presentation here: http://bit.ly/1eG1mYh
+   */
+  public enum AsymmetricKeyAlgorithm
+  {
+
+    /**
+     * The default configurations for typical EC providers (i.e. SunEC provider included in Java 7
+     * and BouncyCastle provider) often use standard named curves from NSA / NIST / ANSI X9.62 /
+     * SECG. This implementation currently defaults to those standard curves but safer curves
+     * should be adopted as soon as they're made available as named curves in the security
+     * providers. BouncyCastle provider for example may be adding a safer curve 'Curve25519' for
+     * example which should be used once available (see discussion here: http://bit.ly/1akHyrX). <p>
+     *
+     * With the default configuration, the BouncyCastle (release 1.5.0) provider will use the
+     * following curves:
+     *
+     * <ul>
+     *  <li>192-bit - NSA / NIST P-192 / ANSI X9.62 (named curve "prime192v1")</li>
+     *  <li>224-bit - NSA / NIST P-224 / ANSI X9.62 (named curve "P-224")</li>
+     *  <li>239-bit - ANSI X9.62 (named curve "prime239v1")</li>
+     *  <li>256-bit - NSA / NIST P-256 / ANSI X9.62 (named curve "prime256v1")</li>
+     *  <li>384-bit - NSA / NIST P-384 (named curve "P-384")</li>
+     *  <li>521-bit - NSA / NIST P-521 (named curve "P-521")</li>
+     * </ul>
+     *
+     * When no named curve is specified, the 239-bit curve (ANSI X9.62 prime239v1) is used.
+     *
+     * The SunCE provider (OpenJDK 7) will use following curves:
+     *
+     * <ul>
+     * <li>192-bit - NSA / NIST P-192 (ASN.1 OID 1.2.840.10045.3.1.1)</li>
+     * <li>224-bit - NSA / NIST P-224 (ASN.1 OID 1.3.132.0.33)</li>
+     * <li>239-bit - ANSI x9.62 prime239v1</li>
+     * <li>256-bit - NSA / NIST P-256 (ASN.1 OID 1.2.840.10045.3.1.7)</li>
+     * <li>384-bit - NSA / NIST P-384 (ASN.1 OID 1.3.132.0.34)</li>
+     * <li>521-bit - NSA / NIST P-521 (ASN.1 OID 1.3.132.0.35)</li>
+     * </ul>
+     *
+     * When no named curve is specified, the 256-bit curve (NSA / NIST P-256) is used. Sun EC provider
+     * includes also some shorter bit length curves which should not be used and some other bit
+     * lengths above 256 bits not listed here but which are also defined by NSA / NIST.  <p>
+     *
+     * The 256-bit curve corresponding to 3072-bit asymmetric RSA key strength in combination
+     * with 128-bit symmetric AES keys and SHA-2 256-bit message digests are considered adequate
+     * for classified information up to secret level (as per NSA Suite B recommendation). Keys
+     * with lower strength should not be used.<p>
+     *
+     * The 384-bit curve corresponds to 7680-bit asymmetric RSA key strength and should be used
+     * in combination with 256-bit symmetric AES keys and 384-bit SHA-2 hash. This level of
+     * security is currently estimated to be secure beyond year 2030 and can be used for
+     * classified information up to top secret level as per NSA suite B recommendation. <p>
+     */
+    EC(
+        new ECGenParameterSpec(ASN_OID_STD_CURVE_NSA_NIST_P521),
+        KeySigner.DEFAULT_EC_SIGNATURE_ALGORITHM
+    ),
+
+    /**
+     * RSA signature/cipher algorithm with key size as specified in
+     * {@link PrivateKeyManager#DEFAULT_RSA_KEY_SIZE} and public exponent value as defined in
+     * {@link PrivateKeyManager#DEFAULT_RSA_PUBLIC_EXPONENT}.  <p>
+     *
+     * Note the developments in solving the discrete logarithm problem (see http://bit.ly/1cRMTak)
+     * and the increasing RSA key sizes that impact performance. For these reasons, elliptic
+     * curves should be preferred.
+     */
+    RSA(
+        new RSAKeyGenParameterSpec(DEFAULT_RSA_KEY_SIZE, DEFAULT_RSA_PUBLIC_EXPONENT),
+        KeySigner.DEFAULT_RSA_SIGNATURE_ALGORITHM
+    );
+
+
+    // Instance Fields ----------------------------------------------------------------------------
+
+    /**
+     * Key generator algorithm configuration parameters.
+     */
+    private AlgorithmParameterSpec algorithmSpec;
+
+    /**
+     * A default signature algorithm associated with this asymmetric key algorithm.
+     */
+    private KeySigner.SignatureAlgorithm defaultSignatureAlgorithm;
+
+
+
+    // Constructors -------------------------------------------------------------------------------
+
+    /**
+     * Constructs a new asymmetric key algorithm enum.
+     *
+     * @param spec
+     *          algorithm parameters
+     *
+     * @param defaultSignatureAlgorithm
+     *          a corresponding default public key signature algorithm to associate with this
+     *          asymmetric key algorithm
+     */
+    private AsymmetricKeyAlgorithm(AlgorithmParameterSpec spec,
+                                   KeySigner.SignatureAlgorithm defaultSignatureAlgorithm)
+    {
+      this.algorithmSpec = spec;
+      this.defaultSignatureAlgorithm = defaultSignatureAlgorithm;
+    }
+
+
+    // Instance Methods ---------------------------------------------------------------------------
+
+    /**
+     * Returns the algorithm's standard name, see
+     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
+     *
+     * @return asymmetric key algorithm standard name
+     */
+    public String getAlgorithmName()
+    {
+      return name();
+    }
+
+
+    /**
+     * Returns a default public key signature algorithm that should be used with this asymmetric
+     * key algorithm.
+     *
+     * @return  a public key signature algorithm associated with this asymmetric key algorithm
+     */
+    public KeySigner.SignatureAlgorithm getDefaultSignatureAlgorithm()
+    {
+      return defaultSignatureAlgorithm;
+    }
+
+
+    // Object Overrides ---------------------------------------------------------------------------
+
+    /**
+     * Returns the algorithm's standard name, see
+     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
+     *
+     * @see #getAlgorithmName()
+     *
+     * @return asymmetric key algorithm standard name
+     */
+    @Override public String toString()
+    {
+      return getAlgorithmName();
+    }
+  }
+
+  
   /**
    * Exception type for the public API of this class to indicate errors.
    */

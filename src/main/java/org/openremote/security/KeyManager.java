@@ -20,6 +20,7 @@
  */
 package org.openremote.security;
 
+import org.openremote.base.exception.IncorrectImplementationException;
 import org.openremote.base.exception.OpenRemoteException;
 import org.openremote.logging.Logger;
 
@@ -34,12 +35,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
+import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -375,9 +383,9 @@ public abstract class KeyManager
     catch (KeyStoreException exception)
     {
      securityLog.error(
-          "Unable to retrieve keystore size : {0}", exception,
-          exception.getMessage()
-      );
+         "Unable to retrieve keystore size : {0}", exception,
+         exception.getMessage()
+     );
 
       return -1;
     }
@@ -387,28 +395,54 @@ public abstract class KeyManager
   // Protected Instance Methods -------------------------------------------------------------------
 
   /**
-   * Stores the keys in this key manager in a secure keystore format. This implementation generates
-   * a file-based, persistent keystore which can be shared with other applications and processes.
+   * Initialization method used by constructors to initialize this instance. Should not be
+   * invoked outside of a constructor.  <p>
    *
+   * @param storage
+   *            The keystore storage type to use with this instance.
+   *
+   * @param provider
+   *            The security provider to use with this instance. Can be null in which case
+   *            the implementations should delegate to the JVM installed security providers
+   *            in their preferred use order.
+   */
+  protected void init(Storage storage, Provider provider)
+  {
+    if (storage == null)
+    {
+      throw new IllegalArgumentException("Implementation Error: null storage type");
+    }
+
+    this.provider = provider;
+    this.storage = storage;
+  }
+
+
+  /**
+   * Stores the keys in this key manager in a secure key store format. This implementation generates
+   * a file-based, persistent key store which can be shared with other applications and processes.
+   * <p>
+   * IMPORTANT NOTE: Subclasses that invoke this method should clear the password character array
+   *                 as soon as it is no longer needed. This prevents passwords from lingering
+   *                 in JVM memory pool any longer than is necessary. Use the
+   *                 {@link #clearPassword(char[])} method for this purpose.
    *
    * @param uri
-   *              The location of the file where the keystore should be persisted
+   *              The location of the file where the key store should be persisted. Must be
+   *              an URI with file scheme.
    *
    * @param password
-   *              A secret password used to access the keystore contents. Note that the character
-   *              array will be set to zero values after this method call completes.
+   *              A secret password used to access the keystore contents. NOTE: the character
+   *              array should be set to zero values after this method call completes, via
+   *              {@link #clearPassword(char[])} method.
    *
-   * @return      an in-memory keystore instance
-   *
-   * @throws ConfigurationException
-   *              if the configured security provider(s) do not contain implementation for the
-   *              required keystore type
+   * @see #clearPassword(char[])
    *
    * @throws KeyManagerException
    *              if loading or creating the keystore fails
    */
-  protected KeyStore save(URI uri, char[] password)
-      throws ConfigurationException, KeyManagerException
+  protected void save(URI uri, char[] password) throws ConfigurationException,
+                                                       KeyManagerException
   {
     if (uri == null)
     {
@@ -417,56 +451,27 @@ public abstract class KeyManager
 
     try
     {
-      KeyStore keystore;
-
-      // If already exists, load from filesystem...
-
-      if (exists(uri))
-      {
-        keystore = instantiateKeyStore(uri, password);
-      }
-
-      // Otherwise create as new...
-
-      else
-      {
-        keystore = createKeyStore();
-      }
-
       BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(uri)));
 
       // Persist...
 
-      return save(keystore, out, password);
+      save(keystore, out, password);
     }
 
-    catch (FileNotFoundException e)
+    catch (FileNotFoundException exception)
     {
       throw new KeyManagerException(
-          "File ''{0}'' cannot be created or opened : {1}",
-          e, resolveFilePath(new File(uri)), e.getMessage()
+          "File ''{0}'' cannot be created or opened : {1}", exception,
+          resolveFilePath(new File(uri)), exception.getMessage()
       );
     }
 
-    catch (SecurityException e)
+    catch (SecurityException exception)
     {
       throw new KeyManagerException(
-          "Security manager has denied access to file ''{0}'' : {1}",
-          e, resolveFilePath(new File(uri)), e.getMessage()
+          "Security manager has denied access to file ''{0}'' : {1}", exception,
+          resolveFilePath(new File(uri)), exception.getMessage()
       );
-    }
-
-    finally
-    {
-      // TODO : push the password clearing responsibility to subclasses...
-
-      if (password != null)
-      {
-        for (int i = 0; i < password.length; ++i)
-        {
-          password[i] = 0;
-        }
-      }
     }
   }
 

@@ -612,16 +612,62 @@ public abstract class KeyManager
 
 
   /**
-   * Returns the security provider associated with this key manager. Note that may return a
-   * null reference in which case the implementations should delegate the functionality to
-   * JVM installed security providers in their preferred use order.
+   * Retrieves a key from underlying key storage.
    *
-   * @return    security provider instance or <tt>null</tt>
+   * @param alias
+   *          Key alias of the key to retrieve.
+   *
+   * @param protection
+   *          Protection parameter to retrieve the key.
+   *
+   * @return  a key store entry, or null if it was not found
+   *
+   * @throws KeyManagerException
+   *          if the key could not be retrieved, due to incorrect protection parameters,
+   *          unsupported algorithm or other reasons
    */
-  protected Provider getSecurityProvider()
+  protected KeyStore.Entry retrieveKey(String alias, KeyStore.ProtectionParameter protection)
+      throws KeyManagerException
   {
-    return provider;
+    try
+    {
+      return keystore.getEntry(alias, protection);
+    }
+
+    catch (KeyStoreException exception)
+    {
+      throw new IncorrectImplementationException(
+          "Implementation Error: password manager has not been initialized.", exception
+      );
+    }
+
+    catch (NoSuchAlgorithmException exception)
+    {
+      throw new KeyManagerException(
+          "Configuration error. Required key storage algorithm is not available: {0}", exception,
+          exception.getMessage()
+      );
+    }
+
+    catch (UnrecoverableKeyException exception)
+    {
+      throw new KeyManagerException(
+          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
+          "protection password: {1}", exception,
+          alias, exception.getMessage()
+      );
+    }
+
+    catch (UnrecoverableEntryException exception)
+    {
+      throw new KeyManagerException(
+          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
+          "protection password: {1}", exception,
+          alias, exception.getMessage()
+      );
+    }
   }
+
 
   /**
    * Checks if keystore exists at given file URI.

@@ -920,42 +920,15 @@ public abstract class KeyManager
 
 
   /**
-   * Loads a keystore instance from an existing file URI.
-   *
-   * @param uri
-   *            file URI to load the keystore from
-   *
-   * @param password
-   *            password to access the keystore
-   *
-   * @return    in-memory keystore instance
-   *
-   * @throws ConfigurationException
-   *            if the configured security provider(s) do not contain implementation for the
-   *            required keystore type
-   *
-   * @throws KeyManagerException
-   *            if loading or creating the keystore fails
-   */
-  private KeyStore instantiateKeyStore(URI uri, char[] password)
-      throws ConfigurationException, KeyManagerException
-  {
-    return instantiateKeyStore(new File(uri), password, storage);
-  }
-
-  /**
-   * Loads a keystore instance from an existing file.
+   * Loads a key store from the given input stream or creates a new instance in case of a
+   * null input stream. Configured key storage type and security provider instance are used
+   * to load/create the keystore.
    *
    * @param file
-   *            file to load the keystore from
+   *            file to load the key store from
    *
    * @param password
-   *            password to access the keystore
-   *
-   * @param type
-   *            the algorithm used to store the keystore data
-   *
-   * @return    in-memory keystore instance
+   *            password to access the key store
    *
    * @throws ConfigurationException
    *            if the configured security provider(s) do not contain implementation for the
@@ -964,9 +937,12 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *            if loading or creating the keystore fails
    */
-  private KeyStore instantiateKeyStore(File file, char[] password, StorageType type)
-      throws ConfigurationException, KeyManagerException
+  private void loadKeyStore(File file, char[] password) throws ConfigurationException,
+                                                               KeyManagerException
   {
+    // This is basically just a convenience method to actual implementation
+    // in loadKeyStore(InputStream, char[])...
+
     if (file == null)
     {
       throw new KeyManagerException("Implementation Error: null file descriptor.");
@@ -976,41 +952,37 @@ public abstract class KeyManager
     {
       BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
 
-      return getKeyStore(in, password, type);
+      loadKeyStore(in, password);
     }
 
-    catch (FileNotFoundException e)
+    catch (FileNotFoundException exception)
     {
       throw new KeyManagerException(
-          "Keystore file ''{0}'' could not be created or opened : {1}",
-          e, resolveFilePath(file), e.getMessage()
+          "Keystore file ''{0}'' could not be created or opened : {1}", exception,
+          resolveFilePath(file), exception.getMessage()
       );
     }
 
-    catch (SecurityException e)
+    catch (SecurityException exception)
     {
       throw new KeyManagerException(
-          "Security manager has denied access to keystore file ''{0}'' : {1}",
-          e, resolveFilePath(file), e.getMessage()
+          "Security manager has denied access to keystore file ''{0}'' : {1}", exception,
+          resolveFilePath(file), exception.getMessage()
       );
     }
   }
 
 
   /**
-   * Loads a key store from input stream (or creates a new, empty one). The keystore storage
-   * format can be provided as a parameter.
+   * Loads a key store from the given input stream or creates a new instance in case of a
+   * null input stream. Configured key storage type and security provider instance are used
+   * to load/create the keystore.
    *
    * @param in
-   *            input stream to keystore file (or null to create a new one)
+   *            input stream to key store file (or null to create a new one)
    *
    * @param password
-   *            shared secret (a password) used for protecting access to the keystore
-   *
-   * @param type
-   *            the algorithm used to securely store the keystore data
-   *
-   * @return  an in-memory keystore instance
+   *            shared secret (a password) used for protecting access to the key store
    *
    * @throws ConfigurationException
    *            if the configured security provider(s) do not contain implementation for the
@@ -1019,35 +991,33 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *            if loading or creating the keystore fails
    */
-  private KeyStore getKeyStore(InputStream in, char[] password, StorageType type)
-      throws ConfigurationException, KeyManagerException
+  private void loadKeyStore(InputStream in, char[] password) throws ConfigurationException,
+                                                                    KeyManagerException
   {
     try
     {
-      KeyStore keystore;
-
       if (provider == null)
       {
-        keystore = KeyStore.getInstance(type.name());
+        // Use system installed security provider...
+
+        keystore = KeyStore.getInstance(storage.getStorageName());
       }
 
       else
       {
-        keystore = KeyStore.getInstance(type.name(), provider);
+        keystore = KeyStore.getInstance(storage.getStorageName(), provider);
       }
 
       keystore.load(in, password);
-
-      return keystore;
     }
 
-    catch (KeyStoreException e)
+    catch (KeyStoreException exception)
     {
       // NOTE:  If the algorithm is not recognized by a provider, it is indicated by a nested
       //        NoSuchAlgorithmException. This is the behavior for both SUN default provider
       //        in Java 6 and BouncyCastle.
 
-      if (e.getCause() != null && e.getCause() instanceof NoSuchAlgorithmException)
+      if (exception.getCause() != null && exception.getCause() instanceof NoSuchAlgorithmException)
       {
         String usedProviders;
 
@@ -1062,33 +1032,39 @@ public abstract class KeyManager
         }
 
         throw new ConfigurationException(
-            "The security provider(s) ''{0}'' do not support keystore type ''{1}'' : {2}",
-            e, usedProviders, type.name(), e.getMessage()
+            "The security provider(s) '{0}' do not support keystore type '{1}' : {2}", exception,
+            usedProviders, storage.name(), exception.getMessage()
         );
       }
 
-      throw new KeyManagerException("Cannot load keystore: {0}", e, e.getMessage());
+      throw new KeyManagerException(
+          "Cannot load keystore: {0}", exception,
+          exception.getMessage()
+      );
     }
 
-    catch (NoSuchAlgorithmException e)
+    catch (NoSuchAlgorithmException exception)
     {
       // If part of the keystore load() the algorithm to verify the keystore contents cannot
       // be found...
 
       throw new KeyManagerException(
-          "Required keystore verification algorithm not found: {0}",
-          e, e.getMessage()
+          "Required keystore verification algorithm not found: {0}", exception,
+          exception.getMessage()
       );
     }
 
-    catch (CertificateException e)
+    catch (CertificateException exception)
     {
       // Can happen if any of the certificates in the store cannot be loaded...
 
-      throw new KeyManagerException("Can't load keystore: {0}", e, e.getMessage());
+      throw new KeyManagerException(
+          "Can't load keystore: {0}", exception,
+          exception.getMessage()
+      );
     }
 
-    catch (IOException e)
+    catch (IOException exception)
     {
       // If there's an I/O problem, or if keystore has been corrupted, or if password is missing
 
@@ -1107,7 +1083,12 @@ public abstract class KeyManager
 //        );
 //      }
 
-      throw new KeyManagerException("Cannot load keystore: {0}", e, e.getMessage());
+      // TODO : this error would be improved by reporting file location and keystore type..
+
+      throw new KeyManagerException(
+          "I/O Error: Cannot load keystore: {0}", exception,
+          exception.getMessage()
+      );
     }
   }
 
@@ -1133,7 +1114,6 @@ public abstract class KeyManager
       return file.getPath();
     }
   }
-
 
 
   // Nested Classes -------------------------------------------------------------------------------

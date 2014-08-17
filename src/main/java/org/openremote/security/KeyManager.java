@@ -172,33 +172,215 @@ public abstract class KeyManager
   // Constructors ---------------------------------------------------------------------------------
 
   /**
-   * Empty implementation, no-args constructor limited for subclass use only.
+   * Creates a new key manager instance with a {@link #DEFAULT_KEYSTORE_STORAGE default} key
+   * storage format using {@link #DEFAULT_SECURITY_PROVIDER default} security provider.
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
    */
-  protected KeyManager()
+  protected KeyManager() throws ConfigurationException, KeyManagerException
   {
-
+    this(DEFAULT_KEYSTORE_STORAGE, DEFAULT_SECURITY_PROVIDER.getProviderInstance());
   }
 
   /**
-   * This constructor allows the subclasses to specify both the storage type and explicit
-   * security provider to use with this instance. The storage type and provider will be used
-   * instead of the default values. <p>
+   * This constructor allows the subclasses to specify both the key storage format and explicit
+   * security provider to use with this instance. The key storage format and security provider
+   * given as arguments will be used instead of the default values for this instance. <p>
    *
-   * Note that the provider parameter allows a null value. This indicates that the appropriate
-   * security provider should be searched from the JVM installed security providers in their
-   * preferred order.
+   * Note that the security provider parameter allows a null value. This indicates that the
+   * appropriate security provider should be searched from the JVM installed security providers
+   * in their preferred order.
+   *
    *
    * @param storage
-   *            The storage type to use with this instance.
+   *            key storage format to use with this instance
    *
    * @param provider
-   *            The explicit security provider to use with the storage of this instance. If a
+   *            The explicit security provider to use with the key storage of this instance. If a
    *            null value is specified, the implementations should opt to delegate the selection
    *            of a security provider to the JVMs installed security provider implementations.
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
    */
-  protected KeyManager(StorageType storage, Provider provider)
+  protected KeyManager(Storage storage, Provider provider)
+      throws ConfigurationException, KeyManagerException
   {
     init(storage, provider);
+
+    loadKeyStore((InputStream) null, null);
+  }
+
+
+  /**
+   * This constructor will load an existing keystore into memory. It expects the keystore
+   * to be in default key storage format as specified in {@link #DEFAULT_KEYSTORE_STORAGE}. <p>
+   *
+   * The URI to a keystore file must use a 'file' scheme.
+   *
+   *
+   * @param keyStoreFile
+   *            a file URI pointing to a keystore file that should be loaded into this key
+   *            manager
+   *
+   * @param password
+   *            a master password to access the keystore file
+   *
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
+   */
+  protected KeyManager(URI keyStoreFile, char[] password) throws ConfigurationException,
+                                                                 KeyManagerException
+  {
+    this(
+        keyStoreFile, password,
+        DEFAULT_KEYSTORE_STORAGE,
+        DEFAULT_SECURITY_PROVIDER.getProviderInstance()
+    );
+  }
+
+
+  /**
+   * This constructor will load an existing keystore into memory. It allows the subclasses to
+   * specify the expected key storage format used by the keystore file. The storage format
+   * must be supported by the {@link #DEFAULT_SECURITY_PROVIDER} implementation. <p>
+   *
+   * The URI to a keystore file must use a 'file' scheme.
+   *
+   *
+   * @param keyStoreFile
+   *            a file URI pointing to a keystore file that should be loaded into this key
+   *            manager
+   *
+   * @param password
+   *            a master password to access the keystore file
+   *
+   * @param storage
+   *            key storage format to use with this instance
+   *
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
+   */
+  protected KeyManager(URI keyStoreFile, char[] password, Storage storage)
+      throws ConfigurationException, KeyManagerException
+  {
+    this(keyStoreFile, password, storage, DEFAULT_SECURITY_PROVIDER.getProviderInstance());
+  }
+
+  /**
+   * This constructor will load an existing keystore into memory. It allows the subclasses to
+   * specify both the expected key storage format and explicit security provider to be used
+   * when the keystore is loaded. <p>
+   *
+   * Note that the security provider parameter allows a null value. This indicates that the
+   * appropriate security provider should be searched from the JVM installed security providers
+   * in their preferred order.  <p>
+   *
+   * The URI to a keystore file must use a 'file' scheme.
+   *
+   *
+   * @param keyStoreFile
+   *            a file URI pointing to a keystore file that should be loaded into this key
+   *            manager
+   *
+   * @param password
+   *            a master password to access the keystore file
+   *
+   * @param storage
+   *            key storage format to use with this instance
+   *
+   * @param provider
+   *            The explicit security provider to use with the key storage of this instance. If a
+   *            null value is specified, the implementations should opt to delegate the selection
+   *            of a security provider to the JVMs installed security provider implementations.
+   *
+   *
+   * @throws ConfigurationException
+   *            if the configured security provider(s) do not contain implementation for the
+   *            required keystore type
+   *
+   * @throws KeyManagerException
+   *            if creating the keystore fails
+   */
+  protected KeyManager(URI keyStoreFile, char[] password, Storage storage, Provider provider)
+      throws ConfigurationException, KeyManagerException
+  {
+    this(storage, provider);
+
+    load(keyStoreFile, password);
+  }
+
+
+  // Public Instance Methods ----------------------------------------------------------------------
+
+  /**
+   * Indicates if this key manager contains a key with a given alias.
+   *
+   * @param keyAlias
+   *          key alias to check
+   *
+   * @return  true if a key is associated with a given alias in this key manager; false
+   *          otherwise
+   */
+  public boolean contains(String keyAlias)
+  {
+    try
+    {
+      return keystore.containsAlias(keyAlias);
+    }
+
+    catch (KeyStoreException exception)
+    {
+      securityLog.error(
+          "Unable to retrieve key info for alias '{0}' : {1}", exception,
+          keyAlias, exception.getMessage()
+      );
+
+      return false;
+    }
+  }
+
+
+  /**
+   * Returns the number of keys currently managed in this key manager.
+   *
+   * @return  number of keys in this key manager
+   */
+  public int size()
+  {
+    try
+    {
+      return keystore.size();
+    }
+
+    catch (KeyStoreException exception)
+    {
+     securityLog.error(
+          "Unable to retrieve keystore size : {0}", exception,
+          exception.getMessage()
+      );
+
+      return -1;
+    }
   }
 
 

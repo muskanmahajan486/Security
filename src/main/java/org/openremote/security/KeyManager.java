@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
@@ -63,13 +64,15 @@ public abstract class KeyManager
   // Constants ------------------------------------------------------------------------------------
 
   /**
-   * This is the default key storage type used if nothing else is specified. Note that PKCS12
-   * is used for asymmetric PKI keys but not for storing symmetric secret keys. For the latter,
+   * This is the default key storage type used if nothing else is specified. <p>
+   *
+   * Note that the default storage format PKCS12 can only be used as an asymmetric public and
+   * private key and a key certificate storage but not for other (symmetric) keys. For the latter,
    * other provider-specific storage types must be used. <p>
    *
    * Default: {@value}
    */
-  public final static StorageType DEFAULT_KEYSTORE_STORAGE_TYPE = StorageType.PKCS12;
+  public final static Storage DEFAULT_KEYSTORE_STORAGE = Storage.PKCS12;
 
   /**
    * The default security provider used by this instance. Note that can contain a null value
@@ -165,9 +168,12 @@ public abstract class KeyManager
   private Storage storage = DEFAULT_KEYSTORE_STORAGE;
 
   /**
-   * The storage type used by this instance.
+   * The security provider used by this instance. <p>
+   *
+   * Note that may contain a null reference in which case implementation should delegate to the
+   * JVM installed security providers in their preferred use order.
    */
-  private StorageType storage = DEFAULT_KEYSTORE_STORAGE_TYPE;
+  private Provider provider = DEFAULT_SECURITY_PROVIDER.getProviderInstance();
 
   /**
    * Reference to the internal keystore instance that is used to persist the key entries in
@@ -1119,18 +1125,144 @@ public abstract class KeyManager
   // Nested Classes -------------------------------------------------------------------------------
 
   /**
-   * Convenience class to hold keystore entry and its protection parameter as single entity in
-   * collections.
+   * Storage implementations for serializing and persisting private keys, public keys/certificates.
+   * <p>
+   *
+   * Supported storage formats are a selection of formats implemented by Sun's Java Cryptography
+   * Extensions (JCE) framework (included as part of Java SDK since version 6) and select
+   * keystore storage formats implemented by the BouncyCastle security library, release 1.50
+   * or later (unless removed in later versions). <p>
+   *
+   * More details of Sun/Oracle JCE storage formats can be found in http://bit.ly/1qlv8r4.
+   * BouncyCastle (release 1.50) keystore types are defined at
+   * http://www.bouncycastle.org/specifications.html
    */
-  private static class KeyStoreEntry
+  public enum Storage
   {
-    private KeyStore.Entry entry;
-    private KeyStore.ProtectionParameter protectionParameter;
 
-    private KeyStoreEntry(KeyStore.Entry entry, KeyStore.ProtectionParameter param)
+    // Sun JCE Provider Storage Formats -----------------------------------------------------------
+
+    /**
+     * PKCS #12 format. Used for storing asymmetric key pairs and X.509 public key certificates.
+     * Standardized format.
+     */
+    PKCS12,
+
+    /**
+     * A proprietary 'Java Keystore' storage format in Sun Java Cryptography Extension ('SunJCE')
+     * implementation. <p>
+     *
+     * This implementation uses password based encryption with Triple DES. Additional
+     * documentation in http://bit.ly/1qybZE9  <p>
+     *
+     * Can be used for storing symmetric keys, asymmetric key pairs and their associated
+     * certificates.
+     */
+    JCEKS,
+
+
+    // BouncyCastle Provider Storage Formats ------------------------------------------------------
+
+    /**
+     * BouncyCastle keystore format which is roughly equivalent to Sun's 'JKS' keystore format
+     * and implementation, and therefore can be used with the standard Java SDK 'keytool'. <p>
+     *
+     * This format is resistant to tampering but not resistant to inspection, therefore in
+     * typical cases the {@link #UBER} storage format is recommended.
+     */
+    BKS(SecurityProvider.BC),
+
+    /**
+     * Recommended BouncyCastle keystore format. Requires password verification and is
+     * resistant to inspection and tampering.
+     */
+    UBER(SecurityProvider.BC);
+
+
+
+    // Instance Fields ----------------------------------------------------------------------------
+
+    /**
+     * Reference to the security provider with the implementation of the storage. Can be null
+     * if no specific provider is used (relying on already installed security providers in the
+     * JVM).
+     */
+    private SecurityProvider provider = null;
+
+
+    // Constructors -------------------------------------------------------------------------------
+
+    /**
+     * Constructs a new storage instance without specific security provider.
+     */
+    private Storage()
     {
-      this.entry = entry;
-      this.protectionParameter = param;
+      // no op
+    }
+
+    /**
+     * Constructs a new storage instance linked to a specific security provider.
+     *
+     * @param provider
+     *            security provider
+     */
+    private Storage(SecurityProvider provider)
+    {
+      this.provider = provider;
+    }
+
+
+    // Public Instance Methods --------------------------------------------------------------------
+
+
+    /**
+     * Returns the name of this storage type. <p>
+     *
+     * For Sun JCE provider implemented storage formats, the standard names are defined in
+     * Java security guide: http://bit.ly/1rjfUEI <p>
+     *
+     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
+     *
+     * @return  key storage name / format string
+     */
+    public String getStorageName()
+    {
+      return name();
+    }
+
+    /**
+     * Returns the security provider instance associated with this storage implementation. Can
+     * return a null if no specific security provider has been associated with the storage
+     * instance.
+     *
+     * @return    security provider instance associated with the storage instance or null if
+     *            no specific provider is used
+     */
+    public Provider getSecurityProvider()
+    {
+      return (provider == null)
+          ? null
+          : provider.getProviderInstance();
+    }
+
+
+    // Object Overrides ---------------------------------------------------------------------------
+
+    /**
+     * Returns the name of this storage type. <p>
+     *
+     * For Sun JCE provider implemented storage formats, the standard names are defined in
+     * Java security guide: http://bit.ly/1rjfUEI <p>
+     *
+     * BouncyCastle storage names are defined in BouncyCastle provider documentation.
+     *
+     * @see #getStorageName
+     *
+     * @return  key storage name / format string
+     */
+    @Override public String toString()
+    {
+      return getStorageName();
     }
   }
 

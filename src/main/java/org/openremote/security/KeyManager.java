@@ -586,15 +586,28 @@ public abstract class KeyManager
    * if desired.
    *
    * @param keyAlias
-   *            A lookup name of the keystore entry to be removed.
+   *            A lookup name of the key entry to be removed.
    *
    * @return    true if key was removed, false otherwise
    */
   protected boolean remove(String keyAlias)
   {
-    KeyStoreEntry entry = keyEntries.remove(keyAlias);
+    try
+    {
+      keystore.deleteEntry(keyAlias);
 
-    return entry != null;
+      return true;
+    }
+
+    catch (KeyStoreException exception)
+    {
+      securityLog.error(
+          "Unable to remove key alias '{0}' : {1}", exception,
+          keyAlias, exception.getMessage()
+      );
+
+      return false;
+    }
   }
 
 

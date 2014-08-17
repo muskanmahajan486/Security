@@ -477,57 +477,23 @@ public abstract class KeyManager
 
 
   /**
-   * Stores the keys in this key manager in a secure keystore format. This implementation generates
-   * an in-memory keystore that is not backed by a persistent storage.
+   * Loads existing, persisted key store contents into this instance. Any previous keys in this
+   * key manager instance are overridden. <p>
    *
-   * @param password
-   *            A secret password used to access the keystore contents. Note that the character
-   *            array will be set to zero bytes when this method completes.
-   *
-   * @return    An in-memory keystore instance.
-   *
-   * @throws ConfigurationException
-   *              if the configured security provider(s) do not contain implementation for the
-   *              required keystore type
-   *
-   * @throws KeyManagerException
-   *            if the keystore creation fails for any reason
-   */
-  protected KeyStore save(char[] password) throws ConfigurationException, KeyManagerException
-  {
-    try
-    {
-      KeyStore keystore = createKeyStore();
-
-      return save(keystore, new ByteArrayOutputStream(), password);
-    }
-
-    finally
-    {
-      // TODO : push the password clearing responsibility to subclasses...
-
-      if (password != null)
-      {
-        for (int i = 0; i < password.length; ++i)
-        {
-          password[i] = 0;
-        }
-      }
-    }
-  }
-
-  /**
-   * Loads an existing keystore from a file URI.
-   *
+   * IMPORTANT NOTE: Subclasses that invoke this method should clear the password character array
+   *                 as soon as it is no longer needed. This prevents passwords from lingering
+   *                 in JVM memory pool any longer than is necessary. Use the
+   *                 {@link #clearPassword(char[])} method for this purpose.
    *
    * @param uri
-   *              file URI pointing to the location of the keystore to load
+   *              URI with file scheme pointing to the file system location of the keystore
+   *              to load
    *
    * @param keystorePassword
    *              The password to access the keystore. Note that the subclasses invoking this
    *              method are responsible for resetting the password character array after use.
    *
-   * @return      The loaded keystore instance.
+   * @see #clearPassword(char[])
    *
    * @throws ConfigurationException
    *              if the configured security provider(s) do not contain implementation for the
@@ -536,35 +502,16 @@ public abstract class KeyManager
    * @throws KeyManagerException
    *              if loading the keystore fails
    */
-  protected KeyStore load(URI uri, char[] keystorePassword)
-      throws ConfigurationException, KeyManagerException
+  protected void load(URI uri, char[] keystorePassword) throws KeyManagerException
   {
     if (uri == null)
     {
       throw new KeyManagerException("Implementation Error: null file URI.");
     }
 
-    return instantiateKeyStore(uri, keystorePassword);
+    loadKeyStore(new File(uri), keystorePassword);
   }
 
-  /**
-   * Creates an in-memory, non-persistent keystore.
-   *
-   * @return    in-memory keystore instance
-   *
-   * @throws ConfigurationException
-   *            if the configured security provider(s) do not contain implementation for the
-   *            required keystore type
-   *
-   * @throws KeyManagerException
-   *            if creating the keystore fails
-   */
-  protected KeyStore createKeyStore() throws ConfigurationException, KeyManagerException
-  {
-    // TODO : the keystore instance should be managed by this instance, relieving the subclasses from the responsiblity
-
-    return getKeyStore(null, null, storage);
-  }
 
   /**
    * Adds a key entry to this instance. Use {@link #save(URI, char[])} to persist

@@ -56,7 +56,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Abstract superclass with a shared implementation to handle keystore based operations.
+ * This is an abstract base class for managing and storing key material. It is useful for
+ * both generating keys (and associated certificates if desired) as well as optionally
+ * persisting keys and key certificates on filesystem using secure keystores.  <p>
+ *
+ * This abstract implementation contains several operations that the subclasses may or may not
+ * choose to expose as part of their public API. If a subclass wants to expose a method
+ * implementation as part of public API, it should create a public method that invokes one of
+ * the protected methods in this class. Some of the method implementations in this class may
+ * be unnecessarily generic to expose in API as-is, and therefore it may make sense to create
+ * a more use-case specific method signatures in each subclass. For examples of protected
+ * methods, see {@link #save(java.net.URI, char[])}, {@link #load(java.net.URI, char[])},
+ * {@link #add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)},
+ * {@link #remove(String)}. <p>
+ *
+ * For examples of subclasses that may expose parts of this class protected API, see
+ * {@link PasswordManager}, {@link PrivateKeyManager} classes.
+ *
+ * @see #save(java.net.URI, char[])
+ * @see #load(java.net.URI, char[])
+ * @see #add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
+ * @see #remove(String)
+ * @see PasswordManager
+ * @see PrivateKeyManager
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */

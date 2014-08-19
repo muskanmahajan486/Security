@@ -87,6 +87,14 @@ public abstract class KeyManager
   public final static SecurityProvider DEFAULT_SECURITY_PROVIDER = SecurityProvider.BC;
 
 
+  /**
+   * If no key-specific password is set for stored keys, use this default empty password instead.
+   * Note, most keystore implementations don't allow passing a null password protection parameters
+   * for keys, and some (e.g. BouncyCastle UBER) do not allow empty passwords (empty char arrays)
+   * either.
+   */
+  public static final char[] EMPTY_KEY_PASSWORD = new char[] { '0' };
+
 
   /**
    * ASN.1 OID for NSA / NIST standard curve P-521. This is equivalent to SEC 2 prime curve
@@ -536,7 +544,7 @@ public abstract class KeyManager
 
     if (param == null)
     {
-      param = new KeyStore.PasswordProtection(new char[] {});
+      param = new KeyStore.PasswordProtection(EMPTY_KEY_PASSWORD);
     }
 
     if (entry instanceof KeyStore.TrustedCertificateEntry)
@@ -1406,7 +1414,7 @@ public abstract class KeyManager
     }
   }
 
-  
+
   /**
    * Exception type for the public API of this class to indicate errors.
    */

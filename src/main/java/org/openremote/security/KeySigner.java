@@ -33,7 +33,7 @@ import org.openremote.base.exception.OpenRemoteException;
 
 /**
  * Allows for a X.509 certificate builder plugin to be attached to
- * {@link AsymmetricKeyManager} implementation.
+ * {@link PrivateKeyManager} implementation.
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */

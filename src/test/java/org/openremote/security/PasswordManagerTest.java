@@ -167,7 +167,7 @@ public class PasswordManagerTest
 
       // Create an existing keystore...
 
-      AsymmetricKeyManager keys = AsymmetricKeyManager.create();
+      PrivateKeyManager keys = PrivateKeyManager.create();
       Certificate cert = keys.createSelfSignedKey(
           "bar", new char[] {'0'}, new BouncyCastleKeySigner(), "test"
       );
@@ -1232,7 +1232,7 @@ public class PasswordManagerTest
       File file = new File(uri);
       file.deleteOnExit();
 
-      AsymmetricKeyManager mgr = AsymmetricKeyManager.create();
+      PrivateKeyManager mgr = PrivateKeyManager.create();
 
       mgr.createSelfSignedKey(
           "test", new char[] { 'a' }, new BouncyCastleKeySigner(), "test"

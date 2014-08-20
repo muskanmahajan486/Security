@@ -43,7 +43,7 @@ import org.openremote.base.exception.OpenRemoteException;
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class AsymmetricKeyManager extends KeyManager
+public class PrivateKeyManager extends KeyManager
 {
 
   // Constants ------------------------------------------------------------------------------------
@@ -168,8 +168,8 @@ public class AsymmetricKeyManager extends KeyManager
 
     /**
      * RSA signature/cipher algorithm with key size as specified in
-     * {@link AsymmetricKeyManager#DEFAULT_RSA_KEY_SIZE} and public exponent value as defined in
-     * {@link AsymmetricKeyManager#DEFAULT_RSA_PUBLIC_EXPONENT}.  <p>
+     * {@link PrivateKeyManager#DEFAULT_RSA_KEY_SIZE} and public exponent value as defined in
+     * {@link PrivateKeyManager#DEFAULT_RSA_PUBLIC_EXPONENT}.  <p>
      *
      * Note the developments in solving the discrete logarithm problem (see http://bit.ly/1cRMTak)
      * and the increasing RSA key sizes that impact performance. For these reasons, elliptic
@@ -220,9 +220,9 @@ public class AsymmetricKeyManager extends KeyManager
    *
    * @return    key manager instance
    */
-  public static AsymmetricKeyManager create()
+  public static PrivateKeyManager create()
   {
-    return new AsymmetricKeyManager();
+    return new PrivateKeyManager();
   }
 
 
@@ -231,7 +231,7 @@ public class AsymmetricKeyManager extends KeyManager
   /**
    * Internal constructor to be used by the static builder methods.
    */
-  private AsymmetricKeyManager()
+  private PrivateKeyManager()
   {
     super();
   }

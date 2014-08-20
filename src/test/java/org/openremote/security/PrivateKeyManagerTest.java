@@ -39,11 +39,11 @@ import org.testng.annotations.Test;
 
 
 /**
- * Unit tests for {@link AsymmetricKeyManager} class.
+ * Unit tests for {@link PrivateKeyManager} class.
  *
  * @author <a href="mailto:juha@openremote.org">Juha Lindfors</a>
  */
-public class AsymmetricKeyManagerTest
+public class PrivateKeyManagerTest
 {
 
   /**
@@ -56,7 +56,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
     String alias = "mykey";
 
-    AsymmetricKeyManager keyManager = AsymmetricKeyManager.create();
+    PrivateKeyManager keyManager = PrivateKeyManager.create();
 
     Certificate cert1 = keyManager.createSelfSignedKey(
         alias, keypassword, new BouncyCastleKeySigner(), "testIssuer"
@@ -83,7 +83,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword2 = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', '2' };
     String alias2 = "mykey2";
 
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     Certificate cert2 = keystore.createSelfSignedKey(
         alias2, keypassword2, new BouncyCastleKeySigner(), "testIssuer"
@@ -128,7 +128,7 @@ public class AsymmetricKeyManagerTest
   {
     String alias2 = "mykey2";
 
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     Certificate cert = keystore.createSelfSignedKey(
         alias2, null, new BouncyCastleKeySigner(), "testInMemoryKeyStore"
@@ -145,7 +145,7 @@ public class AsymmetricKeyManagerTest
    */
   @Test public void testNullKey() throws Exception
   {
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
@@ -169,7 +169,7 @@ public class AsymmetricKeyManagerTest
    */
   @Test public void testEmptyKey() throws Exception
   {
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
@@ -196,7 +196,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'a', 'b', 'c' };
     String alias2 = "mykey2243";
 
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
@@ -229,7 +229,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
     String alias2 = "mykey5221";
 
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
@@ -261,7 +261,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
     String alias2 = "mykey5221";
 
-    AsymmetricKeyManager keystore = AsymmetricKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
@@ -296,7 +296,7 @@ public class AsymmetricKeyManagerTest
     char[] keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
     String alias1 = "key1";
 
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
+    PrivateKeyManager keyMgr = PrivateKeyManager.create();
 
     Certificate cert1 = keyMgr.createSelfSignedKey(
         alias1, keypassword1, new BouncyCastleKeySigner(), "testIssuer"
@@ -339,7 +339,7 @@ public class AsymmetricKeyManagerTest
     Assert.assertTrue(cert.equals(cert2));
     Assert.assertTrue(cert.getPublicKey().equals(cert2.getPublicKey()));
     Assert.assertTrue(cert.getPublicKey() instanceof ECPublicKey);
-    Assert.assertTrue(cert.getPublicKey().getAlgorithm().equals(AsymmetricKeyManager.KeyAlgorithm.EC.name()));
+    Assert.assertTrue(cert.getPublicKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
 
     String alias = keystore.getCertificateAlias(cert1);
 
@@ -381,7 +381,7 @@ public class AsymmetricKeyManagerTest
 
     Assert.assertTrue(entry.getPrivateKey() != null);
     Assert.assertTrue(entry.getPrivateKey() instanceof ECPrivateKey);
-    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(AsymmetricKeyManager.KeyAlgorithm.EC.name()));
+    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
 
     keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
 
@@ -392,7 +392,7 @@ public class AsymmetricKeyManagerTest
 
     Assert.assertTrue(entry.getPrivateKey() != null);
     Assert.assertTrue(entry.getPrivateKey() instanceof ECPrivateKey);
-    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(AsymmetricKeyManager.KeyAlgorithm.EC.name()));
+    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
   }
 
 
@@ -404,7 +404,7 @@ public class AsymmetricKeyManagerTest
   @Test public void testInMemoryKeystoreOperations() throws Exception
   {
 
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
+    PrivateKeyManager keyMgr = PrivateKeyManager.create();
 
     // Add two keys...
 
@@ -536,7 +536,7 @@ public class AsymmetricKeyManagerTest
    */
   @Test public void testFileKeyStore() throws Exception
   {
-    AsymmetricKeyManager keyMgr = AsymmetricKeyManager.create();
+    PrivateKeyManager keyMgr = PrivateKeyManager.create();
 
     char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
     String alias1 = "key1";
@@ -560,7 +560,7 @@ public class AsymmetricKeyManagerTest
       Assert.assertTrue(c == 0);
     }
 
-    KeyStore loadStore = KeyStore.getInstance(AsymmetricKeyManager.StorageType.PKCS12.name());
+    KeyStore loadStore = KeyStore.getInstance(PrivateKeyManager.StorageType.PKCS12.name());
 
     storePW = new char[] { 'f', 'o', 'o'};
     loadStore.load(new BufferedInputStream(new FileInputStream(f)), storePW);
@@ -577,28 +577,28 @@ public class AsymmetricKeyManagerTest
   @Test public void testKeyAlgorithmNames()
   {
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.EC.name().equals(AsymmetricKeyManager.KeyAlgorithm.EC.toString())
+        PrivateKeyManager.KeyAlgorithm.EC.name().equals(PrivateKeyManager.KeyAlgorithm.EC.toString())
     );
 
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.EC.toString().equals(AsymmetricKeyManager.KeyAlgorithm.EC.getAlgorithmName())
+        PrivateKeyManager.KeyAlgorithm.EC.toString().equals(PrivateKeyManager.KeyAlgorithm.EC.getAlgorithmName())
     );
 
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.EC.getAlgorithmName().equals(AsymmetricKeyManager.KeyAlgorithm.EC.name())
+        PrivateKeyManager.KeyAlgorithm.EC.getAlgorithmName().equals(PrivateKeyManager.KeyAlgorithm.EC.name())
     );
 
 
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.RSA.name().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.toString())
+        PrivateKeyManager.KeyAlgorithm.RSA.name().equals(PrivateKeyManager.KeyAlgorithm.RSA.toString())
     );
 
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.RSA.toString().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.getAlgorithmName())
+        PrivateKeyManager.KeyAlgorithm.RSA.toString().equals(PrivateKeyManager.KeyAlgorithm.RSA.getAlgorithmName())
     );
 
     Assert.assertTrue(
-        AsymmetricKeyManager.KeyAlgorithm.RSA.getAlgorithmName().equals(AsymmetricKeyManager.KeyAlgorithm.RSA.name())
+        PrivateKeyManager.KeyAlgorithm.RSA.getAlgorithmName().equals(PrivateKeyManager.KeyAlgorithm.RSA.name())
     );
 
   }

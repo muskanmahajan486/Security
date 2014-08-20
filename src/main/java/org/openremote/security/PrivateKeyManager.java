@@ -20,18 +20,14 @@
  */
 package org.openremote.security;
 
+import java.net.URI;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.AlgorithmParameterSpec;
+import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.Certificate;
-import java.math.BigInteger;
 
-import org.openremote.base.exception.OpenRemoteException;
+import org.openremote.security.provider.BouncyCastleKeySigner;
 
 
 /**
@@ -49,193 +45,132 @@ public class PrivateKeyManager extends KeyManager
   // Constants ------------------------------------------------------------------------------------
 
   /**
-   * ASN.1 OID for NSA / NIST standard curve P-521. This is equivalent to SEC 2 prime curve
-   * "secp521r1". OID = {@value}
-   */
-  public final static String ASN_OID_STD_CURVE_NSA_NIST_P521 = "1.3.132.0.35";
-
-  /**
-   * ASN.1 OID for NSA / NIST standard curve P-384. This is equivalent to SEC 2 prime curve
-   * "secp384r1". OID = {@value}
-   */
-  public final static String ASN_OID_STD_CURVE_NSA_NIST_P384 = "1.3.132.0.34";
-
-  /**
-   * ASN.1 OID for NSA / NIST standard curve P-256. This is equivalent to SEC 2 prime curve
-   * "secp256r1" and ANSI X9.62 "prime256v1". OID = {@value}
-   */
-  public final static String ASN_OID_STD_CURVE_NSA_NIST_P256 = "1.2.840.10045.3.1.7";
-
-
-  /**
    * The default key algorithm used when generating self-signed key pairs : {@value}
    */
-  public final static KeyAlgorithm DEFAULT_SELF_SIGNED_KEY_ALGORITHM = KeyAlgorithm.EC;
+  public static final AsymmetricKeyAlgorithm DEFAULT_SELF_SIGNED_KEY_ALGORITHM =
+      AsymmetricKeyAlgorithm.EC;
+
+  public static final String DEFAULT_SELF_SIGNED_KEY_ISSUER = "OpenRemote, Inc.";
 
 
-  /**
-   * RSA key size : {@value} <p>
-   *
-   * This is recommended asymmetric RSA key size for classified, secret data, as per NSA Suite B.
-   */
-  public final static int DEFAULT_RSA_KEY_SIZE = 3072;
-
-  /**
-   * Public exponent value used in RSA algorithm (increase impacts performance): {@value}
-   *
-   * @see java.security.spec.RSAKeyGenParameterSpec#F4
-   */
-  public final static BigInteger DEFAULT_RSA_PUBLIC_EXPONENT = RSAKeyGenParameterSpec.F4;
-
-
-
-  // Enums ----------------------------------------------------------------------------------------
-
-
-  /**
-   * Algorithms for generating asymmetric key pairs, as defined in the document:
-   * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator <p>
-   *
-   * Elliptic curve algorithms should be favored for any new implementations that require long
-   * term, persistent signature keys. DSA is not included as an option and RSA is included to
-   * support existing systems, if necessary (see http://bit.ly/1cRMTak for RSA developments). <p>
-   *
-   * It is worth noting that there currently exists quite a bit of debate around the quality
-   * and safety properties of many standard curve specifications typically used with ECC.
-   * Much of the discussion can be followed via Safecurves website at
-   * http://safecurves.cr.yp.to/index.html.  <p>
-   *
-   * In particular, the curve specifications originating from NSA / NIST are under criticism
-   * for couple of different reasons. One critique is the unexplained seed values that were
-   * used to generate the curves, articulated as one of the motivations for creating
-   * ECC Brainpool standard curves described here: http://bit.ly/1caBYF4   <p>
-   *
-   * In addition to the unclear seed value motivation, the NSA / NIST curve properties are
-   * criticized for their difficult to implement properties and some safety weaknesses. Some
-   * of these arguments are detailed in the presentation here: http://bit.ly/1eG1mYh
-   */
-  public enum KeyAlgorithm
-  {
-
-    /**
-     * The default configurations for typical EC providers (i.e. SunEC provider included in Java 7
-     * and BouncyCastle provider) often use standard named curves from NSA / NIST / ANSI X9.62 /
-     * SECG. This implementation currently defaults to those standard curves but safer curves
-     * should be adopted as soon as they're made available as named curves in the security
-     * providers. BouncyCastle provider for example may be adding a safer curve 'Curve25519' for
-     * example which should be used once available (see discussion here: http://bit.ly/1akHyrX). <p>
-     *
-     * With the default configuration, the BouncyCastle (release 1.5.0) provider will use the
-     * following curves:
-     *
-     * <ul>
-     *  <li>192-bit - NSA / NIST P-192 / ANSI X9.62 (named curve "prime192v1")</li>
-     *  <li>224-bit - NSA / NIST P-224 / ANSI X9.62 (named curve "P-224")</li>
-     *  <li>239-bit - ANSI X9.62 (named curve "prime239v1")</li>
-     *  <li>256-bit - NSA / NIST P-256 / ANSI X9.62 (named curve "prime256v1")</li>
-     *  <li>384-bit - NSA / NIST P-384 (named curve "P-384")</li>
-     *  <li>521-bit - NSA / NIST P-521 (named curve "P-521")</li>
-     * </ul>
-     *
-     * When no named curve is specified, the 239-bit curve (ANSI X9.62 prime239v1) is used.
-     *
-     * The SunCE provider (OpenJDK 7) will use following curves:
-     *
-     * <ul>
-     * <li>192-bit - NSA / NIST P-192 (ASN.1 OID 1.2.840.10045.3.1.1)</li>
-     * <li>224-bit - NSA / NIST P-224 (ASN.1 OID 1.3.132.0.33)</li>
-     * <li>239-bit - ANSI x9.62 prime239v1</li>
-     * <li>256-bit - NSA / NIST P-256 (ASN.1 OID 1.2.840.10045.3.1.7)</li>
-     * <li>384-bit - NSA / NIST P-384 (ASN.1 OID 1.3.132.0.34)</li>
-     * <li>521-bit - NSA / NIST P-521 (ASN.1 OID 1.3.132.0.35)</li>
-     * </ul>
-     *
-     * When no named curve is specified, the 256-bit curve (NSA / NIST P-256) is used. Sun EC provider
-     * includes also some shorter bit length curves which should not be used and some other bit
-     * lengths above 256 bits not listed here but which are also defined by NSA / NIST.  <p>
-     *
-     * The 256-bit curve corresponding to 3072-bit asymmetric RSA key strength in combination
-     * with 128-bit symmetric AES keys and SHA-2 256-bit message digests are considered adequate
-     * for classified information up to secret level (as per NSA Suite B recommendation). Keys
-     * with lower strength should not be used.<p>
-     *
-     * The 384-bit curve corresponds to 7680-bit asymmetric RSA key strength and should be used
-     * in combination with 256-bit symmetric AES keys and 384-bit SHA-2 hash. This level of
-     * security is currently estimated to be secure beyond year 2030 and can be used for
-     * classified information up to top secret level as per NSA suite B recommendation. <p>
-     */
-    EC(new ECGenParameterSpec(ASN_OID_STD_CURVE_NSA_NIST_P521)),
-
-    /**
-     * RSA signature/cipher algorithm with key size as specified in
-     * {@link PrivateKeyManager#DEFAULT_RSA_KEY_SIZE} and public exponent value as defined in
-     * {@link PrivateKeyManager#DEFAULT_RSA_PUBLIC_EXPONENT}.  <p>
-     *
-     * Note the developments in solving the discrete logarithm problem (see http://bit.ly/1cRMTak)
-     * and the increasing RSA key sizes that impact performance. For these reasons, elliptic
-     * curves should be preferred.
-     */
-    RSA(new RSAKeyGenParameterSpec(DEFAULT_RSA_KEY_SIZE, DEFAULT_RSA_PUBLIC_EXPONENT));
-
-    /**
-     * Key generator algorithm configuration parameters.
-     */
-    private AlgorithmParameterSpec spec;
-
-    private KeyAlgorithm(AlgorithmParameterSpec spec)
-    {
-      this.spec = spec;
-    }
-
-    /**
-     * Returns the algorithm's standard name, see
-     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
-     *
-     * @see #getAlgorithmName()
-     *
-     * @return asymmetric key algorithm standard name
-     */
-    @Override public String toString()
-    {
-      return getAlgorithmName();
-    }
-
-    /**
-     * Returns the algorithm's standard name, see
-     * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator
-     *
-     * @return asymmetric key algorithm standard name
-     */
-    public String getAlgorithmName()
-    {
-      return name();
-    }
-  }
+  private static final KeySigner keySigner = new BouncyCastleKeySigner();
 
 
   // Class Members --------------------------------------------------------------------------------
 
   /**
-   * Creates a new asymmetric key manager.
+   * Creates a new private key manager.
    *
    * @return    key manager instance
+   *
+   * @throws    ConfigurationException if creating private key manager fails, e.g. the requested
+   *            keystore algorithm is not found with the installed security providers.
    */
-  public static PrivateKeyManager create()
+  public static PrivateKeyManager create() throws ConfigurationException
   {
-    return new PrivateKeyManager();
+    return create(DEFAULT_KEYSTORE_STORAGE);
   }
+
+  /**
+   * Creates a new private key manager with a given storage format.
+   *
+   * @param  storage
+   *            the desired key storage format
+   *
+   * @return    key manager instance
+   *
+   * @throws    ConfigurationException if creating private key manager fails, e.g. the requested
+   *            keystore algorithm is not found with the installed security providers.
+   */
+  public static PrivateKeyManager create(Storage storage) throws ConfigurationException
+  {
+    try
+    {
+      return new PrivateKeyManager(storage, storage.getSecurityProvider());
+    }
+
+    catch (KeyManagerException exception)
+    {
+      throw new ConfigurationException(
+          "Could not create private key manager : {0}", exception,
+          exception.getMessage()
+      );
+    }
+  }
+
+  public static PrivateKeyManager create(Storage storage, SecurityProvider provider)
+      throws ConfigurationException
+  {
+    try
+    {
+      return new PrivateKeyManager(storage, provider.getProviderInstance());
+    }
+
+    catch (KeyManagerException exception)
+    {
+      throw new ConfigurationException(
+          "Could not create private key manager : {0}", exception,
+          exception.getMessage()
+      );
+    }
+  }
+
+  public static PrivateKeyManager create(URI keyStoreLocation, char[] masterPassword)
+      throws ConfigurationException
+  {
+    return create(keyStoreLocation, masterPassword, DEFAULT_KEYSTORE_STORAGE);
+  }
+
+  public static PrivateKeyManager create(URI keyStoreLocation, char[] masterPassword,
+                                         Storage storage) throws ConfigurationException
+  {
+    try
+    {
+      return new PrivateKeyManager(keyStoreLocation, masterPassword, storage);
+    }
+
+    catch (KeyManagerException exception)
+    {
+      throw new ConfigurationException(
+          "Could not create private key manager : {0}", exception,
+          exception.getMessage()
+      );
+    }
+  }
+
+
+
+  // Private Instance Fields ----------------------------------------------------------------------
+
+  /**
+   * Location of the keystore, if persisted.
+   */
+  private URI keystoreLocation = null;
 
 
   // Constructors ---------------------------------------------------------------------------------
 
+  private PrivateKeyManager(Storage storage, SecurityProvider provider)
+      throws KeyManagerException
+  {
+    this(storage, provider.getProviderInstance());
+  }
+
   /**
    * Internal constructor to be used by the static builder methods.
    */
-  private PrivateKeyManager()
+  private PrivateKeyManager(Storage storage, Provider provider) throws KeyManagerException
   {
-    super();
+    super(storage, provider);
   }
 
+  private PrivateKeyManager(URI keyStoreLocation, char[] masterPassword, Storage storage)
+      throws KeyManagerException
+  {
+    super(keyStoreLocation, masterPassword, storage);
+
+    this.keystoreLocation = keyStoreLocation;
+  }
 
   // Public Instance Methods ----------------------------------------------------------------------
 

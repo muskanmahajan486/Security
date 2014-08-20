@@ -237,77 +237,55 @@ public class PrivateKeyManager extends KeyManager
       {
         keyProtection = null;
       }
-    }
-  }
 
+      add(keyName, privateKeyEntry, keyProtection);
 
-  // Private Instance Methods ---------------------------------------------------------------------
-
-  /**
-   * Generates a new asymmetric key pair using the given algorithm and algorithm parameters.
-   *
-   * @param keyAlgo
-   *            algorithm for the key generator
-   *
-   * @return generated key pair
-   *
-   * @throws KeyGeneratorException
-   *            in case any errors in key generation
-   */
-  private KeyPair generateKey(KeyAlgorithm keyAlgo) throws KeyGeneratorException
-  {
-    try
-    {
-      KeyPairGenerator keyGen;
-
-      // TODO :
-      //        move keypair generator instance retrieval and KeyAlgorithm enum to
-      //        superclass (rename to AsymmetricKeyAlgorithm)
-
-      if (getSecurityProvider() == null)
+      if (keystoreLocation != null)
       {
-        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName());
+          save(keystoreLocation, masterPassword);
       }
 
-      else
-      {
-        keyGen = KeyPairGenerator.getInstance(keyAlgo.getAlgorithmName(), getSecurityProvider());
-      }
-
-      keyGen.initialize(keyAlgo.spec);
-
-      return keyGen.generateKeyPair();
+      return certificate;
     }
 
-    catch (InvalidAlgorithmParameterException e)
+    catch (KeySigner.SigningException exception)
     {
-      throw new KeyGeneratorException(
-          "Invalid algorithm parameter in {0} : {1}", e, keyAlgo, e.getMessage()
+      throw new KeyManagerException(
+          "Key signing failed: {0}", exception,
+          exception.getMessage()
       );
     }
 
-    catch (NoSuchAlgorithmException e)
+    finally
     {
-      throw new KeyGeneratorException(
-          "No security provider found for {0} : {1}", e, keyAlgo, e.getMessage()
-      );
+      clearPassword(masterPassword);
     }
   }
 
 
-  // Nested Classes -------------------------------------------------------------------------------
-
-  /**
-   * Specific (internal -- shows up as root cause) exception type for asymmetric
-   * key pair generation.
-   */
-  public static class KeyGeneratorException extends OpenRemoteException
+  public PrivateKey getKey(String alias) throws KeyManagerException
   {
-    private KeyGeneratorException(String msg, Throwable cause, Object... params)
+    return getKey(alias, EMPTY_KEY_PASSWORD);
+  }
+
+  public PrivateKey getKey(String alias, char[] password) throws KeyManagerException
+  {
+    KeyStore.Entry entry = retrieveKey(alias, new KeyStore.PasswordProtection(password));
+
+    if (entry instanceof KeyStore.PrivateKeyEntry)
     {
-      super(msg, cause, params);
+      KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)entry;
+
+      return privateKeyEntry.getPrivateKey();
+    }
+
+    else
+    {
+      throw new KeyManagerException("Key alias '{0}' is not a private key entry.");
     }
   }
+
+
 
 }
 

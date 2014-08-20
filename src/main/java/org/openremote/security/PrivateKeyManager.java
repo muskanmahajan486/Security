@@ -174,98 +174,68 @@ public class PrivateKeyManager extends KeyManager
 
   // Public Instance Methods ----------------------------------------------------------------------
 
-  /**
-   * Creates an asymmetric key pair and associated self-signed X.509 public key certificate. <p>
-   *
-   * The key generator algorithm and algorithm configuration parameters are defined in
-   * {@link #DEFAULT_SELF_SIGNED_KEY_ALGORITHM}. <p>
-   *
-   * The self-signed public key X.509 certificate builder is given as a method argument (this is
-   * currently not provided by standard Java security architecture providers).  The default
-   * configuration as specified in {@link KeySigner.Configuration#createDefault(String)}
-   * is used for validity period and signing the certificate.
-   *
-   * @param keyName
-   *            The key name 'alias' that is used to retrieve the key information from keystore
-   *
-   * @param keyPassword
-   *            A secret password used to retrieve the key from the keystore. Note that the
-   *            character array is reset to zero bytes when this method completes.
-   *
-   * @param signer
-   *            an implementation that provides a X.509 public certificate for the public key in
-   *            this asymmetric key pair
-   *
-   * @param issuerCommonName
-   *            a X.500 common name used in the certificate, note that the other name attributes
-   *            are fixed to the defaults as per the
-   *            {@link KeySigner.Configuration#createDefault(String)} implementation.
-   *
-   * @return  public key X.509 certificate for the generated asymmetric key pair
-   *
-   * @throws KeyManagerException
-   *            if key generation or certificate generation fails
-   */
-  public Certificate createSelfSignedKey(String keyName, char[] keyPassword,
-                                         KeySigner signer,
-                                         String issuerCommonName) throws KeyManagerException
+
+  public Certificate addKey(String keyName, char[] masterPassword) throws KeyManagerException
+  {
+    return addKey(
+        keyName, masterPassword,
+        DEFAULT_SELF_SIGNED_KEY_ALGORITHM,
+        DEFAULT_SELF_SIGNED_KEY_ISSUER
+    );
+  }
+
+  public Certificate addKey(String keyName, char[] masterPassword, String issuer)
+      throws KeyManagerException
+  {
+    return addKey(keyName, masterPassword, DEFAULT_SELF_SIGNED_KEY_ALGORITHM, issuer);
+  }
+
+  public Certificate addKey(String keyName, char[] masterPassword,
+                            AsymmetricKeyAlgorithm keyAlgorithm)
+      throws KeyManagerException
+  {
+    return addKey(keyName, masterPassword, keyAlgorithm, DEFAULT_SELF_SIGNED_KEY_ISSUER);
+  }
+
+
+  public Certificate addKey(String keyName, char[] masterPassword,
+                            AsymmetricKeyAlgorithm keyAlgorithm, String issuer)
+      throws KeyManagerException
   {
     try
     {
       if (keyName == null || keyName.equals(""))
       {
-        throw new KeyManagerException("Implementation error: Null or empty key alias is not allowed.");
-      }
-
-      if (signer == null)
-      {
-        throw new KeyManagerException("Implementation error: null certificate signer reference.");
-      }
-
-      if (issuerCommonName == null || issuerCommonName.equals(""))
-      {
-        throw new KeyManagerException("Implementation error: null or empty issuer name is not allowed.");
-      }
-
-      try
-      {
-        KeyPair keyPair = generateKey(DEFAULT_SELF_SIGNED_KEY_ALGORITHM);
-
-        Certificate certificate = signer.signPublicKey(
-            KeySigner.Configuration.createDefault(issuerCommonName)
+        throw new KeyManagerException(
+            "Implementation error: Null or empty key alias is not allowed."
         );
-
-        KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(
-            keyPair.getPrivate(),
-            new java.security.cert.Certificate[] { certificate }
-        );
-
-        add(keyName, privateKeyEntry, new KeyStore.PasswordProtection(keyPassword));
-
-        return certificate;
       }
 
-      catch (KeySigner.SigningException e)
-      {
-        throw new KeyManagerException("Certification creation failed : {0}", e, e.getMessage());
-      }
 
-      catch (KeyGeneratorException e)
-      {
-        throw new KeyManagerException("Key pair generation failed : {0}", e, e.getMessage());
-      }
-    }
+      // Generate key...
 
-    finally
-    {
-      // Clear the password on exit...
+      KeyPair keyPair = generateKey(keyAlgorithm);
 
-      if (keyPassword != null)
+
+      // Sign the public key to create a certificate...
+
+      Certificate certificate = keySigner.signPublicKey(
+          KeySigner.Configuration.createDefault(keyPair, issuer)
+      );
+
+
+      // Store the private key and public key + certificate in key store...
+
+      KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(
+          keyPair.getPrivate(),
+          new java.security.cert.Certificate[] { certificate }
+      );
+
+      KeyStore.PasswordProtection keyProtection = new KeyStore.PasswordProtection(masterPassword);
+
+      if (masterPassword == null || masterPassword.length == 0)
       {
-        for (int i = 0; i < keyPassword.length; ++i)
-        {
-          keyPassword[i] = 0;
-        }
+        keyProtection = null;
       }
     }
   }

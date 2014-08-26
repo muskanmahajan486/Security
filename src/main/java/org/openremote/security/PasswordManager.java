@@ -20,27 +20,15 @@
  */
 package org.openremote.security;
 
-import org.openremote.exception.OpenRemoteException;
+import org.openremote.base.exception.OpenRemoteException;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.security.UnrecoverableEntryException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
 
 
 /**
- * This is a password storage implementation using Java's keystore mechanism. It can
+ * This is a password storage implementation using Java's key store mechanism. It can
  * be used in cases where an asymmetric key challenge (normally preferred) based on
  * private key is not an option. <p>
  *
@@ -58,19 +46,13 @@ import java.util.Arrays;
 public class PasswordManager extends KeyManager
 {
 
+
   // Private Instance Fields ----------------------------------------------------------------------
 
   /**
    * Location of the keystore, if persisted.
    */
   private URI keystoreLocation = null;
-
-  /**
-   * The backing keystore instance.
-   *
-   * TODO : should push to super class
-   */
-  private KeyStore keystore = null;
 
 
   // Constructors ---------------------------------------------------------------------------------

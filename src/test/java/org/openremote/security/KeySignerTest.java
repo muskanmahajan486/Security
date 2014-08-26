@@ -97,16 +97,16 @@ public class KeySignerTest
   /**
    * Basic test to guard against empty issuer common names in configuration constructor.
    */
-  @Test public void testEmptyConfigurationIssuerName()
+  @Test public void testEmptyConfigurationIssuerName() throws Exception
   {
     try
     {
-      new KeySigner.Configuration("");
+      KeySigner.Configuration.createDefault(KeySignerTest.generateRSAKeyPair(), "");
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -115,13 +115,15 @@ public class KeySignerTest
   /**
    * Tests string trimming on provided issuer name.
    */
-  @Test public void testConfigurationIssuerNameTrimming()
+  @Test public void testConfigurationIssuerNameTrimming() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration("  foo  ");
+    KeySigner.Configuration config = KeySigner.Configuration.createDefault(
+        KeySignerTest.generateRSAKeyPair(), "  foo  "
+    );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
 
     // Check default signature algorithm...
@@ -160,16 +162,18 @@ public class KeySignerTest
   /**
    * Tests string trimming on provided issuer name and validity of 3 days.
    */
-  @Test public void testConfiguration2IssuerNameTrimming()
+  @Test public void testConfiguration2IssuerNameTrimming() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        KeySignerTest.generateRSAKeyPair(),
+        KeySigner.SignatureAlgorithm.SHA512_WITH_RSA,
         new KeySigner.Validity(3),
         "  foo  "
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
 
     // Check default signature algorithm...

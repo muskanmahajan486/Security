@@ -131,7 +131,7 @@ public class KeySignerTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-                KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+                KeySigner.DEFAULT_RSA_SIGNATURE_ALGORITHM)
     );
 
 
@@ -181,7 +181,7 @@ public class KeySignerTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.SignatureAlgorithm.SHA512_WITH_RSA)
     );
 
 
@@ -307,7 +307,7 @@ public class KeySignerTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.DEFAULT_RSA_SIGNATURE_ALGORITHM)
     );
 
 
@@ -356,7 +356,7 @@ public class KeySignerTest
     Assert.assertTrue(
         config.getSignatureAlgorithm()
             .equals(
-        KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM)
+        KeySigner.SignatureAlgorithm.SHA256_WITH_RSA)
     );
 
 
@@ -680,7 +680,8 @@ public class KeySignerTest
   @Test public void testExceptionConstructor()
   {
     Exception e = new KeySigner.SigningException(
-        "foo {0}", new Error("bar"), "acme");
+        "foo {0}", new Error("bar"), "acme"
+    );
 
     Assert.assertTrue(e.getCause() instanceof Error);
     Assert.assertTrue(e.getMessage().equals("foo acme"));

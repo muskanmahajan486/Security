@@ -20,9 +20,12 @@
  */
 package org.openremote.security;
 
+import org.openremote.base.exception.IncorrectImplementationException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +36,33 @@ import java.util.concurrent.TimeUnit;
  */
 public class KeySignerTest
 {
+  // Class Members --------------------------------------------------------------------------------
+
+  /**
+   * Public helper method for all tests to generate 2048 bit RSA key pair using default
+   * security providers.
+   */
+  public static KeyPair generateRSAKeyPair() throws Exception
+  {
+    return generateRSAKeyPair(2048);
+  }
+
+  /**
+   * Public helper method for all tests to generate RSA key pair using default security
+   * providers.
+   */
+  public static KeyPair generateRSAKeyPair(int bitlen) throws Exception
+  {
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+
+    keyGen.initialize(bitlen);
+
+    return keyGen.generateKeyPair();
+  }
+
+
+
+  // Tests ----------------------------------------------------------------------------------------
 
   /**
    * Basic test for setting the certificate issuer common name in configuration.

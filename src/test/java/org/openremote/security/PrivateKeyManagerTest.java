@@ -687,37 +687,46 @@ public class PrivateKeyManagerTest
    */
   @Test public void testFileKeyStore() throws Exception
   {
-    PrivateKeyManager keyMgr = PrivateKeyManager.create();
-
-    char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
-    String alias1 = "key1";
-
-    keyMgr.createSelfSignedKey(
-        alias1, keypassword, new BouncyCastleKeySigner(), "testIssuer"
-    );
-
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
-    f.deleteOnExit();
-
-    char[] storePW = new char[] { 'f', 'o', 'o'};
-
-    keyMgr.save(f.toURI(), storePW);
-
-    // Make sure the password is erased from memory after the API call...
-
-    for (char c : storePW)
+    try
     {
-      Assert.assertTrue(c == 0);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      PrivateKeyManager keyMgr = PrivateKeyManager.create(KeyManager.Storage.UBER);
+
+      // TODO : this is not a key password but a master password...
+      char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
+      String alias1 = "key1";
+
+      keyMgr.addKey(alias1, keypassword, "testIssuer");
+
+      File dir = new File(System.getProperty("user.dir"));
+      File f = new File(dir, "test.keystore." + UUID.randomUUID());
+      f.deleteOnExit();
+
+      char[] storePW = new char[] { 'f', 'o', 'o'};
+
+      keyMgr.save(f.toURI(), storePW);
+
+      // Make sure the password is erased from memory after the API call...
+
+      for (char c : storePW)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      KeyStore loadStore = KeyStore.getInstance(KeyManager.Storage.UBER.getStorageName());
+
+      storePW = new char[] { 'f', 'o', 'o'};
+      loadStore.load(new BufferedInputStream(new FileInputStream(f)), storePW);
+
+      Assert.assertTrue(loadStore.size() == 1);
+      Assert.assertTrue(loadStore.containsAlias("key1"));
     }
 
-    KeyStore loadStore = KeyStore.getInstance(PrivateKeyManager.StorageType.PKCS12.name());
-
-    storePW = new char[] { 'f', 'o', 'o'};
-    loadStore.load(new BufferedInputStream(new FileInputStream(f)), storePW);
-
-    Assert.assertTrue(loadStore.size() == 1);
-    Assert.assertTrue(loadStore.containsAlias("key1"));
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
   }
 
 

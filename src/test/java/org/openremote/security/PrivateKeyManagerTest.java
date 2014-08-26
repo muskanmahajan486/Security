@@ -348,13 +348,73 @@ public class PrivateKeyManagerTest
     catch (KeyManager.KeyManagerException e)
     {
       // expected....
-
-      for (char c : keypassword)
-      {
-        Assert.assertTrue(c == 0);
-      }
     }
   }
+
+//  /**
+//   * Test a certificate builder null reference.
+//   *
+//   * @throws Exception  if test fails for any reason
+//   */
+//  @Test public void testSelfSignedNullCertBuilder() throws Exception
+//  {
+//    char[] keypassword = new char[] { 'a', 'b', 'c' };
+//    String alias2 = "mykey2243";
+//
+//    PrivateKeyManager keystore = PrivateKeyManager.create();
+//
+//    try
+//    {
+//      keystore.createSelfSignedKey(
+//          alias2, keypassword, null, "testInMemoryKeyStore-2243"
+//      );
+//
+//      Assert.fail("should not get here...");
+//    }
+//
+//    catch (KeyManager.KeyManagerException e)
+//    {
+//      // expected....
+//
+//      for (char c : keypassword)
+//      {
+//        Assert.assertTrue(c == 0);
+//      }
+//    }
+//  }
+
+
+//  /**
+//   * Test a null issuer name.
+//   *
+//   * @throws Exception  if test fails for any reason
+//   */
+//  @Test public void testSelfSignedNullIssuerName() throws Exception
+//  {
+//    char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
+//    String alias2 = "mykey5221";
+//
+//    PrivateKeyManager keystore = PrivateKeyManager.create();
+//
+//    try
+//    {
+//      keystore.createSelfSignedKey(
+//          alias2, keypassword, new BouncyCastleKeySigner(), null
+//      );
+//
+//      Assert.fail("should not get here...");
+//    }
+//
+//    catch (KeyManager.KeyManagerException e)
+//    {
+//      // expected....
+//
+//      for (char c : keypassword)
+//      {
+//        Assert.assertTrue(c == 0);
+//      }
+//    }
+//  }
 
   /**
    * Test a empty string issuer name.

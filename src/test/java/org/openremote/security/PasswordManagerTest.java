@@ -459,14 +459,19 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordWrongPassword() throws Exception
   {
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "test-" + UUID.randomUUID());
-    file.deleteOnExit();
-
-    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
-
     try
     {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
+      // TODO : currently this sets a NEW password to the store...
+
       mgr.addPassword("test", new byte[] { '1' }, new char[] { 'c' });
 
       Assert.fail("should not get here...");
@@ -476,7 +481,13 @@ public class PasswordManagerTest
     {
       // expected...
     }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
   }
+
 
   /**
    * Tests error handling when adding password with a null alias.
@@ -520,14 +531,16 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordEmptyAlias() throws Exception
   {
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "test-" + UUID.randomUUID());
-    file.deleteOnExit();
-
-    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
-
     try
     {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
       mgr.addPassword("", new byte[] { '1' }, new char[] { 'c' });
 
       Assert.fail("should not get here...");
@@ -537,7 +550,13 @@ public class PasswordManagerTest
     {
       // expected...
     }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
   }
+
 
   /**
    * Tests addPassword() error handling when the given password is a null reference.
@@ -546,14 +565,17 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordNullPassword() throws Exception
   {
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "test-" + UUID.randomUUID());
-    file.deleteOnExit();
-
-    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
-
     try
     {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
       mgr.addPassword("test", null, new char[] { 'c' });
 
       Assert.fail("should not get here...");
@@ -562,6 +584,11 @@ public class PasswordManagerTest
     catch (KeyManager.KeyManagerException e)
     {
       // expected...
+    }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
     }
   }
 
@@ -594,14 +621,17 @@ public class PasswordManagerTest
    */
   @Test public void testAddPasswordNullMasterPassword() throws Exception
   {
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "test-" + UUID.randomUUID());
-    file.deleteOnExit();
-
-    PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
-
     try
     {
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
+
       mgr.addPassword("test", new byte[] { '0' }, null);
 
       Assert.fail("should not get here...");
@@ -611,7 +641,13 @@ public class PasswordManagerTest
     {
       // expected...
     }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
   }
+
 
   /**
    * Tests addPassword() error handling when the store master password is an empty character

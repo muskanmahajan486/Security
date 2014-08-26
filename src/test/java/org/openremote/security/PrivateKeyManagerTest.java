@@ -737,30 +737,41 @@ public class PrivateKeyManagerTest
   @Test public void testKeyAlgorithmNames()
   {
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.EC.name().equals(PrivateKeyManager.KeyAlgorithm.EC.toString())
+        KeyManager.AsymmetricKeyAlgorithm.EC.name()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.EC.toString())
     );
 
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.EC.toString().equals(PrivateKeyManager.KeyAlgorithm.EC.getAlgorithmName())
+        KeyManager.AsymmetricKeyAlgorithm.EC.toString()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.EC.getAlgorithmName())
     );
 
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.EC.getAlgorithmName().equals(PrivateKeyManager.KeyAlgorithm.EC.name())
+        KeyManager.AsymmetricKeyAlgorithm.EC.getAlgorithmName()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.EC.name())
     );
 
 
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.RSA.name().equals(PrivateKeyManager.KeyAlgorithm.RSA.toString())
+        KeyManager.AsymmetricKeyAlgorithm.RSA.name()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.RSA.toString())
     );
 
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.RSA.toString().equals(PrivateKeyManager.KeyAlgorithm.RSA.getAlgorithmName())
+        KeyManager.AsymmetricKeyAlgorithm.RSA.toString()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.RSA.getAlgorithmName())
     );
 
     Assert.assertTrue(
-        PrivateKeyManager.KeyAlgorithm.RSA.getAlgorithmName().equals(PrivateKeyManager.KeyAlgorithm.RSA.name())
+        KeyManager.AsymmetricKeyAlgorithm.RSA.getAlgorithmName()
+            .equals(
+        KeyManager.AsymmetricKeyAlgorithm.RSA.name())
     );
-
   }
 }
 

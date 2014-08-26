@@ -79,24 +79,35 @@ public class PasswordManagerTest
    */
   @Test public void testFileConstructor() throws Exception
   {
-    // Create an existing, empty keystore...
-
-    TestBKStore store = new TestBKStore();
-
-    File dir = new File(System.getProperty("user.dir"));
-    File file = new File(dir, "test.store-" + UUID.randomUUID());
-    file.deleteOnExit();
-
-    store.save(file.toURI(), new char[] { '0' });
-
-    char[] pw = new char[] { '0' };
-    PasswordManager mgr = new PasswordManager(file.toURI(), pw);
-
-    // check that password was erased....
-
-    for (Character c : pw)
+    try
     {
-      Assert.assertTrue(c == 0);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+
+      // Create an existing, empty keystore...
+
+      TestUBERStore store = new TestUBERStore();
+
+      File dir = new File(System.getProperty("user.dir"));
+      File file = new File(dir, "test.store-" + UUID.randomUUID());
+      file.deleteOnExit();
+
+      store.save(file.toURI(), new char[] { '0' });
+
+      char[] pw = new char[] { '0' };
+      PasswordManager mgr = new PasswordManager(file.toURI(), pw);
+
+      // check that password was erased....
+
+      for (Character c : pw)
+      {
+        Assert.assertTrue(c == 0);
+      }
+    }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
     }
   }
 
@@ -116,7 +127,7 @@ public class PasswordManagerTest
 
       // Create an existing keystore...
 
-      TestBKStore store = new TestBKStore();
+      TestUBERStore store = new TestUBERStore();
 
       File dir = new File(System.getProperty("user.dir"));
       File file = new File(dir, "test.store-" + UUID.randomUUID());
@@ -168,15 +179,13 @@ public class PasswordManagerTest
       // Create an existing keystore...
 
       PrivateKeyManager keys = PrivateKeyManager.create();
-      Certificate cert = keys.createSelfSignedKey(
-          "bar", new char[] {'0'}, new BouncyCastleKeySigner(), "test"
-      );
+      Certificate cert = keys.addKey("bar", new char[] {'0'}, "test");
 
       File dir = new File(System.getProperty("user.dir"));
       File file = new File(dir, "test.store-" + UUID.randomUUID());
       file.deleteOnExit();
 
-      TestBKStore store = new TestBKStore();
+      TestUBERStore store = new TestUBERStore();
       store.add(
           "foo",
           new KeyStore.TrustedCertificateEntry(cert),
@@ -383,11 +392,11 @@ public class PasswordManagerTest
 
       Assert.assertTrue(Arrays.equals(pw, new byte[] { '1' }));
 
-      TestBKStore store = new TestBKStore();
-      KeyStore ks = store.load(file.toURI(), new char[] { 'b' });
+      TestUBERStore store = new TestUBERStore();
+      store.load(file.toURI(), new char[] { 'b' });
 
-      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)ks.getEntry(
-          "test", new KeyStore.PasswordProtection(new char[] { 'b' })
+      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)store.retrieveKey(
+          "test", new KeyStore.PasswordProtection(new char[] {'b'})
       );
 
       Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { '1' }));
@@ -766,8 +775,8 @@ public class PasswordManagerTest
       mgr.addPassword("test1", new byte[] { '1' }, new char[] { 'b' });
       mgr.addPassword("test2", new byte[] { '2' }, new char[] { 'b' });
 
-      TestBKStore store = new TestBKStore();
-      KeyStore ks = store.load(uri, new char[] { 'b' });
+      TestUBERStore store = new TestUBERStore();
+      store.load(uri, new char[] {'b'});
 
       Assert.assertTrue(ks.size() == 2);
       Assert.assertTrue(ks.containsAlias("test1"));
@@ -1298,11 +1307,11 @@ public class PasswordManagerTest
 
   // Nested Classes -------------------------------------------------------------------------------
 
-  private static class TestBKStore extends KeyManager
+  private static class TestUBERStore extends KeyManager
   {
-    private TestBKStore()
+    private TestUBERStore() throws Exception
     {
-      super(StorageType.BKS, new BouncyCastleProvider());
+      super(Storage.UBER, new BouncyCastleProvider());
     }
   }
 }

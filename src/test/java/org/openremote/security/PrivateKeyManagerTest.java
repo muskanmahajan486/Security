@@ -619,63 +619,59 @@ public class PrivateKeyManagerTest
 
     String alias5 = "key2";
 
-    keyMgr.createSelfSignedKey(
-        alias5, new char[] {}, new BouncyCastleKeySigner(), "testIssuer3"
-    );
+    keyMgr.addKey(alias5, new char[] {}, "testIssuer3");
 
     String alias6 = "key6";
 
-    keyMgr.createSelfSignedKey(
-        alias6, new char[] {}, new BouncyCastleKeySigner(), "testIssuer4"
-    );
+    keyMgr.addKey(alias6, new char[] {}, "testIssuer4");
 
 
     // Convert to keystore instance....
 
-    keystore = keyMgr.save(new char[] { 0 });
+    keyMgr.save(dest.toURI(), new char[] {0});
 
-    Assert.assertTrue(keystore.size() == 5, "expected 5 keys, found " + keystore.size());
+    Assert.assertTrue(keyMgr.size() == 5, "expected 5 keys, found " + keyMgr.size());
 
-    Assert.assertTrue(keystore.containsAlias("key1"));
-    Assert.assertTrue(keystore.containsAlias("key2"));
-    Assert.assertTrue(keystore.containsAlias("key3"));
-    Assert.assertTrue(keystore.containsAlias("key4"));
-    Assert.assertTrue(keystore.containsAlias("key6"));
+    Assert.assertTrue(keyMgr.contains("key1"));
+    Assert.assertTrue(keyMgr.contains("key2"));
+    Assert.assertTrue(keyMgr.contains("key3"));
+    Assert.assertTrue(keyMgr.contains("key4"));
+    Assert.assertTrue(keyMgr.contains("key6"));
 
 
     // retrieve password protected private key entry...
 
     keypassword = new char[] { 'a', 'C', 'm', '3' };
 
-    KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+    KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry)keyMgr.retrieveKey(
         "key1",
         new KeyStore.PasswordProtection(keypassword)
     );
 
     Assert.assertTrue(entry.getPrivateKey() != null);
 
-    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+    entry = (KeyStore.PrivateKeyEntry)keyMgr.retrieveKey(
         "key2",
         new KeyStore.PasswordProtection(null)
     );
 
     Assert.assertTrue(entry.getPrivateKey() != null);
 
-    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+    entry = (KeyStore.PrivateKeyEntry)keyMgr.retrieveKey(
         "key3",
         new KeyStore.PasswordProtection(null)
     );
 
     Assert.assertTrue(entry.getPrivateKey() != null);
 
-    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+    entry = (KeyStore.PrivateKeyEntry)keyMgr.retrieveKey(
         "key4",
         new KeyStore.PasswordProtection(null)
     );
 
     Assert.assertTrue(entry.getPrivateKey() != null);
 
-    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+    entry = (KeyStore.PrivateKeyEntry)keyMgr.retrieveKey(
         "key6",
         new KeyStore.PasswordProtection(null)
     );

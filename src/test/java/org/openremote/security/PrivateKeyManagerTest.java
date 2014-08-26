@@ -57,20 +57,37 @@ public class PrivateKeyManagerTest
    */
   @Test public void testSelfSignedKey() throws Exception
   {
-    char[] keypassword = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
-    String alias = "mykey";
+    try
+    {
+      // Bouncycastle is required as an installed security provider for this functionality,
+      // due to generating elliptic curve key which in Java 6 is not included as part of JCE.
 
-    PrivateKeyManager keyManager = PrivateKeyManager.create();
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-    Certificate cert1 = keyManager.createSelfSignedKey(
-        alias, keypassword, new BouncyCastleKeySigner(), "testIssuer"
-    );
+      char[] keypassword = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+      String alias = "mykey";
 
-    Assert.assertTrue(cert1 instanceof X509Certificate);
+      PrivateKeyManager keyManager = PrivateKeyManager.create();
 
-    // Make sure password is erased in memory...
+      Certificate cert1 = keyManager.addKey(alias, keypassword, "testIssuer");
 
-    for (char c : keypassword)
+      Assert.assertTrue(cert1 instanceof X509Certificate);
+
+      X509Certificate cert = (X509Certificate)cert1;
+
+      Assert.assertTrue(cert.getIssuerX500Principal().getName().contains("testIssuer"));
+
+      // TODO .. cert checks like above
+
+      // Make sure password is erased in memory...
+
+      for (char c : keypassword)
+      {
+        Assert.assertTrue(c == 0);
+      }
+    }
+
+    finally
     {
       Assert.assertTrue(c == 0);
     }

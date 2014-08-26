@@ -89,7 +89,32 @@ public class PrivateKeyManagerTest
 
     finally
     {
-      Assert.assertTrue(c == 0);
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
+  }
+
+  /**
+   * Certificate creation failure when required security provider is missing.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testSelfSignedKeyMissingProvider() throws Exception
+  {
+    try
+    {
+      PrivateKeyManager keyManager = PrivateKeyManager.create();
+
+      char[] keypassword = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+      String alias = "mykey";
+
+      keyManager.addKey(alias, keypassword);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
     }
   }
 

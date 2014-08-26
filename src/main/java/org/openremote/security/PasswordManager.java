@@ -58,7 +58,7 @@ public class PasswordManager extends KeyManager
   // Constructors ---------------------------------------------------------------------------------
 
   /**
-   * Constructs an in-memory password manager backed by {@link StorageType#BKS} storage format. <p>
+   * Constructs an in-memory password manager backed by {@link Storage#UBER} storage format. <p>
    *
    * Requires BouncyCastle security provider to be available on the classpath and installed
    * as a security provider to the JVM.
@@ -67,7 +67,7 @@ public class PasswordManager extends KeyManager
    * @see org.bouncycastle.jce.provider.BouncyCastleProvider
    *
    * @throws ConfigurationException
-   *            if the configured security provider(s) do not support {@link StorageType#BKS}
+   *            if the configured security provider(s) do not support {@link Storage#UBER}
    *            keystore type
    *
    * @throws  KeyManagerException
@@ -75,14 +75,12 @@ public class PasswordManager extends KeyManager
    */
   public PasswordManager() throws ConfigurationException, KeyManagerException
   {
-    init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
-
-    this.keystore = createKeyStore();
+    super(Storage.UBER, SecurityProvider.BC.getProviderInstance());
   }
 
 
   /**
-   * Constructs a persistent password manager backed by {@link StorageType#BKS} storage format.
+   * Constructs a persistent password manager backed by {@link Storage#UBER} storage format.
    * If no password storage exists at the given URI, a new one will be created. <p>
    *
    * Requires BouncyCastle security provider to be available on the classpath and installed
@@ -99,7 +97,7 @@ public class PasswordManager extends KeyManager
    *            array will be cleared when this constructor completes.
    *
    * @throws ConfigurationException
-   *            if the configured security provider(s) do not support {@link StorageType#BKS}
+   *            if the configured security provider(s) do not support {@link Storage#UBER}
    *            keystore type
    *
    * @throws  KeyManagerException
@@ -109,10 +107,10 @@ public class PasswordManager extends KeyManager
   public PasswordManager(URI keystoreLocation, char[] masterPassword)
       throws ConfigurationException, KeyManagerException
   {
+    super(Storage.UBER, SecurityProvider.BC.getProviderInstance());
+
     try
     {
-      init(StorageType.BKS, SecurityProvider.BC.getProviderInstance());
-
       if (keystoreLocation == null)
       {
         throw new KeyManagerException("Implementation error: keystore location URI is null.");
@@ -138,6 +136,7 @@ public class PasswordManager extends KeyManager
       clearPassword(masterPassword);
     }
   }
+
 
   // Public Instance Methods ----------------------------------------------------------------------
 

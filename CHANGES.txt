@@ -1,6 +1,55 @@
 
-Version 0.3 - 2014/XX/XX
+Version 0.3 - 2014/08/XX
 ========================
+
+THIS IS A NON-COMPATIBLE UPDATE TO PREVIOUS 0.2 VERSION
+OF THIS LIBRARY.
+
+Update from previous version requires code changes to
+update to new API usage:
+
+  - Interface X509CertificateBuilder has been renamed
+    to KeySigner
+
+    * Calls to createSelfSignedCertificate(KeyPair, Configuration)
+      should be replaced with API call signPublicKey(Configuration).
+      Configuration object has been modified to contain the key
+      pair used in signing the public key.
+
+  - Class BouncyCastleX509CertificateBuilder has been
+    renamed to BouncyCastleKeySigner
+
+  - Class AsymmetricKeyManager has been renamed to
+    PrivateKeyManager
+    
+    * ASN.1 and RSA key related constants, KeyAlgorithm renamed to
+      AsymmetricKeyAlgorithm and pushed to KeyManager superclass.  
+    * createSelfSignedKey() renamed to addKey()
+
+  - Exception CertificateBuilderException has been
+    renamed to SigningException
+
+  - KeyManager abstract superclass rewrite:
+
+    * Constructors have changed.
+    * StorageType enum renamed to Storage.
+    * init(), save(), load(), add(), remove() have been rewritten 
+      to manage internal keystore reference
+    * createKeyStore() has been deleted
+
+  - PasswordManager has changed its internal storage format from
+    BKS to UBER. It won't load previously saved passwords that
+    use BKS storage format by default.
+
+
+Other changes in this release:
+
+ - KeyManager adds new public size() and contains()
+   methods, add() implementation handles also trusted
+   certificate storage, new retrieveKey(), getCertificate(),
+   generateKey(), getStorageType() and clearPassword()
+   convenience  methods added for subclasses. Added
+   AsymmetricKeyAlgorithm enum.
 
  - PasswordManager PasswordNotFoundException is now
    public. API clients can also generate these 

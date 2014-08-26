@@ -421,7 +421,7 @@ public class PrivateKeyManagerTest
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testEmptyIssuerName() throws Exception
+  @Test public void testSelfSignedEmptyIssuerName() throws Exception
   {
     char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
     String alias2 = "mykey5221";
@@ -430,9 +430,7 @@ public class PrivateKeyManagerTest
 
     try
     {
-      keystore.createSelfSignedKey(
-          alias2, keypassword, new BouncyCastleKeySigner(), ""
-      );
+      keystore.addKey(alias2, keypassword, "");
 
       Assert.fail("should not get here...");
     }
@@ -447,7 +445,7 @@ public class PrivateKeyManagerTest
       }
     }
   }
-  
+
 
    // TODO : test certificate contents
 
@@ -458,106 +456,105 @@ public class PrivateKeyManagerTest
    */
   @Test public void testInMemoryKeystore() throws Exception
   {
-    char[] keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
-    String alias1 = "key1";
-
-    PrivateKeyManager keyMgr = PrivateKeyManager.create();
-
-    Certificate cert1 = keyMgr.createSelfSignedKey(
-        alias1, keypassword1, new BouncyCastleKeySigner(), "testIssuer"
-    );
-
-
-    char[] keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
-    String alias2 = "key2";
-
-    Certificate cert2 = keyMgr.createSelfSignedKey(
-        alias2, keypassword2, new BouncyCastleKeySigner(), "testIssuer2"
-    );
-
-    char[] storePW = new char[] { 'f', 'o', 'o', 'b', 'a', 'r' };
-    KeyStore keystore = keyMgr.save(storePW);
-
-
-    // Make sure the password is erased from memory...
-
-    for (char c : storePW)
+    try
     {
-      Assert.assertTrue(c == 0);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      char[] keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
+      String alias1 = "key1";
+
+      PrivateKeyManager keyMgr = PrivateKeyManager.create(KeyManager.Storage.BKS);
+
+      Certificate cert1 = keyMgr.addKey(alias1, keypassword1, "testIssuer");
+
+
+      // TODO : these are not key passwords but master passwords...
+
+      char[] keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
+      String alias2 = "key2";
+
+      Certificate cert2 = keyMgr.addKey(alias2, keypassword2, "testIssuer2");
+
+      char[] storePW = new char[] { 'f', 'o', 'o', 'b', 'a', 'r' };
+      File dest = File.createTempFile("openremote", "tmp");
+      dest.deleteOnExit();
+
+      keyMgr.save(dest.toURI(), storePW);
+      Assert.assertTrue(dest.exists());
+
+
+      // Make sure the password is erased from memory...
+
+      for (char c : storePW)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      Assert.assertTrue(keyMgr.size() == 2);
+
+      Assert.assertTrue(keyMgr.contains("key1"));
+      Assert.assertTrue(keyMgr.contains("key2"));
+
+      // check the public key certificates...
+
+      Certificate cert = keyMgr.getCertificate("key1");
+
+      Assert.assertTrue(cert.equals(cert1));
+      Assert.assertTrue(cert.getPublicKey().equals(cert1.getPublicKey()));
+
+
+      cert = keyMgr.getCertificate("key2");
+
+      Assert.assertTrue(cert.equals(cert2));
+      Assert.assertTrue(cert.getPublicKey().equals(cert2.getPublicKey()));
+      Assert.assertTrue(cert.getPublicKey() instanceof ECPublicKey);
+      Assert.assertTrue(
+          cert.getPublicKey().getAlgorithm().equals(PrivateKeyManager.AsymmetricKeyAlgorithm.EC.name())
+      );
+
+  //    Certificate[] chain = cert.getCertificateChain();
+  //
+  //    Assert.assertTrue(chain.length == 1);
+
+
+
+      // Retrieve password protected private keys...
+
+      keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
+
+      PrivateKey privateKey = keyMgr.getKey("key1", keypassword1);
+  //
+  //    KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+  //        "key1",
+  //        new KeyStore.PasswordProtection(keypassword1)
+  //    );
+
+      Assert.assertTrue(privateKey != null);
+      Assert.assertTrue(privateKey instanceof ECPrivateKey);
+      Assert.assertTrue(
+          privateKey.getAlgorithm().equals(KeyManager.AsymmetricKeyAlgorithm.EC.name())
+      );
+
+      keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
+
+  //    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
+  //        "key2",
+  //        new KeyStore.PasswordProtection(keypassword2)
+  //    );
+
+      privateKey = keyMgr.getKey("key2", keypassword2);
+
+      Assert.assertTrue(privateKey != null);
+      Assert.assertTrue(privateKey instanceof ECPrivateKey);
+      Assert.assertTrue(
+          privateKey.getAlgorithm().equals(KeyManager.AsymmetricKeyAlgorithm.EC.name())
+      );
     }
 
-    Assert.assertTrue(keystore.size() == 2);
-
-    Assert.assertTrue(keystore.containsAlias("key1"));
-    Assert.assertTrue(keystore.containsAlias("key2"));
-
-    // check the public key certificates...
-
-    Certificate cert = keystore.getCertificate("key1");
-
-    Assert.assertTrue(cert.equals(cert1));
-    Assert.assertTrue(cert.getPublicKey().equals(cert1.getPublicKey()));
-
-
-    cert = keystore.getCertificate("key2");
-
-    Assert.assertTrue(cert.equals(cert2));
-    Assert.assertTrue(cert.getPublicKey().equals(cert2.getPublicKey()));
-    Assert.assertTrue(cert.getPublicKey() instanceof ECPublicKey);
-    Assert.assertTrue(cert.getPublicKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
-
-    String alias = keystore.getCertificateAlias(cert1);
-
-    Assert.assertTrue(alias.equals("key1"));
-
-    alias = keystore.getCertificateAlias(cert2);
-
-    Assert.assertTrue(alias.equals("key2"));
-
-
-    Certificate[] chain = keystore.getCertificateChain("key1");
-
-    Assert.assertTrue(chain.length == 1);
-
-    Assert.assertTrue(keystore.isKeyEntry("key1"));
-    Assert.assertTrue(keystore.isKeyEntry("key2"));
-
-
-    // convert in-memory keystore to file-based...
-
-    File f = File.createTempFile("openremote", null);
-    FileOutputStream fout = new FileOutputStream(f);
-    BufferedOutputStream bout = new BufferedOutputStream(fout);
-
-    storePW = new char[] { 'f', 'o', 'o', '_', 'b', 'a', 'r' };
-    keystore.store(bout, storePW);
-
-    Assert.assertTrue(f.exists());
-
-
-    // Retrieve password protected private keys...
-
-    keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
-
-    KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
-        "key1",
-        new KeyStore.PasswordProtection(keypassword1)
-    );
-
-    Assert.assertTrue(entry.getPrivateKey() != null);
-    Assert.assertTrue(entry.getPrivateKey() instanceof ECPrivateKey);
-    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
-
-    keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
-
-    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
-        "key2",
-        new KeyStore.PasswordProtection(keypassword2)
-    );
-
-    Assert.assertTrue(entry.getPrivateKey() != null);
-    Assert.assertTrue(entry.getPrivateKey() instanceof ECPrivateKey);
-    Assert.assertTrue(entry.getPrivateKey().getAlgorithm().equals(PrivateKeyManager.KeyAlgorithm.EC.name()));
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
   }
 
 

@@ -126,78 +126,199 @@ public class PrivateKeyManagerTest
    */
   @Test public void testMultipleSelfSignedKeys() throws Exception
   {
-    char[] keypassword2 = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', '2' };
-    String alias2 = "mykey2";
-
-    PrivateKeyManager keystore = PrivateKeyManager.create();
-
-    Certificate cert2 = keystore.createSelfSignedKey(
-        alias2, keypassword2, new BouncyCastleKeySigner(), "testIssuer"
-    );
-
-    // Make sure password is erased in memory...
-
-    for (char c : keypassword2)
+    try
     {
-      Assert.assertTrue(c == 0);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      char[] keypassword2 = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', '2' };
+      String alias2 = "mykey2";
+
+      PrivateKeyManager keystore = PrivateKeyManager.create(KeyManager.Storage.UBER);
+
+      Certificate cert2 = keystore.addKey(alias2, keypassword2, "testIssuer1");
+
+      // Make sure password is erased in memory...
+
+      for (char c : keypassword2)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      char[] keypassword3 = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', '3' };
+      String alias3 = "mykey3";
+
+      Certificate cert3 = keystore.addKey(alias3, keypassword3, "testIssuer2");
+
+      // Make sure password is erased in memory...
+
+      for (char c : keypassword2)
+      {
+        Assert.assertTrue(c == 0);
+      }
+
+      Assert.assertNotNull(cert2);
+      Assert.assertNotNull(cert3);
+
+      Assert.assertTrue(cert2 instanceof X509Certificate);
+      Assert.assertTrue(cert3 instanceof X509Certificate);
+
+      Assert.assertTrue(!cert2.equals(cert3));
+
+      Assert.assertTrue(((X509Certificate)cert2).getIssuerX500Principal().getName().contains("testIssuer1"));
+      Assert.assertTrue(((X509Certificate)cert3).getIssuerX500Principal().getName().contains("testIssuer2"));
+
+      // TODO .. cert checks like above
+      // TODO keystore size() check == 2
     }
 
-    char[] keypassword3 = new char[] { 'm', 'y', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', '3' };
-    String alias3 = "mykey3";
-
-    Certificate cert3 = keystore.createSelfSignedKey(
-        alias3, keypassword3, new BouncyCastleKeySigner(), "testIssuer"
-    );
-
-    // Make sure password is erased in memory...
-
-    for (char c : keypassword2)
+    finally
     {
-      Assert.assertTrue(c == 0);
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
     }
-
-    Assert.assertNotNull(cert2);
-    Assert.assertNotNull(cert3);
-
-    Assert.assertTrue(cert2 instanceof X509Certificate);
-    Assert.assertTrue(cert3 instanceof X509Certificate);
-
-    Assert.assertTrue(!cert2.equals(cert3));
   }
 
   /**
-   * Test a key alias null password which is allowed.
+   * Test a key alias null password which is allowed (null will be converted to
+   * {@link KeyManager#EMPTY_KEY_PASSWORD}).
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testNullPassword() throws Exception
+  @Test public void testSelfSignedNullPasswordDefaults() throws Exception
+  {
+    // TODO : no longer defaults, PKCS12 storage is explicit
+    try
+    {
+      // Default asymmetric keypair for createSelfSignedKey is elliptic curve -- this
+      // requires an installed provider in Java 6 (JCE might include EC keys in Java 7)...
+
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      String alias2 = "mykey2";
+
+      PrivateKeyManager keystore = PrivateKeyManager.create(KeyManager.Storage.PKCS12);
+
+      Certificate cert = keystore.addKey(
+          alias2, null
+      );
+
+      Assert.assertNotNull(cert);
+      Assert.assertTrue(cert instanceof X509Certificate);
+      Assert.assertTrue(keystore.size() == 1);
+    }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
+  }
+
+
+  /**
+   * Tests default key algo in self signed keys (defined in
+   * {@link PrivateKeyManager#DEFAULT_SELF_SIGNED_KEY_ALGORITHM}) which currently is EC
+   * elliptic curve algorithm -- this is only available via BouncyCastle on Java 6. Testing
+   * error behavior on missing provider (test may fail in Java 7 and later that includes
+   * EC algorithms in JCE).
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testSelfSignedDefaultKeyAlgoNoProvider() throws Exception
+  {
+    try
+    {
+      String alias2 = "mykey2";
+
+      PrivateKeyManager keystore = PrivateKeyManager.create(KeyManager.Storage.PKCS12);
+
+      keystore.addKey(alias2, null);
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (KeyManager.KeyManagerException e)
+    {
+      // expected...
+    }
+  }
+
+
+  /**
+   * Test a key alias null password on BouncyCastle UBER storage. Null arg will be
+   * converted to {@link KeyManager#EMPTY_KEY_PASSWORD} which is a non-empty char array
+   * which UBER requires for keys.
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testSelfSignedNullPasswordUberStorage() throws Exception
+  {
+    try
+    {
+      // BouncyCastle provider must be installed for UBER storage use...
+
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+
+      String alias2 = "mykey2";
+
+      PrivateKeyManager keystore = PrivateKeyManager.create(KeyManager.Storage.UBER);
+
+      Certificate cert = keystore.addKey(
+          alias2, null
+      );
+
+      Assert.assertNotNull(cert);
+      Assert.assertTrue(cert instanceof X509Certificate);
+      Assert.assertTrue(keystore.size() == 1);
+    }
+
+    finally
+    {
+      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
+    }
+  }
+
+  /**
+   * Test a key alias null password with JCEKS storage and RSA keys. Null password
+   * arg will be converted to {@link KeyManager#EMPTY_KEY_PASSWORD} char array (non-empty).
+   *
+   * @throws Exception  if test fails for any reason
+   */
+  @Test public void testSelfSignedNullPasswordJCEKSStorage() throws Exception
   {
     String alias2 = "mykey2";
 
-    PrivateKeyManager keystore = PrivateKeyManager.create();
+    PrivateKeyManager keystore = PrivateKeyManager.create(KeyManager.Storage.JCEKS);
+//
+//    Certificate cert = keystore.createSelfSignedKey(
+//        alias2, null, new BouncyCastleKeySigner(), "testInMemoryKeyStore",
+//        KeyManager.AsymmetricKeyAlgorithm.RSA
+//    );
 
-    Certificate cert = keystore.createSelfSignedKey(
-        alias2, null, new BouncyCastleKeySigner(), "testInMemoryKeyStore"
-    );
+    char[] password = new char[] { '1', '2' };
+    Certificate cert = keystore.addKey(alias2, password, KeyManager.AsymmetricKeyAlgorithm.RSA);
 
     Assert.assertNotNull(cert);
     Assert.assertTrue(cert instanceof X509Certificate);
+    Assert.assertTrue(keystore.size() == 1);
+
+    for (char c : password)
+    {
+      Assert.assertTrue(c == 0);
+    }
   }
+
 
   /**
    * Test a keystore null key alias which should *not* be allowed.
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testNullKey() throws Exception
+  @Test public void testSelfSignedNullKey() throws Exception
   {
     PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
-      keystore.createSelfSignedKey(
-          null, null, new BouncyCastleKeySigner(), "testInMemoryKeyStore"
-      );
+      keystore.addKey(null, null);
 
       Assert.fail("should not get here...");
     }
@@ -213,75 +334,13 @@ public class PrivateKeyManagerTest
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testEmptyKey() throws Exception
+  @Test public void testSelfSignedEmptyKey() throws Exception
   {
     PrivateKeyManager keystore = PrivateKeyManager.create();
 
     try
     {
-      keystore.createSelfSignedKey(
-          "", null, new BouncyCastleKeySigner(), "testInMemoryKeyStore"
-      );
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected....
-    }
-  }
-
-  /**
-   * Test a certificate builder null reference.
-   *
-   * @throws Exception  if test fails for any reason
-   */
-  @Test public void testNullCertBuilder() throws Exception
-  {
-    char[] keypassword = new char[] { 'a', 'b', 'c' };
-    String alias2 = "mykey2243";
-
-    PrivateKeyManager keystore = PrivateKeyManager.create();
-
-    try
-    {
-      keystore.createSelfSignedKey(
-          alias2, keypassword, null, "testInMemoryKeyStore-2243"
-      );
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected....
-
-      for (char c : keypassword)
-      {
-        Assert.assertTrue(c == 0);
-      }
-    }
-  }
-
-
-  /**
-   * Test a null issuer name.
-   *
-   * @throws Exception  if test fails for any reason
-   */
-  @Test public void testNullIssuerName() throws Exception
-  {
-    char[] keypassword = new char[] { 'f', 'd', 's', '5', '_', '1' };
-    String alias2 = "mykey5221";
-
-    PrivateKeyManager keystore = PrivateKeyManager.create();
-
-    try
-    {
-      keystore.createSelfSignedKey(
-          alias2, keypassword, new BouncyCastleKeySigner(), null
-      );
+      keystore.addKey("", null);
 
       Assert.fail("should not get here...");
     }

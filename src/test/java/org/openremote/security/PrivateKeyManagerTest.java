@@ -566,59 +566,52 @@ public class PrivateKeyManagerTest
   @Test public void testInMemoryKeystoreOperations() throws Exception
   {
 
-    PrivateKeyManager keyMgr = PrivateKeyManager.create();
+    PrivateKeyManager keyMgr = PrivateKeyManager.create(KeyManager.Storage.PKCS12, SecurityProvider.BC);
 
     // Add two keys...
 
     char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
     String alias1 = "key1";
 
-    keyMgr.createSelfSignedKey(
-        alias1, keypassword, new BouncyCastleKeySigner(), "testIssuer"
-    );
+    keyMgr.addKey(alias1, keypassword, "testIssuer");
 
     String alias2 = "key2";
 
-    keyMgr.createSelfSignedKey(
-        alias2, new char[] {}, new BouncyCastleKeySigner(), "testIssuer2"
-    );
+    keyMgr.addKey(alias2, new char[] {}, "testIssuer2");
 
 
-    // Convert to keystore...
+    File dest = File.createTempFile("openremote", "tmp");
+    dest.deleteOnExit();
 
     char[] storePW = new char[] { 'f', 'o', 'o'};
-    KeyStore keystore = keyMgr.save(storePW);
+    keyMgr.save(dest.toURI(), storePW);
 
-    Assert.assertTrue(keystore.size() == 2);
-    Assert.assertTrue(keystore.containsAlias("key1"));
-    Assert.assertTrue(keystore.containsAlias("key2"));
+    Assert.assertTrue(keyMgr.size() == 2);
+    Assert.assertTrue(keyMgr.contains("key1"));
+    Assert.assertTrue(keyMgr.contains("key2"));
 
 
     // Add two additional keys...
 
     String alias3 = "key3";
 
-    keyMgr.createSelfSignedKey(
-        alias3, new char[] {}, new BouncyCastleKeySigner(), "testIssuer3"
-    );
+    keyMgr.addKey(alias3, new char[] {}, "testIssuer3");
 
     String alias4 = "key4";
 
-    keyMgr.createSelfSignedKey(
-        alias4, new char[] {}, new BouncyCastleKeySigner(), "testIssuer4"
-    );
+    keyMgr.addKey(alias4, new char[] {}, "testIssuer4");
 
     // Convert to keystore...
 
     storePW = new char[] { 'f', 'o', 'o'};
-    keystore = keyMgr.save(storePW);
+    keyMgr.save(dest.toURI(), storePW);
 
-    Assert.assertTrue(keystore.size() == 4);
+    Assert.assertTrue(keyMgr.size() == 4);
 
-    Assert.assertTrue(keystore.containsAlias("key1"));
-    Assert.assertTrue(keystore.containsAlias("key2"));
-    Assert.assertTrue(keystore.containsAlias("key3"));
-    Assert.assertTrue(keystore.containsAlias("key4"));
+    Assert.assertTrue(keyMgr.contains("key1"));
+    Assert.assertTrue(keyMgr.contains("key2"));
+    Assert.assertTrue(keyMgr.contains("key3"));
+    Assert.assertTrue(keyMgr.contains("key4"));
 
 
 

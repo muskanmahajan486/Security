@@ -208,16 +208,17 @@ public class KeySignerTest
   /**
    * Tests string trimming on provided issuer name and with SHA-256 with EC-DSA signature algo.
    */
-  @Test public void testConfiguration3IssuerNameTrimming()
+  @Test public void testConfiguration3IssuerNameTrimming() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        generateRSAKeyPair(),
         KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA,
         "  foo  "
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
     Assert.assertTrue(
         config.getSignatureAlgorithm()
@@ -251,17 +252,18 @@ public class KeySignerTest
   /**
    * Tests string trimming on provided issuer name.
    */
-  @Test public void testConfiguration4IssuerNameTrimming()
+  @Test public void testConfiguration4IssuerNameTrimming() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        generateRSAKeyPair(),
         KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
         new KeySigner.Validity(5),
         "  foo  "
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
 
     Assert.assertTrue(
@@ -293,13 +295,16 @@ public class KeySignerTest
   /**
    * Test for behavior if common name 'CN' attribute type is explicitly set.
    */
-  @Test public void testConfigurationIssuerNameWithAttributeType()
+  @Test public void testConfigurationIssuerNameWithAttributeType() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration("CN=foo");
+    KeySigner.Configuration config = KeySigner.Configuration.createDefault(
+        generateRSAKeyPair(),
+        "CN=foo"
+    );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
 
     // Check default signature algorithm...
@@ -339,16 +344,18 @@ public class KeySignerTest
    * Test for behavior if common name 'CN' attribute type is explicitly set and with a custom
    * validity period.
    */
-  @Test public void testConfiguration2IssuerNameWithAttributeType()
+  @Test public void testConfiguration2IssuerNameWithAttributeType() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        generateRSAKeyPair(),
+        KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
         new KeySigner.Validity(10),
         "CN=foo"
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
 
     // Check default signature algorithm...
@@ -383,16 +390,17 @@ public class KeySignerTest
    * Test for behavior if common name 'CN' attribute type is explicitly set and SHA-512
    * with EC DSA for signature algorithm.
    */
-  @Test public void testConfiguration3IssuerNameWithAttributeType()
+  @Test public void testConfiguration3IssuerNameWithAttributeType() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        generateRSAKeyPair(),
         KeySigner.SignatureAlgorithm.SHA512_WITH_ECDSA,
         "CN=foo"
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
     Assert.assertTrue(
         config.getSignatureAlgorithm()
@@ -429,17 +437,18 @@ public class KeySignerTest
    * Test for behavior if common name 'CN' attribute type is explicitly set and signature
    * algorithm is SHA-512 with RSA and validity period is one day.
    */
-  @Test public void testConfiguration4IssuerNameWithAttributeType()
+  @Test public void testConfiguration4IssuerNameWithAttributeType() throws Exception
   {
     long time = System.currentTimeMillis();
 
-    KeySigner.Configuration config = new KeySigner.Configuration(
+    KeySigner.Configuration config = KeySigner.Configuration.createSelfSigned(
+        generateRSAKeyPair(),
         KeySigner.SignatureAlgorithm.SHA512_WITH_RSA,
         new KeySigner.Validity(1),
         "CN=foo"
     );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
 
     Assert.assertTrue(
         config.getSignatureAlgorithm()
@@ -471,16 +480,16 @@ public class KeySignerTest
    * Test for encoding special characters in issuer common name. Commas are currently rejected.
    * See the to-do tasks in the implementation for details.
    */
-  @Test public void testConfigurationIssuerNameWithComma()
+  @Test public void testConfigurationIssuerNameWithComma() throws Exception
   {
     try
     {
-      new KeySigner.Configuration("OpenRemote, Inc.");
+      KeySigner.Configuration.createDefault(generateRSAKeyPair(), "OpenRemote, Inc.");
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -490,33 +499,12 @@ public class KeySignerTest
    * Test for encoding special characters in issuer common name. Commas are currently rejected.
    * See the to-do tasks in the implementation for details.
    */
-  @Test public void testConfiguration2IssuerNameWithComma()
+  @Test public void testConfiguration2IssuerNameWithComma() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(
-          KeySigner.SignatureAlgorithm.SHA256_WITH_ECDSA,
-          "OpenRemote, Inc."
-      );
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (IllegalArgumentException e)
-    {
-      // expected...
-    }
-  }
-
-  /**
-   * Test for encoding special characters in issuer common name. Commas are currently rejected.
-   * See the to-do tasks in the implementation for details.
-   */
-  @Test public void testConfiguration3IssuerNameWithComma()
-  {
-    try
-    {
-      new KeySigner.Configuration(
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
           KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
           "OpenRemote, Inc."
       );
@@ -524,7 +512,7 @@ public class KeySignerTest
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -534,11 +522,35 @@ public class KeySignerTest
    * Test for encoding special characters in issuer common name. Commas are currently rejected.
    * See the to-do tasks in the implementation for details.
    */
-  @Test public void testConfiguration4IssuerNameWithComma()
+  @Test public void testConfiguration3IssuerNameWithComma() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          KeySigner.SignatureAlgorithm.SHA256_WITH_RSA,
+          "OpenRemote, Inc."
+      );
+
+      Assert.fail("should not get here...");
+    }
+
+    catch (IncorrectImplementationException e)
+    {
+      // expected...
+    }
+  }
+
+  /**
+   * Test for encoding special characters in issuer common name. Commas are currently rejected.
+   * See the to-do tasks in the implementation for details.
+   */
+  @Test public void testConfiguration4IssuerNameWithComma() throws Exception
+  {
+    try
+    {
+     KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
           KeySigner.SignatureAlgorithm.SHA384_WITH_RSA,
           "OpenRemote, Inc."
       );
@@ -546,7 +558,7 @@ public class KeySignerTest
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -556,16 +568,16 @@ public class KeySignerTest
    * Test for encoding additional attributes with issuer common name. These are currently
    * rejected.
    */
-  @Test public void testConfigurationIssuerNameAdditionalAttributes()
+  @Test public void testConfigurationIssuerNameAdditionalAttributes() throws Exception
   {
     try
     {
-      new KeySigner.Configuration("LOCALITY=bar");
+      KeySigner.Configuration.createDefault(generateRSAKeyPair(), "LOCALITY=bar");
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -575,19 +587,20 @@ public class KeySignerTest
    * Test for encoding additional attributes with issuer common name. These are currently
    * rejected.
    */
-  @Test public void testConfiguration2IssuerNameAdditionalAttributes()
+  @Test public void testConfiguration2IssuerNameAdditionalAttributes() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(
-          KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          KeySigner.DEFAULT_RSA_SIGNATURE_ALGORITHM,
           "LOCALITY=bar"
       );
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -597,11 +610,13 @@ public class KeySignerTest
    * Test for encoding additional attributes with issuer common name. These are currently
    * rejected.
    */
-  @Test public void testConfiguration3IssuerNameAdditionalAttributes()
+  @Test public void testConfiguration3IssuerNameAdditionalAttributes() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          KeySigner.SignatureAlgorithm.SHA512_WITH_RSA,
           new KeySigner.Validity(KeySigner.Validity.DEFAULT_VALID_DAYS),
           "LOCALITY=bar"
       );
@@ -609,7 +624,7 @@ public class KeySignerTest
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -619,12 +634,13 @@ public class KeySignerTest
    * Test for encoding additional attributes with issuer common name. These are currently
    * rejected.
    */
-  @Test public void testConfiguration4IssuerNameAdditionalAttributes()
+  @Test public void testConfiguration4IssuerNameAdditionalAttributes() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(
-          KeySigner.Configuration.DEFAULT_SIGNATURE_ALGORITHM,
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          KeySigner.DEFAULT_RSA_SIGNATURE_ALGORITHM,
           new KeySigner.Validity(KeySigner.Validity.DEFAULT_VALID_DAYS),
           "LOCALITY=bar"
       );
@@ -632,7 +648,7 @@ public class KeySignerTest
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -641,16 +657,20 @@ public class KeySignerTest
   /**
    * Test null guard on config signature algorithm.
    */
-  @Test public void testConfigurationNullSignatureAlgo()
+  @Test public void testConfigurationNullSignatureAlgo() throws Exception
   {
     try
     {
-      new KeySigner.Configuration((KeySigner.SignatureAlgorithm)null, "foo");
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          (KeySigner.SignatureAlgorithm) null,
+          "foo"
+      );
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }
@@ -659,16 +679,20 @@ public class KeySignerTest
   /**
    * Test null guard on validity in configuration ctor.
    */
-  @Test public void testConfigurationNullValidity()
+  @Test public void testConfigurationNullValidity() throws Exception
   {
     try
     {
-      new KeySigner.Configuration((KeySigner.Validity)null, "bar");
+      KeySigner.Configuration.createSelfSigned(
+          generateRSAKeyPair(),
+          KeySigner.SignatureAlgorithm.SHA512_WITH_RSA,
+          null, "bar"
+      );
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }

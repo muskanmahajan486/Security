@@ -67,26 +67,28 @@ public class KeySignerTest
   /**
    * Basic test for setting the certificate issuer common name in configuration.
    */
-  @Test public void testConfigurationIssuerName()
+  @Test public void testConfigurationIssuerName() throws Exception
   {
-    KeySigner.Configuration config = new KeySigner.Configuration("foo");
+    KeySigner.Configuration config = KeySigner.Configuration.createDefault(
+        KeySignerTest.generateRSAKeyPair(), "foo"
+    );
 
-    Assert.assertTrue(config.getIssuer().getX500Name().contains("CN=foo"));
+    Assert.assertTrue(config.getIssuer().toX500Name().contains("CN=foo"));
   }
 
   /**
    * Basic test for null guard for issuer common name in configuration constructor.
    */
-  @Test public void testNullConfigurationIssuerName()
+  @Test public void testNullConfigurationIssuerName() throws Exception
   {
     try
     {
-      new KeySigner.Configuration(null);
+      KeySigner.Configuration.createDefault(KeySignerTest.generateRSAKeyPair(), null);
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }

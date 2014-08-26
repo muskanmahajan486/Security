@@ -409,13 +409,13 @@ public class PasswordManagerTest
       mgr.addPassword("tz", new byte[] { 'z' }, new char[] { 'b' });
       mgr.addPassword("tx", new byte[] { 'x' }, new char[] { 'b' });
 
-      ks = store.load(file.toURI(), new char[] { 'b' });
+      store.load(file.toURI(), new char[] {'b'});
 
-      Assert.assertTrue(ks.containsAlias("tz"));
-      Assert.assertTrue(ks.containsAlias("tx"));
-      Assert.assertTrue(ks.containsAlias("test"));
+      Assert.assertTrue(store.contains("tz"));
+      Assert.assertTrue(store.contains("tx"));
+      Assert.assertTrue(store.contains("test"));
 
-      Assert.assertTrue(ks.size() == 3);
+      Assert.assertTrue(store.size() == 3);
     }
 
     finally
@@ -778,9 +778,9 @@ public class PasswordManagerTest
       TestUBERStore store = new TestUBERStore();
       store.load(uri, new char[] {'b'});
 
-      Assert.assertTrue(ks.size() == 2);
-      Assert.assertTrue(ks.containsAlias("test1"));
-      Assert.assertTrue(ks.containsAlias("test2"));
+      Assert.assertTrue(store.size() == 2);
+      Assert.assertTrue(store.contains("test1"));
+      Assert.assertTrue(store.contains("test2"));
 
       // Remove...
 
@@ -800,10 +800,10 @@ public class PasswordManagerTest
         // expected...
       }
 
-      ks = store.load(uri, new char[] { 'b' });
+      store.load(uri, new char[] { 'b' });
 
-      Assert.assertTrue(ks.size() == 1);
-      Assert.assertTrue(ks.containsAlias("test2"));
+      Assert.assertTrue(store.size() == 1);
+      Assert.assertTrue(store.contains("test2"));
     }
 
     finally

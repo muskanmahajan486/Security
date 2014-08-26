@@ -118,15 +118,14 @@ public class PasswordManager extends KeyManager
 
       this.keystoreLocation = keystoreLocation;
 
+
       if (exists(keystoreLocation))
       {
-        this.keystore = load(keystoreLocation, masterPassword);
+        load(keystoreLocation, masterPassword);
       }
 
       else
       {
-        this.keystore = createKeyStore();
-
         save(keystoreLocation, masterPassword);
       }
     }
@@ -163,12 +162,20 @@ public class PasswordManager extends KeyManager
   {
     try
     {
-      add(alias, password, storeMasterPassword);
+      KeyStore.Entry entry = new KeyStore.SecretKeyEntry(new SecretKeySpec(password, "password"));
+      KeyStore.ProtectionParameter protection = new KeyStore.PasswordProtection(storeMasterPassword);
+
+      super.add(alias, entry, protection);
 
       if (keystoreLocation != null)
       {
         save(keystoreLocation, storeMasterPassword);
       }
+    }
+
+    catch (IllegalArgumentException exception)
+    {
+      throw new KeyManagerException(exception.getMessage(), exception);
     }
 
     finally
@@ -201,7 +208,12 @@ public class PasswordManager extends KeyManager
         return;
       }
 
-      remove(alias, storeMasterPassword);
+      remove(alias);
+
+      if (keystoreLocation != null)
+      {
+        super.save(keystoreLocation, storeMasterPassword);
+      }
     }
 
     finally
@@ -234,12 +246,12 @@ public class PasswordManager extends KeyManager
     {
       if (alias == null || alias.equals(""))
       {
-        throw new PasswordNotFoundException(
-            "Implementation Error: null or empty password alias."
-        );
+        throw new PasswordNotFoundException("Implementation Error: null or empty password alias.");
       }
 
-      if (!keystore.entryInstanceOf(alias, KeyStore.SecretKeyEntry.class))
+      KeyStore.Entry entry = retrieveKey(alias, new KeyStore.PasswordProtection(storeMasterPassword));
+
+      if (!(entry instanceof KeyStore.SecretKeyEntry))
       {
         throw new PasswordNotFoundException(
             "Implementation Error: password alias ''{0}'' does not correspond to secret " +
@@ -248,43 +260,14 @@ public class PasswordManager extends KeyManager
         );
       }
 
-      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)keystore.getEntry(
-          alias, new KeyStore.PasswordProtection(storeMasterPassword)
-      );
-
-      return entry.getSecretKey().getEncoded();
+      return ((KeyStore.SecretKeyEntry) entry).getSecretKey().getEncoded();
     }
 
-    catch (KeyStoreException e)
+    catch (KeyManagerException exception)
     {
       throw new PasswordNotFoundException(
-          "Implementation Error: password manager has not been loaded."
-      );
-    }
-
-    catch (NoSuchAlgorithmException e)
-    {
-      throw new PasswordNotFoundException(
-          "Configuration error. Required password storage algorithm is not available: {0}",
-          e, e.getMessage()
-      );
-    }
-
-    catch (UnrecoverableKeyException e)
-    {
-      throw new PasswordNotFoundException(
-          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
-          "protection password: {1}",
-          e, alias, e.getMessage()
-      );
-    }
-
-    catch (UnrecoverableEntryException e)
-    {
-      throw new PasswordNotFoundException(
-          "Password with alias ''{0}'' could not be retrieved, possibly due to incorrect " +
-          "protection password: {1}",
-          e, alias, e.getMessage()
+          "Password with alias '{0}' could not be retrieved : {1}", exception,
+          alias, exception.getMessage()
       );
     }
 

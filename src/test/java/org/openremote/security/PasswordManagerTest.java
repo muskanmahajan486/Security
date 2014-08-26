@@ -1279,22 +1279,20 @@ public class PasswordManagerTest
 
       PrivateKeyManager mgr = PrivateKeyManager.create();
 
-      mgr.createSelfSignedKey(
-          "test", new char[] { 'a' }, new BouncyCastleKeySigner(), "test"
+      mgr.addKey(
+          "test", new char[] {'a'}, "test"
       );
 
-      mgr.save(new char[] { 'a' });
-
-      PasswordManager pwmgr = new PasswordManager(uri, new char[] { 'a' });
+      mgr.save(file.toURI(), new char[] { 'a' });
 
       try
       {
-        pwmgr.getPassword("test", new char[] { 'a' });
+        PasswordManager pwmgr = new PasswordManager(uri, new char[] { 'a' });
 
         Assert.fail("could not get here...");
       }
 
-      catch (PasswordManager.PasswordNotFoundException e)
+      catch (KeyManager.KeyManagerException e)
       {
         // expected...
       }
@@ -1314,7 +1312,9 @@ public class PasswordManagerTest
    */
   @Test public void testCtor()
   {
-    PasswordManager.PasswordNotFoundException e = new PasswordManager.PasswordNotFoundException("test");
+
+    PasswordManager.PasswordNotFoundException e =
+        new PasswordManager.PasswordNotFoundException("test");
 
     Assert.assertTrue(e.getMessage().equals("test"));
     Assert.assertTrue(e.getCause() == null);

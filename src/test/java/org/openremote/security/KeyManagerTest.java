@@ -425,7 +425,7 @@ public class KeyManagerTest
 
 
   /**
-   * Tests behavior when an existing keystore has been corrupted.
+   * Tests load behavior when an existing keystore has been corrupted.
    *
    * @throws Exception  if test fails
    */
@@ -466,7 +466,7 @@ public class KeyManagerTest
 
     try
     {
-      ks.save(f.toURI(), password);
+      ks.load(f.toURI(), password);
 
       Assert.fail("should not get here...");
     }

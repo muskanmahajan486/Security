@@ -341,33 +341,37 @@ public class KeyManagerTest
   }
 
   /**
-   * Tests adding a secret key to BouncyCastle UBER storage.
+   * Tests error behavior when null file descriptor is used.
    *
-   * @throws Exception  if test fails
+   * @throws Exception    if test fails
    */
-  @Test public void testAddingSecretKeyToUBER() throws Exception
+  @Test public void testLoadingNullFile() throws Exception
   {
-    // UBER implementation requires "BC" to be available as security provider...
-
     try
     {
-      Security.addProvider(new BouncyCastleProvider());
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      UBERStorage ks = new UBERStorage();
+      UBERStorage mgr = new UBERStorage();
 
-      ks.add(
-          "alias",
-          new KeyStore.SecretKeyEntry(
-              new SecretKeySpec(new byte[] { 'a' }, "test")
-          ),
-          new KeyStore.PasswordProtection(new char[] { 'b' })
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] {'a'}, "foo")),
+          new KeyStore.PasswordProtection(new char[] {'b'})
       );
 
-      char[] password = new char[] { 'f', 'o', 'o' };
+      char[] pw = new char[] { '1' };
 
-      KeyStore keystore = ks.save(password);
+      try
+      {
+        mgr.load(null, pw);
 
-      Assert.assertTrue(keystore.getType().equals("UBER"), "got " + keystore.getType());
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
     }
 
     finally

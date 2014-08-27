@@ -513,7 +513,11 @@ public abstract class KeyManager
       throw new KeyManagerException("Implementation Error: null file URI.");
     }
 
-    loadKeyStore(new File(uri), keystorePassword);
+
+    if (exists(uri))
+    {
+      loadKeyStore(new File(uri), keystorePassword);
+    }
   }
 
 

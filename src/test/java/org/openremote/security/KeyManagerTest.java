@@ -306,25 +306,38 @@ public class KeyManagerTest
 
 
   /**
-   * Tests adding a secret key to JCEKS storage.
+   * Tests saving and loading secret keys with Sun proprietary JCEKS storage.
    *
-   * @throws Exception  if test fails
+   * @throws Exception    if test fails
    */
-  @Test public void testAddingSecretKeyToJCEKS() throws Exception
+  @Test public void testLoadExistingKeyStoreJCEKS() throws Exception
   {
-    JCEKSStorage ks = new JCEKSStorage();
+    JCEKSStorage mgr = new JCEKSStorage();
 
-    ks.add(
-        "alias",
-        new KeyStore.SecretKeyEntry(
-            new SecretKeySpec(new byte[] { 'a' }, "test")
-        ),
+    mgr.add(
+        "test",
+        new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
         new KeyStore.PasswordProtection(new char[] { 'b' })
     );
 
-    char[] password = new char[] { 'f', 'o', 'o' };
+    File dir = new File(System.getProperty("user.dir"));
+    File f = new File(dir, "test.keystore." + UUID.randomUUID());
+    f.deleteOnExit();
 
-    ks.save(password);
+    char[] pw = new char[] { '1' };
+
+    mgr.save(f.toURI(), pw);
+
+    pw = new char[] { '1' };
+
+    KeyStore keystore = KeyStore.getInstance(KeyManager.Storage.JCEKS.getStorageName());
+    keystore.load(new FileInputStream(f), pw);
+
+    KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)keystore.getEntry(
+        "test", new KeyStore.PasswordProtection(new char[] {'b'})
+    );
+
+    Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
   }
 
   /**

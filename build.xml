@@ -154,7 +154,7 @@
         <include name = "org/openremote/security/**/*.class"/>
       </fileset>
       <fileset dir = "${classes.dir}">
-        <include name = "org/openremote/exception/**/*.class"/>
+        <include name = "org/openremote/base/exception/**/*.class"/>
       </fileset>
     </copy>
 

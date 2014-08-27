@@ -258,38 +258,52 @@ public class KeyManagerTest
     }
   }
 
+
   /**
-   * Test behavior when a secret key is added to storage that does not
-   * support them.
+   * Tests saving and loading secret keys with BouncyCastle UBER storage.
    *
-   * @throws Exception  if test fails
+   * @throws Exception    if test fails
    */
-  @Test public void testAddingSecretKeyToPKCS12() throws Exception
+  @Test public void testLoadExistingKeyStoreUBER() throws Exception
   {
-    PKCS12Storage ks = new PKCS12Storage();
-
-    ks.add(
-        "alias",
-        new KeyStore.SecretKeyEntry(
-            new SecretKeySpec(new byte[] { 'a' }, "test")
-        ),
-        new KeyStore.PasswordProtection(new char[] { 'b' })
-    );
-
-    char[] password = new char[] { 'f', 'o', 'o' };
-
     try
     {
-      ks.save(password);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      Assert.fail("should not get here...");
+      UBERStorage mgr = new UBERStorage();
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      File dir = new File(System.getProperty("user.dir"));
+      File f = new File(dir, "test.keystore." + UUID.randomUUID());
+      f.deleteOnExit();
+
+      char[] pw = new char[] { '1' };
+
+      mgr.save(f.toURI(), pw);
+
+      pw = new char[] { '1' };
+
+      KeyStore keystore = KeyStore.getInstance(KeyManager.Storage.UBER.getStorageName());
+      keystore.load(new FileInputStream(f), pw);
+
+      KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry)keystore.getEntry(
+          "test", new KeyStore.PasswordProtection(new char[] {'b'})
+      );
+
+      Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] {'a'}));
     }
 
-    catch (KeyManager.KeyManagerException e)
+    finally
     {
-      // expected...
+      Security.removeProvider("BC");
     }
   }
+
 
   /**
    * Tests adding a secret key to JCEKS storage.

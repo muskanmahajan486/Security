@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.Provider;
@@ -68,30 +69,33 @@ public class KeyManagerTest
   @Test public void testStorageTypes()
   {
     Assert.assertTrue(
-        KeyManager.StorageType.PKCS12.name().equals(KeyManager.StorageType.PKCS12.toString())
+        KeyManager.Storage.PKCS12.name().equals(KeyManager.Storage.PKCS12.toString())
     );
 
     Assert.assertTrue(
-        KeyManager.StorageType.PKCS12.name().equals(KeyManager.StorageType.PKCS12.getStorageTypeName())
+        KeyManager.Storage.PKCS12.name().equals(KeyManager.Storage.PKCS12.getStorageName())
     );
 
     Assert.assertTrue(
-        KeyManager.StorageType.JCEKS.name().equals(KeyManager.StorageType.JCEKS.toString())
+        KeyManager.Storage.JCEKS.name().equals(KeyManager.Storage.JCEKS.toString())
     );
 
     Assert.assertTrue(
-        KeyManager.StorageType.JCEKS.name().equals(KeyManager.StorageType.JCEKS.getStorageTypeName())
+        KeyManager.Storage.JCEKS.name().equals(KeyManager.Storage.JCEKS.getStorageName())
     );
 
 
     Assert.assertTrue(
-        KeyManager.StorageType.BKS.name().equals(KeyManager.StorageType.BKS.toString())
+        KeyManager.Storage.BKS.name().equals(KeyManager.Storage.BKS.toString())
     );
 
     Assert.assertTrue(
-        KeyManager.StorageType.BKS.name().equals(KeyManager.StorageType.BKS.getStorageTypeName())
+        KeyManager.Storage.BKS.name().equals(KeyManager.Storage.BKS.getStorageName())
     );
   }
+
+
+  // Save tests -----------------------------------------------------------------------------------
 
   /**
    * Tests keystore save when file descriptor is null.

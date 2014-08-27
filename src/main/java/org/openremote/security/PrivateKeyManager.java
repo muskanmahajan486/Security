@@ -50,7 +50,7 @@ public class PrivateKeyManager extends KeyManager
   public static final AsymmetricKeyAlgorithm DEFAULT_SELF_SIGNED_KEY_ALGORITHM =
       AsymmetricKeyAlgorithm.EC;
 
-  public static final String DEFAULT_SELF_SIGNED_KEY_ISSUER = "OpenRemote, Inc.";
+  public static final String DEFAULT_SELF_SIGNED_KEY_ISSUER = "OpenRemote Inc.";
 
 
   private static final KeySigner keySigner = new BouncyCastleKeySigner();

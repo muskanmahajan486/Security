@@ -194,32 +194,32 @@ public class KeyManagerTest
     }
   }
 
-  /**
-   * Tests storing a keystore with null master password.
-   *
-   * @throws Exception  if test fails
-   */
-  @Test public void testFileKeyStoreNullPassword() throws Exception
-  {
-    TestKeyManager keyMgr = new TestKeyManager();
 
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
-    f.deleteOnExit();
+  /**
+   * Test error behavior when file path is incorrectly defined.
+   */
+  @Test public void testSaveWithBrokenFile() throws Exception
+  {
+    TestKeyManager mgr = new TestKeyManager();
+
+    File f = new File("///");
+    char[] pw = new char[] { 'p' };
 
     try
     {
-      keyMgr.save(f.toURI(), null);
+      mgr.save(f.toURI(), pw);
 
       Assert.fail("should not get here...");
     }
 
     catch (KeyManager.KeyManagerException e)
     {
-      // expected
+      // expected...
     }
   }
 
+
+  // Load tests -----------------------------------------------------------------------------------
 
   /**
    * Test behavior when loading keystore with wrong password.
@@ -230,16 +230,15 @@ public class KeyManagerTest
   {
     JCEKSStorage ks = new JCEKSStorage();
 
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
+    File f = File.createTempFile("openremote", "tmp");
     f.deleteOnExit();
 
     ks.add(
         "alias",
         new KeyStore.SecretKeyEntry(
-            new SecretKeySpec(new byte[] { 'a' }, "test")
+            new SecretKeySpec(new byte[] {'a'}, "test")
         ),
-        new KeyStore.PasswordProtection(new char[] { 'b' })
+        new KeyStore.PasswordProtection(new char[] {'b'})
     );
 
     char[] password = new char[] { 'f', 'o', 'o' };
@@ -248,7 +247,7 @@ public class KeyManagerTest
 
     try
     {
-      ks.save(f.toURI(), new char[] { 0 });
+      ks.load(f.toURI(), new char[] { 0 });
 
       Assert.fail("should not get here...");
     }

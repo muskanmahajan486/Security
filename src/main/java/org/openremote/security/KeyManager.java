@@ -386,10 +386,10 @@ public abstract class KeyManager
 
     catch (KeyStoreException exception)
     {
-     securityLog.error(
-         "Unable to retrieve keystore size : {0}", exception,
-         exception.getMessage()
-     );
+      securityLog.error(
+          "Unable to retrieve keystore size : {0}", exception,
+          exception.getMessage()
+      );
 
       return -1;
     }

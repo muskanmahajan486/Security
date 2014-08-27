@@ -242,7 +242,7 @@ public class PrivateKeyManager extends KeyManager
 
       if (keystoreLocation != null)
       {
-          save(keystoreLocation, masterPassword);
+        save(keystoreLocation, masterPassword);
       }
 
       return certificate;

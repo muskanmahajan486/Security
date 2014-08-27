@@ -702,6 +702,10 @@ public class KeyManagerTest
   private static class TestKeyManager extends KeyManager
   {
     // no op, just to test abstract superclass implementation...
+    TestKeyManager() throws Exception
+    {
+      // TODO
+    }
   }
 
   /**
@@ -730,9 +734,9 @@ public class KeyManagerTest
       }
     }
 
-    JCEKSStorage()
+    JCEKSStorage() throws KeyManagerException
     {
-      super(StorageType.JCEKS, findJCEKSProvider());
+      super(Storage.JCEKS, findJCEKSProvider());
     }
   }
 
@@ -741,9 +745,9 @@ public class KeyManagerTest
    */
   private static class UBERStorage extends KeyManager
   {
-    UBERStorage()
+    UBERStorage() throws KeyManagerException
     {
-      super(StorageType.UBER, new BouncyCastleProvider());
+      super(Storage.UBER, new BouncyCastleProvider());
     }
   }
 
@@ -753,9 +757,9 @@ public class KeyManagerTest
    */
   private static class UnavailableBKS extends KeyManager
   {
-    UnavailableBKS()
+    UnavailableBKS() throws KeyManagerException
     {
-      super(StorageType.BKS, new EmptyProvider());
+      super(Storage.BKS, new EmptyProvider());
     }
   }
 
@@ -764,15 +768,15 @@ public class KeyManagerTest
    */
   private static class PKCS12Storage extends KeyManager
   {
-    PKCS12Storage()
+    PKCS12Storage() throws KeyManagerException
     {
-      super(StorageType.PKCS12, null);
+      super(Storage.PKCS12, null);
     }
   }
 
   private static class BrokenStorageManager extends KeyManager
   {
-    BrokenStorageManager()
+    BrokenStorageManager() throws KeyManagerException
     {
       super(null, new BouncyCastleProvider());
     }
@@ -788,5 +792,6 @@ public class KeyManagerTest
       super("Empty Test Provider", 0.0, "Testing");
     }
   }
+
 }
 

@@ -123,25 +123,24 @@ public class KeyManagerTest
 
 
   /**
-   * Tests storing an empty in-memory keystore.
+   * Tests storing an empty keystore.
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testEmptyInMemoryKeystore() throws Exception
+  @Test public void testEmptyKeystore() throws Exception
   {
     TestKeyManager keyMgr = new TestKeyManager();
     char[] password = new char[] { 'f', 'o', 'o' };
 
-    KeyStore keystore = keyMgr.save(password);
+    File dest = File.createTempFile("openremote", "tmp");
+    dest.deleteOnExit();
+
+    keyMgr.save(dest.toURI(), password);
+
+    KeyStore keystore = KeyStore.getInstance(KeyManager.DEFAULT_KEYSTORE_STORAGE.getStorageName());
+    keystore.load(new FileInputStream(dest), new char[] { 'f', 'o', 'o' } );
 
     Assert.assertTrue(keystore.size() == 0);
-
-    // Ensure we've erased the password from memory after API call...
-
-    for (char c : password)
-    {
-      Assert.assertTrue(c == 0);
-    }
   }
 
 

@@ -382,34 +382,44 @@ public class KeyManagerTest
 
 
   /**
-   * Test implementation behavior when requested keystore algorithm is not available.
+   * Tests the error handling behavior when null password is given.
    *
-   * @throws Exception  if test fails
+   * @throws Exception    if test fails
    */
-  @Test public void testAddingSecretKeyToUnavailableBKS() throws Exception
+  @Test public void testLoadingWithNullPassword() throws Exception
   {
-    UnavailableBKS ks = new UnavailableBKS();
-
-    ks.add(
-        "alias",
-        new KeyStore.SecretKeyEntry(
-            new SecretKeySpec(new byte[] { 'a' }, "test")
-        ),
-        new KeyStore.PasswordProtection(new char[] { 'b' })
-    );
-
-    char[] password = new char[] { 'f', 'o', 'o' };
-
     try
     {
-      ks.save(password);
+      Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      Assert.fail("Should not get here...");
+      UBERStorage mgr = new UBERStorage();
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      File dir = new File(System.getProperty("user.dir"));
+      File f = new File(dir, "test.keystore." + UUID.randomUUID());
+      f.deleteOnExit();
+
+      try
+      {
+        mgr.load(f.toURI(), null);
+
+        Assert.fail("should not get here...");
+      }
+
+      catch (KeyManager.KeyManagerException e)
+      {
+        // expected...
+      }
     }
 
-    catch (KeyManager.ConfigurationException e)
+    finally
     {
-      // expected...
+      Security.removeProvider("BC");
     }
   }
 

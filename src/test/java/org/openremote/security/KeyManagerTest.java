@@ -145,17 +145,20 @@ public class KeyManagerTest
 
 
   /**
-   * Tests storing an empty in-memory keystore with empty keystore password.
+   * Tests storing an empty keystore with empty keystore password.
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testEmptyInMemoryKeystoreWithEmptyPassword() throws Exception
+  @Test public void testEmptyKeystoreWithEmptyPassword() throws Exception
   {
     TestKeyManager keyMgr = new TestKeyManager();
 
     try
     {
-      keyMgr.save(new char[] { });
+      File dest = File.createTempFile("openremote", "tmp");
+      dest.deleteOnExit();
+
+      keyMgr.save(dest.toURI(), new char[] {});
 
       Assert.fail("should not get here...");
     }
@@ -167,17 +170,20 @@ public class KeyManagerTest
   }
 
   /**
-   * Tests storing an empty in-memory keystore with null keystore password.
+   * Tests storing an empty keystore with null keystore password.
    *
    * @throws Exception  if test fails for any reason
    */
-  @Test public void testEmptyInMemoryKeystoreWithNullPassword() throws Exception
+  @Test public void testEmptyKeystoreWithNullPassword() throws Exception
   {
     TestKeyManager keyMgr = new TestKeyManager();
 
     try
     {
-      keyMgr.save(null);
+      File dest = File.createTempFile("openremote", "tmp");
+      dest.deleteOnExit();
+
+      keyMgr.save(dest.toURI(), null);
 
       Assert.fail("should not get here...");
     }

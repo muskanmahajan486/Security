@@ -26,7 +26,6 @@ import org.openremote.logging.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,8 +51,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is an abstract base class for managing and storing key material. It is useful for

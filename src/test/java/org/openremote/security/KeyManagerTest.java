@@ -575,30 +575,25 @@ public class KeyManagerTest
 
 
   /**
-   * Tests error handling behavior on add() with null alias.
+   * Test implementation behavior when requested keystore algorithm is not available.
    *
-   * @see KeyManager#add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
+   * @throws Exception  if test fails
    */
-  @Test public void testAddNullAlias()
+  @Test public void testAddingSecretKeyToUnavailableBKS() throws Exception
   {
-    TestKeyManager mgr = new TestKeyManager();
-
     try
     {
-      mgr.add(
-          null,
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
-          new KeyStore.PasswordProtection(new char[] { 'b' })
-      );
+      new UnavailableBKS();
 
       Assert.fail("should not get here...");
     }
 
-    catch (IllegalArgumentException e)
+    catch (KeyManager.ConfigurationException e)
     {
       // expected...
     }
   }
+
 
   /**
    * Tests error handling behavior on add() with empty alias.

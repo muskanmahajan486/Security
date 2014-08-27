@@ -648,96 +648,33 @@ public class KeyManagerTest
   }
 
   /**
-   * Basic test to invoke createKeyStore()
+   * Tests error handling behavior on add() with empty alias.
    *
-   * @throws Exception    if test fails
+   * @see KeyManager#add(String, java.security.KeyStore.Entry, java.security.KeyStore.ProtectionParameter)
    */
-  @Test public void testCreateKeyStore() throws Exception
+  @Test public void testAddNullEntry() throws Exception
   {
     TestKeyManager mgr = new TestKeyManager();
-    KeyStore store = mgr.createKeyStore();
 
-    Assert.assertTrue(store != null);
-  }
-
-
-  // Load Tests -----------------------------------------------------------------------------------
-
-  /**
-   * Tests saving and loading secret keys with BouncyCastle UBER storage.
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testLoadExistingKeyStoreUBER() throws Exception
-  {
     try
     {
-      Security.addProvider(SecurityProvider.BC.getProviderInstance());
-
-      UBERStorage mgr = new UBERStorage();
-
       mgr.add(
           "test",
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
-          new KeyStore.PasswordProtection(new char[] { 'b' })
+          null,
+          new KeyStore.PasswordProtection(new char[] {'b'})
       );
 
-      File dir = new File(System.getProperty("user.dir"));
-      File f = new File(dir, "test.keystore." + UUID.randomUUID());
-      f.deleteOnExit();
-
-      char[] pw = new char[] { '1' };
-
-      mgr.save(f.toURI(), pw);
-
-      pw = new char[] { '1' };
-
-      KeyStore ks = mgr.load(f.toURI(), pw);
-
-      KeyStore.SecretKeyEntry entry =
-          (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
-
-      Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
+      Assert.fail("should not get here...");
     }
 
-    finally
+    catch (KeyManager.KeyManagerException e)
     {
-      Security.removeProvider("BC");
+      // expected...
     }
   }
 
-  /**
-   * Tests saving and loading secret keys with Sun proprietary JCEKS storage.
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testLoadExistingKeyStoreJCEKS() throws Exception
-  {
-    JCEKSStorage mgr = new JCEKSStorage();
 
-    mgr.add(
-        "test",
-        new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
-        new KeyStore.PasswordProtection(new char[] { 'b' })
-    );
-
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
-    f.deleteOnExit();
-
-    char[] pw = new char[] { '1' };
-
-    mgr.save(f.toURI(), pw);
-
-    pw = new char[] { '1' };
-
-    KeyStore ks = mgr.load(f.toURI(), pw);
-
-    KeyStore.SecretKeyEntry entry =
-        (KeyStore.SecretKeyEntry)ks.getEntry("test", new KeyStore.PasswordProtection(new char[] {'b'}));
-
-    Assert.assertTrue(Arrays.equals(entry.getSecretKey().getEncoded(), new byte[] { 'a' }));
-  }
+  // Subclassing tests ----------------------------------------------------------------------------
 
   /**
    * Tests error behavior when null file descriptor is used.

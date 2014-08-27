@@ -535,32 +535,44 @@ public class KeyManagerTest
   }
 
   /**
-   * Test error behavior when file doesn't exist.
+   * Tests adding a secret key to BouncyCastle UBER storage.
+   *
+   * @throws Exception  if test fails
    */
-  @Test public void testSaveWithBrokenFile()
+  @Test public void testAddingSecretKeyToUBER() throws Exception
   {
-    TestKeyManager mgr = new TestKeyManager();
-
-    File f = new File("///");
-    char[] pw = new char[] { 'p' };
+    // UBER implementation requires "BC" to be available as security provider...
 
     try
     {
-      mgr.save(f.toURI(), pw);
+      Security.addProvider(new BouncyCastleProvider());
 
-      Assert.fail("should not get here...");
+      UBERStorage ks = new UBERStorage();
+
+      ks.add(
+          "alias",
+          new KeyStore.SecretKeyEntry(
+              new SecretKeySpec(new byte[] { 'a' }, "test")
+          ),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
+
+      char[] password = new char[] { 'f', 'o', 'o' };
+
+      File dest = File.createTempFile("openremote", "tmp");
+      dest.deleteOnExit();
+
+      ks.save(dest.toURI(), password);
+
+      Assert.assertTrue(ks.getStorageType().getStorageName().equals("UBER"));
     }
 
-    catch (KeyManager.KeyManagerException e)
+    finally
     {
-      // expected...
-    }
-
-    for (Character c : pw)
-    {
-      Assert.assertTrue(c == 0);
+      Security.removeProvider("BC");
     }
   }
+
 
   /**
    * Tests error handling behavior on add() with null alias.

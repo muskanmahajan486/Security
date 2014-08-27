@@ -478,22 +478,27 @@ public class KeyManagerTest
   }
 
 
+  // Add Tests ------------------------------------------------------------------------------------
+
   /**
-   * Tests storing a keystore with empty master password.
+   * Test behavior when a secret key is added to storage that does not
+   * support them.
    *
    * @throws Exception  if test fails
    */
-  @Test public void testFileKeyStoreEmptyPassword() throws Exception
+  @Test public void testAddingSecretKeyToPKCS12() throws Exception
   {
-    TestKeyManager keyMgr = new TestKeyManager();
-
-    File dir = new File(System.getProperty("user.dir"));
-    File f = new File(dir, "test.keystore." + UUID.randomUUID());
-    f.deleteOnExit();
+    PKCS12Storage ks = new PKCS12Storage();
 
     try
     {
-      keyMgr.save(f.toURI(), new char[] {});
+      ks.add(
+          "alias",
+          new KeyStore.SecretKeyEntry(
+              new SecretKeySpec(new byte[] { 'a' }, "test")
+          ),
+          new KeyStore.PasswordProtection(new char[] { 'b' })
+      );
 
       Assert.fail("should not get here...");
     }
@@ -505,21 +510,28 @@ public class KeyManagerTest
   }
 
   /**
-   * Test against a broken implementation (subclass) of a key manager.
+   * Tests adding a secret key to JCEKS storage.
+   *
+   * @throws Exception  if test fails
    */
-  @Test public void testBrokenStorageManager()
+  @Test public void testAddingSecretKeyToJCEKS() throws Exception
   {
-    try
-    {
-      new BrokenStorageManager();
+    JCEKSStorage ks = new JCEKSStorage();
 
-      Assert.fail("should not get here...");
-    }
+    ks.add(
+        "alias",
+        new KeyStore.SecretKeyEntry(
+            new SecretKeySpec(new byte[] { 'a' }, "test")
+        ),
+        new KeyStore.PasswordProtection(new char[] { 'b' })
+    );
 
-    catch (IllegalArgumentException e)
-    {
-      // expected...
-    }
+    char[] password = new char[] { 'f', 'o', 'o' };
+
+    File dest = File.createTempFile("openremote", "tmp");
+    dest.deleteOnExit();
+
+    ks.save(dest.toURI(), password);
   }
 
   /**

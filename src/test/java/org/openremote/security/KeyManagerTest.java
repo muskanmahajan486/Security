@@ -677,86 +677,24 @@ public class KeyManagerTest
   // Subclassing tests ----------------------------------------------------------------------------
 
   /**
-   * Tests error behavior when null file descriptor is used.
-   *
-   * @throws Exception    if test fails
+   * Test against a broken implementation (subclass) of a key manager.
    */
-  @Test public void testLoadingNullFile() throws Exception
+  @Test public void testBrokenStorageManager() throws KeyManager.KeyManagerException
   {
     try
     {
-      Security.addProvider(SecurityProvider.BC.getProviderInstance());
+      new BrokenStorageManager();
 
-      UBERStorage mgr = new UBERStorage();
-
-      mgr.add(
-          "test",
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] {'a'}, "foo")),
-          new KeyStore.PasswordProtection(new char[] {'b'})
-      );
-
-      char[] pw = new char[] { '1' };
-
-      try
-      {
-        mgr.load(null, pw);
-
-        Assert.fail("should not get here...");
-      }
-
-      catch (KeyManager.KeyManagerException e)
-      {
-        // expected...
-      }
+      Assert.fail("should not get here...");
     }
 
-    finally
+    catch (IllegalArgumentException e)
     {
-      Security.removeProvider("BC");
+      // expected...
     }
   }
 
-  /**
-   * Tests the error handling behavior when null password is given.
-   *
-   * @throws Exception    if test fails
-   */
-  @Test public void testLoadingWithNullPassword() throws Exception
-  {
-    try
-    {
-      Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      UBERStorage mgr = new UBERStorage();
-
-      mgr.add(
-          "test",
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
-          new KeyStore.PasswordProtection(new char[] { 'b' })
-      );
-
-      File dir = new File(System.getProperty("user.dir"));
-      File f = new File(dir, "test.keystore." + UUID.randomUUID());
-      f.deleteOnExit();
-
-      try
-      {
-        mgr.load(f.toURI(), null);
-
-        Assert.fail("should not get here...");
-      }
-
-      catch (KeyManager.KeyManagerException e)
-      {
-        // expected...
-      }
-    }
-
-    finally
-    {
-      Security.removeProvider("BC");
-    }
-  }
 
 
   // Nested Classes -------------------------------------------------------------------------------

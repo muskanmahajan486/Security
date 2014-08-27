@@ -167,7 +167,7 @@ public class PrivateKeyManager extends KeyManager
   private PrivateKeyManager(URI keyStoreLocation, char[] masterPassword, Storage storage)
       throws KeyManagerException
   {
-    super(keyStoreLocation, masterPassword, storage);
+    super(keyStoreLocation, masterPassword, storage, storage.getSecurityProvider());
 
     this.keystoreLocation = keyStoreLocation;
   }

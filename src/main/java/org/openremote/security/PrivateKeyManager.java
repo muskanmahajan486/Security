@@ -249,7 +249,7 @@ public class PrivateKeyManager extends KeyManager
 
       add(keyName, privateKeyEntry, keyProtection);
 
-      if (keystoreLocation != null)
+      if (keystoreLocation != null && masterPassword !=null && masterPassword.length > 0)
       {
         save(keystoreLocation, masterPassword);
       }

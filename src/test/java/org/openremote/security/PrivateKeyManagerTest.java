@@ -460,35 +460,27 @@ public class PrivateKeyManagerTest
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      char[] keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
       String alias1 = "key1";
 
       PrivateKeyManager keyMgr = PrivateKeyManager.create(KeyManager.Storage.BKS);
 
-      Certificate cert1 = keyMgr.addKey(alias1, keypassword1, "testIssuer");
+      Certificate cert1 = keyMgr.addKey(alias1);
 
 
-      // TODO : these are not key passwords but master passwords...
-
-      char[] keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
       String alias2 = "key2";
 
-      Certificate cert2 = keyMgr.addKey(alias2, keypassword2, "testIssuer2");
+      Certificate cert2 = keyMgr.addKey(alias2);
+
+
 
       char[] storePW = new char[] { 'f', 'o', 'o', 'b', 'a', 'r' };
-      File dest = File.createTempFile("openremote", "tmp");
+      File dest = File.createTempFile("cloudseance", "tmp");
       dest.deleteOnExit();
 
       keyMgr.save(dest.toURI(), storePW);
+
       Assert.assertTrue(dest.exists());
 
-
-      // Make sure the password is erased from memory...
-
-      for (char c : storePW)
-      {
-        Assert.assertTrue(c == 0);
-      }
 
       Assert.assertTrue(keyMgr.size() == 2);
 
@@ -512,22 +504,8 @@ public class PrivateKeyManagerTest
           cert.getPublicKey().getAlgorithm().equals(PrivateKeyManager.AsymmetricKeyAlgorithm.EC.name())
       );
 
-  //    Certificate[] chain = cert.getCertificateChain();
-  //
-  //    Assert.assertTrue(chain.length == 1);
 
-
-
-      // Retrieve password protected private keys...
-
-      keypassword1 = new char[] { 'F', 'o', 'o', 'B', 'a', 'r' };
-
-      PrivateKey privateKey = keyMgr.getKey("key1", keypassword1);
-  //
-  //    KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
-  //        "key1",
-  //        new KeyStore.PasswordProtection(keypassword1)
-  //    );
+      PrivateKey privateKey = keyMgr.getKey("key1");
 
       Assert.assertTrue(privateKey != null);
       Assert.assertTrue(privateKey instanceof ECPrivateKey);
@@ -535,14 +513,7 @@ public class PrivateKeyManagerTest
           privateKey.getAlgorithm().equals(KeyManager.AsymmetricKeyAlgorithm.EC.name())
       );
 
-      keypassword2 = new char[] { 'F', 'o', 'o', 'b', 'a', 'r' };
-
-  //    entry = (KeyStore.PrivateKeyEntry)keystore.getEntry(
-  //        "key2",
-  //        new KeyStore.PasswordProtection(keypassword2)
-  //    );
-
-      privateKey = keyMgr.getKey("key2", keypassword2);
+      privateKey = keyMgr.getKey("key2");
 
       Assert.assertTrue(privateKey != null);
       Assert.assertTrue(privateKey instanceof ECPrivateKey);
@@ -691,13 +662,12 @@ public class PrivateKeyManagerTest
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      PrivateKeyManager keyMgr = PrivateKeyManager.create(KeyManager.Storage.UBER);
+      PrivateKeyManager manager = PrivateKeyManager.create(KeyManager.Storage.UBER);
 
-      // TODO : this is not a key password but a master password...
-      char[] keypassword = new char[] { 'a', 'C', 'm', '3'};
+      char[] password = new char[] { 'a', 'C', 'm', '3'};
       String alias1 = "key1";
 
-      keyMgr.addKey(alias1, keypassword, "testIssuer");
+      manager.addKey(alias1, password, "testIssuer");
 
       File dir = new File(System.getProperty("user.dir"));
       File f = new File(dir, "test.keystore." + UUID.randomUUID());
@@ -705,14 +675,11 @@ public class PrivateKeyManagerTest
 
       char[] storePW = new char[] { 'f', 'o', 'o'};
 
-      keyMgr.save(f.toURI(), storePW);
+      // This will change tha password...
 
-      // Make sure the password is erased from memory after the API call...
+      manager.save(f.toURI(), storePW);
 
-      for (char c : storePW)
-      {
-        Assert.assertTrue(c == 0);
-      }
+
 
       KeyStore loadStore = KeyStore.getInstance(KeyManager.Storage.UBER.getStorageName());
 

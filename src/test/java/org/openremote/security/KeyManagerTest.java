@@ -30,6 +30,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.URI;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
@@ -392,17 +393,17 @@ public class KeyManagerTest
     {
       Security.addProvider(SecurityProvider.BC.getProviderInstance());
 
-      UBERStorage mgr = new UBERStorage();
-
-      mgr.add(
-          "test",
-          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] { 'a' }, "foo")),
-          new KeyStore.PasswordProtection(new char[] { 'b' })
-      );
-
       File dir = new File(System.getProperty("user.dir"));
       File f = new File(dir, "test.keystore." + UUID.randomUUID());
       f.deleteOnExit();
+
+      UBERStorage mgr = new UBERStorage(f.toURI());
+
+      mgr.add(
+          "test",
+          new KeyStore.SecretKeyEntry(new SecretKeySpec(new byte[] {'a'}, "foo")),
+          new KeyStore.PasswordProtection(new char[] {'b'})
+      );
 
       try
       {
@@ -745,11 +746,33 @@ public class KeyManagerTest
    */
   private static class UBERStorage extends KeyManager
   {
-    UBERStorage() throws KeyManagerException
+    private URI location;
+
+    private UBERStorage() throws Exception
     {
       super(Storage.UBER, new BouncyCastleProvider());
     }
+
+    private UBERStorage(URI location) throws KeyManagerException
+    {
+      super(Storage.UBER, new BouncyCastleProvider());
+
+      this.location = location;
+    }
+
+
+    @Override protected void add(String alias, KeyStore.Entry entry,
+                                 KeyStore.ProtectionParameter param) throws KeyManagerException
+    {
+      super.add(alias, entry, param);
+
+      if (location != null)
+      {
+        super.save(location, "Something".toCharArray());
+      }
+    }
   }
+
 
   /**
    * Test KeyManager implementation that attempts to load/create a keystore of a type

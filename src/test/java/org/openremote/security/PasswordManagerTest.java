@@ -452,42 +452,6 @@ public class PasswordManagerTest
     }
   }
 
-  /**
-   * Test error handling when adding password with incorrect storage credentials.
-   *
-   * @throws Exception      if test fails
-   */
-  @Test public void testAddPasswordWrongPassword() throws Exception
-  {
-    try
-    {
-      Security.addProvider(SecurityProvider.BC.getProviderInstance());
-
-
-      File dir = new File(System.getProperty("user.dir"));
-      File file = new File(dir, "test-" + UUID.randomUUID());
-      file.deleteOnExit();
-
-      PasswordManager mgr = new PasswordManager(file.toURI(), new char[] { 'b' });
-
-      // TODO : currently this sets a NEW password to the store...
-
-      mgr.addPassword("test", new byte[] { '1' }, new char[] { 'c' });
-
-      Assert.fail("should not get here...");
-    }
-
-    catch (KeyManager.KeyManagerException e)
-    {
-      // expected...
-    }
-
-    finally
-    {
-      Security.removeProvider(SecurityProvider.BC.getProviderInstance().getName());
-    }
-  }
-
 
   /**
    * Tests error handling when adding password with a null alias.

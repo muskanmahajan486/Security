@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.openremote.base.exception.IncorrectImplementationException;
 import org.openremote.security.KeyManager;
 import org.openremote.security.KeySigner;
 import org.openremote.security.KeySignerTest;
@@ -889,7 +890,7 @@ public class BouncyCastleKeySignerTest
       Assert.fail("should not get here...");
     }
 
-    catch (KeySigner.SigningException e)
+    catch (IncorrectImplementationException e)
     {
       // expected...
     }

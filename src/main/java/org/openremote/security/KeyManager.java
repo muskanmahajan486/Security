@@ -295,7 +295,7 @@ public abstract class KeyManager
   protected KeyManager(URI keyStoreFile, char[] password, Storage storage)
       throws ConfigurationException, KeyManagerException
   {
-    this(keyStoreFile, password, storage, DEFAULT_SECURITY_PROVIDER.getProviderInstance());
+    this(keyStoreFile, password, storage, storage.getSecurityProvider());
   }
 
   /**

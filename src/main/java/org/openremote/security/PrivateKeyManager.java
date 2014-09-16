@@ -174,6 +174,15 @@ public class PrivateKeyManager extends KeyManager
 
   // Public Instance Methods ----------------------------------------------------------------------
 
+  public Certificate addKey(String keyName) throws KeyManagerException
+  {
+    return addKey(
+        keyName, null,
+        DEFAULT_SELF_SIGNED_KEY_ALGORITHM,
+        DEFAULT_SELF_SIGNED_KEY_ISSUER
+    );
+  }
+
 
   public Certificate addKey(String keyName, char[] masterPassword) throws KeyManagerException
   {
